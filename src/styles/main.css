@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Theme colors - following Fuwari style */
+  --primary: oklch(0.70 0.14 250);
+  --primary-light: oklch(0.85 0.10 250);
+
+  /* Background colors */
+  --card-bg: oklch(0.985 0 0);
+  --float-panel-bg: oklch(0.985 0 0);
+
+  /* Button backgrounds */
+  --btn-regular-bg: oklch(0.95 0 0);
+  --btn-regular-bg-hover: oklch(0.92 0 0);
+  --btn-regular-bg-active: oklch(0.88 0 0);
+  --btn-plain-bg-hover: oklch(0.92 0 0);
+  --btn-plain-bg-active: oklch(0.88 0 0);
+  --btn-card-bg-hover: oklch(0.92 0 0);
+  --btn-card-bg-active: oklch(0.88 0 0);
+  --enter-btn-bg: oklch(0.95 0 0);
+  --enter-btn-bg-hover: oklch(0.92 0 0);
+  --enter-btn-bg-active: oklch(0.88 0 0);
+
+  /* Text colors */
+  --btn-content: oklch(0.55 0 0);
+  --link-underline: oklch(0.90 0 0);
+  --link-hover: oklch(0.80 0 0);
+  --link-active: oklch(0.70 0 0);
+  --meta-divider: oklch(0.70 0 0);
+
+  /* Code block */
+  --codeblock-bg: oklch(0.20 0.02 250);
+  --codeblock-topbar-bg: oklch(0.18 0.02 250);
+
+  /* Border radius */
+  --radius-large: 0.75rem;
+
+  /* Selection */
+  --selection-bg: oklch(0.90 0.08 250);
+
+  /* Line */
+  --line-color: oklch(0.70 0 0);
+
+  /* Page width */
+  --page-width: 1200px;
+  --toc-width: 15rem;
+}
+
+.dark {
+  --card-bg: oklch(0.15 0.02 250);
+  --float-panel-bg: oklch(0.15 0.02 250);
+
+  --btn-regular-bg: oklch(0.20 0.02 250);
+  --btn-regular-bg-hover: oklch(0.25 0.02 250);
+  --btn-regular-bg-active: oklch(0.30 0.02 250);
+  --btn-plain-bg-hover: oklch(0.25 0.02 250);
+  --btn-plain-bg-active: oklch(0.30 0.02 250);
+  --btn-card-bg-hover: oklch(0.25 0.02 250);
+  --btn-card-bg-active: oklch(0.30 0.02 250);
+  --enter-btn-bg: oklch(0.20 0.02 250);
+  --enter-btn-bg-hover: oklch(0.25 0.02 250);
+  --enter-btn-bg-active: oklch(0.30 0.02 250);
+
+  --btn-content: oklch(0.70 0 0);
+  --link-underline: oklch(0.30 0 0);
+  --link-hover: oklch(0.40 0 0);
+  --link-active: oklch(0.50 0 0);
+  --meta-divider: oklch(0.40 0 0);
+
+  --codeblock-bg: oklch(0.18 0.02 250);
+  --codeblock-topbar-bg: oklch(0.15 0.02 250);
+
+  --selection-bg: oklch(0.35 0.08 250);
+
+  --line-color: oklch(0.40 0 0);
+}
+
+@layer base {
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-white dark:bg-[oklch(0.10_0.02_250)] transition-colors duration-300;
+  }
+}
+
+@layer components {
+  .card-base {
+    @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--card-bg)] transition-colors duration-300;
+  }
+
+  .text-90 {
+    @apply text-black/90 dark:text-white/90;
+  }
+
+  .text-75 {
+    @apply text-black/75 dark:text-white/75;
+  }
+
+  .text-50 {
+    @apply text-black/50 dark:text-white/50;
+  }
+
+  .text-30 {
+    @apply text-black/30 dark:text-white/30;
+  }
+
+  .btn-plain {
+    @apply transition flex items-center justify-center bg-none
+      text-black/75 hover:text-[var(--primary)] dark:text-white/75 dark:hover:text-[var(--primary)]
+      hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)];
+  }
+
+  .btn-regular {
+    @apply transition flex items-center justify-center bg-[var(--btn-regular-bg)]
+      hover:bg-[var(--btn-regular-bg-hover)] active:bg-[var(--btn-regular-bg-active)]
+      text-[var(--btn-content)] dark:text-white/75;
+  }
+
+  .btn-card {
+    @apply transition flex items-center justify-center bg-[var(--card-bg)]
+      hover:bg-[var(--btn-card-bg-hover)] active:bg-[var(--btn-card-bg-active)];
+  }
+
+  .meta-icon {
+    @apply w-8 h-8 transition rounded-md flex items-center justify-center
+      bg-[var(--btn-regular-bg)] text-[var(--btn-content)] mr-2;
+  }
+
+  .link {
+    @apply transition rounded-md p-1 -m-1
+      hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)];
+  }
+
+  .link-lg {
+    @apply transition rounded-md p-1.5 -m-1.5
+      hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)];
+  }
+
+  .link-underline {
+    @apply transition underline decoration-2 decoration-dashed decoration-[var(--link-underline)]
+      hover:decoration-[var(--link-hover)] active:decoration-[var(--link-active)]
+      underline-offset-[0.25rem];
+  }
+
+  .input-base {
+    @apply w-full px-4 py-3 rounded-lg bg-[var(--card-bg)] border border-black/10 dark:border-white/10
+      text-90 placeholder:text-50 focus:border-[var(--primary)] focus:outline-none transition;
+  }
+
+  .float-panel {
+    @apply rounded-[var(--radius-large)] overflow-hidden bg-[var(--float-panel-bg)]
+      shadow-xl dark:shadow-none transition-colors duration-300;
+  }
+}
+
+/* Markdown content styles */
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+  @apply text-90 font-bold mt-6 mb-4;
+}
+
+.markdown-content h1 { @apply text-3xl; }
+.markdown-content h2 { @apply text-2xl; }
+.markdown-content h3 { @apply text-xl; }
+
+.markdown-content p {
+  @apply text-75 leading-relaxed mb-4;
+}
+
+.markdown-content pre {
+  @apply bg-[var(--codeblock-bg)] rounded-lg p-4 overflow-x-auto mb-4;
+}
+
+.markdown-content code {
+  @apply text-sm text-white/90;
+}
+
+.markdown-content a {
+  @apply link-underline text-[var(--primary)];
+}
+
+.markdown-content ul, .markdown-content ol {
+  @apply text-75 mb-4 pl-6;
+}
+
+.markdown-content li {
+  @apply mb-2;
+}
+
+.markdown-content img {
+  @apply rounded-lg max-w-full h-auto mb-4;
+}
+
+.markdown-content blockquote {
+  @apply border-l-4 border-[var(--primary)] pl-4 text-50 italic mb-4;
+}
