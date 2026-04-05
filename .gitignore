@@ -1,6 +1,2 @@
-dist/index.html
-dist/assets/index-6rrQbeKD.css
-dist/assets/index-BLkQI8l5.css
-dist/assets/index-DrjVDacj.js
-dist/assets/index-hM7pr-1Q.js
-node_modules/.vite/deps/_metadata.json
+dist
+node_modules
