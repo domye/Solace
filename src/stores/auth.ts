@@ -70,3 +70,15 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+
+// Listen for token refresh events from API interceptor
+if (typeof window !== 'undefined') {
+  window.addEventListener('auth:token-refreshed', ((event: CustomEvent) => {
+    const { accessToken, refreshToken } = event.detail;
+    useAuthStore.getState().setTokens(accessToken, refreshToken);
+  }) as EventListener);
+
+  window.addEventListener('auth:logout', () => {
+    useAuthStore.getState().logout();
+  });
+}
