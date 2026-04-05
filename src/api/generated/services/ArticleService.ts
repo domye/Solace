@@ -15,6 +15,8 @@ export class ArticleService {
    * @param pageSize 每页数量
    * @param status 按状态筛选
    * @param authorId 按作者ID筛选
+   * @param category 按分类slug筛选
+   * @param tag 按标签slug筛选
    * @returns handler_Response OK
    * @throws ApiError
    */
@@ -23,6 +25,8 @@ export class ArticleService {
     pageSize: number = 10,
     status?: string,
     authorId?: number,
+    category?: string,
+    tag?: string,
   ): CancelablePromise<handler_Response> {
     return this.httpRequest.request({
       method: 'GET',
@@ -32,6 +36,8 @@ export class ArticleService {
         'pageSize': pageSize,
         'status': status,
         'author_id': authorId,
+        'category': category,
+        'tag': tag,
       },
     });
   }
@@ -51,6 +57,40 @@ export class ArticleService {
       errors: {
         400: `Bad Request`,
         401: `Unauthorized`,
+      },
+    });
+  }
+  /**
+   * 获取归档列表
+   * @returns handler_Response OK
+   * @throws ApiError
+   */
+  public getArticlesArchive(): CancelablePromise<handler_Response> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/articles/archive',
+    });
+  }
+  /**
+   * 搜索文章
+   * @param q 搜索关键词
+   * @param page 页码
+   * @param pageSize 每页数量
+   * @returns handler_Response OK
+   * @throws ApiError
+   */
+  public getArticlesSearch(
+    q: string,
+    page: number = 1,
+    pageSize: number = 10,
+  ): CancelablePromise<handler_Response> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/articles/search',
+      query: {
+        'q': q,
+        'page': page,
+        'pageSize': pageSize,
       },
     });
   }

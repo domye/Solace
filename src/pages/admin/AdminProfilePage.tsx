@@ -24,25 +24,25 @@ export function AdminProfilePage() {
         avatar_url: avatarUrl,
         bio,
       });
-      setSuccess('Profile updated successfully');
+      setSuccess('个人资料更新成功');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update');
+      setError(err instanceof Error ? err.message : '更新失败');
     }
   };
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* 头部 */}
       <div className="card-base p-6 fade-in-up">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--klein-blue)] to-[var(--sky-blue)] flex items-center justify-center">
             <Icon icon="material-symbols:person-outline-rounded" className="text-xl text-white" />
           </div>
-          <h1 className="text-90 text-xl font-bold">Profile Settings</h1>
+          <h1 className="text-90 text-xl font-bold">个人设置</h1>
         </div>
       </div>
 
-      {/* Form */}
+      {/* 表单 */}
       <form onSubmit={handleSubmit} className="card-base p-6 fade-in-up" style={{ animationDelay: '0.1s' }}>
         {error && (
           <div className="bg-red-500/10 text-red-500 rounded-[var(--radius-medium)] p-3 mb-4 text-sm">
@@ -56,12 +56,12 @@ export function AdminProfilePage() {
           </div>
         )}
 
-        {/* Avatar Preview */}
+        {/* 头像预览 */}
         <div className="mb-6 text-center">
           {avatarUrl ? (
             <img
               src={avatarUrl}
-              alt="Avatar"
+              alt="头像"
               className="w-24 h-24 rounded-full mx-auto object-cover ring-4 ring-[var(--primary)]/20 mb-2 breathing"
             />
           ) : (
@@ -72,14 +72,14 @@ export function AdminProfilePage() {
         </div>
 
         <InputField
-          label="Nickname"
+          label="昵称"
           value={nickname}
           onChange={setNickname}
-          placeholder="Display name"
+          placeholder="显示名称"
         />
 
         <InputField
-          label="Avatar URL"
+          label="头像链接"
           value={avatarUrl}
           onChange={setAvatarUrl}
           placeholder="https://example.com/avatar.png"
@@ -87,27 +87,27 @@ export function AdminProfilePage() {
         />
 
         <TextAreaField
-          label="Bio"
+          label="个人简介"
           value={bio}
           onChange={setBio}
-          placeholder="Tell us about yourself"
+          placeholder="介绍一下你自己"
           rows={3}
         />
 
-        {/* Read-only info */}
+        {/* 只读信息 */}
         <div className="border-t border-[var(--border-light)] pt-4 mt-4">
           <div className="text-50 text-sm space-y-1">
             <div className="flex items-center gap-2">
               <Icon icon="material-symbols:badge-outline-rounded" className="text-base" />
-              Username: <span className="text-75">{user?.username}</span>
+              用户名：<span className="text-75">{user?.username}</span>
             </div>
             <div className="flex items-center gap-2">
               <Icon icon="material-symbols:mail-outline-rounded" className="text-base" />
-              Email: <span className="text-75">{user?.email}</span>
+              邮箱：<span className="text-75">{user?.email}</span>
             </div>
             <div className="flex items-center gap-2">
               <Icon icon="material-symbols:shield-outline-rounded" className="text-base" />
-              Role: <span className="text-75">{user?.role}</span>
+              角色：<span className="text-75">{user?.role}</span>
             </div>
           </div>
         </div>
@@ -118,7 +118,7 @@ export function AdminProfilePage() {
             loading={updateMutation.isPending}
             className="bg-gradient-to-r from-[var(--klein-blue)] to-[var(--klein-blue-light)] text-white"
           >
-            Save Changes
+            保存更改
           </LoadingButton>
         </div>
       </form>

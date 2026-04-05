@@ -11,10 +11,12 @@ interface ThemeState {
 
 const DEFAULT_HUE = 250;
 
+// 应用色相值
 export function applyHue(hue: number) {
   document.documentElement.style.setProperty('--hue', String(hue));
 }
 
+// 应用主题
 export function applyTheme(theme: 'light' | 'dark') {
   if (theme === 'dark') {
     document.documentElement.classList.add('dark');

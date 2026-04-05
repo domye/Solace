@@ -20,7 +20,7 @@ export function ArticleEditorPage() {
   const [status, setStatus] = useState<request_CreateArticleRequest.status>(request_CreateArticleRequest.status.DRAFT);
   const [error, setError] = useState('');
 
-  // Load existing article data
+  // 加载现有文章数据
   useEffect(() => {
     if (existingArticle) {
       setTitle(existingArticle.title);
@@ -35,12 +35,12 @@ export function ArticleEditorPage() {
     setError('');
 
     if (!title.trim()) {
-      setError('Title is required');
+      setError('标题不能为空');
       return;
     }
 
     if (!content.trim()) {
-      setError('Content is required');
+      setError('内容不能为空');
       return;
     }
 
@@ -67,25 +67,25 @@ export function ArticleEditorPage() {
         navigate('/admin');
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to save');
+      setError(err instanceof Error ? err.message : '保存失败');
     }
   };
 
   return (
     <div className="space-y-4">
-      {/* Header */}
+      {/* 头部 */}
       <div className="card-base p-6 fade-in-up">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--klein-blue)] to-[var(--sky-blue)] flex items-center justify-center">
             <Icon icon={isEdit ? 'material-symbols:edit-outline-rounded' : 'material-symbols:add-rounded'} className="text-xl text-white" />
           </div>
           <h1 className="text-90 text-xl font-bold">
-            {isEdit ? 'Edit Article' : 'New Article'}
+            {isEdit ? '编辑文章' : '新建文章'}
           </h1>
         </div>
       </div>
 
-      {/* Form */}
+      {/* 表单 */}
       <form onSubmit={handleSubmit} className="card-base p-6 fade-in-up" style={{ animationDelay: '0.1s' }}>
         {error && (
           <div className="bg-red-500/10 text-red-500 rounded-[var(--radius-medium)] p-3 mb-4 text-sm">
@@ -94,33 +94,33 @@ export function ArticleEditorPage() {
         )}
 
         <InputField
-          label="Title"
+          label="标题"
           value={title}
           onChange={setTitle}
-          placeholder="Article title"
+          placeholder="文章标题"
           required
         />
 
         <TextAreaField
-          label="Summary"
+          label="摘要"
           value={summary}
           onChange={setSummary}
-          placeholder="Brief summary of the article"
+          placeholder="文章简要摘要"
           rows={2}
         />
 
         <TextAreaField
-          label="Content"
+          label="内容"
           value={content}
           onChange={setContent}
-          placeholder="Write your article content here..."
+          placeholder="在这里撰写文章内容..."
           rows={20}
           required
         />
 
-        {/* Status */}
+        {/* 状态 */}
         <div className="mb-6">
-          <label className="block text-75 text-sm font-medium mb-2">Status</label>
+          <label className="block text-75 text-sm font-medium mb-2">状态</label>
           <div className="flex gap-2">
             {Object.values(request_CreateArticleRequest.status).map((s) => (
               <button
@@ -137,27 +137,27 @@ export function ArticleEditorPage() {
                   icon={s === 'published' ? 'material-symbols:public-rounded' : 'material-symbols:edit-note-rounded'}
                   className="mr-1"
                 />
-                {s.charAt(0).toUpperCase() + s.slice(1)}
+                {s === 'published' ? '发布' : '草稿'}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Actions */}
+        {/* 操作按钮 */}
         <div className="flex gap-2">
           <LoadingButton
             type="submit"
             loading={createMutation.isPending || updateMutation.isPending}
             className="bg-gradient-to-r from-[var(--klein-blue)] to-[var(--klein-blue-light)] text-white"
           >
-            {isEdit ? 'Update' : 'Create'}
+            {isEdit ? '更新' : '创建'}
           </LoadingButton>
           <button
             type="button"
             onClick={() => navigate('/admin')}
             className="btn-plain rounded-[var(--radius-medium)] py-3 px-6 scale-animation ripple"
           >
-            Cancel
+            取消
           </button>
         </div>
       </form>

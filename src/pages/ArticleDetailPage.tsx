@@ -14,7 +14,7 @@ export function ArticleDetailPage() {
         <div className="w-16 h-16 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
           <Icon icon="material-symbols:error-outline-rounded" className="text-3xl text-red-500" />
         </div>
-        <p className="text-75">Failed to load article</p>
+        <p className="text-75">加载文章失败</p>
       </div>
     );
   }
@@ -23,7 +23,7 @@ export function ArticleDetailPage() {
     return (
       <div className="card-base p-8 text-center">
         <div className="w-12 h-12 rounded-full border-2 border-[var(--primary)] border-t-transparent mx-auto mb-4 animate-spin" />
-        <p className="text-50">Loading article...</p>
+        <p className="text-50">正在加载文章...</p>
       </div>
     );
   }
@@ -34,14 +34,14 @@ export function ArticleDetailPage() {
         <div className="w-16 h-16 rounded-full bg-[var(--btn-regular-bg)] mx-auto mb-4 flex items-center justify-center">
           <Icon icon="material-symbols:search-rounded" className="text-3xl text-[var(--primary)]" />
         </div>
-        <p className="text-75">Article not found</p>
+        <p className="text-75">未找到文章</p>
       </div>
     );
   }
 
   return (
     <article className="space-y-4">
-      {/* Cover Image */}
+      {/* 封面图片 */}
       {article.cover_image && (
         <div className="card-base overflow-hidden fade-in-up">
           <img
@@ -52,29 +52,29 @@ export function ArticleDetailPage() {
         </div>
       )}
 
-      {/* Article Content */}
+      {/* 文章内容 */}
       <div className="card-base p-6 md:p-8 fade-in-up" style={{ animationDelay: '0.1s' }}>
-        {/* Title */}
+        {/* 标题 */}
         <h1 className="text-90 text-2xl md:text-3xl font-bold mb-4">{article.title}</h1>
 
-        {/* Meta */}
+        {/* 元信息 */}
         <PostMeta article={article} />
 
-        {/* Summary */}
+        {/* 摘要 */}
         {article.summary && (
           <div className="text-50 border-l-2 border-[var(--primary)] pl-4 mb-6 italic">
             {article.summary}
           </div>
         )}
 
-        {/* Content */}
+        {/* 正文内容 */}
         <div className="markdown-content mt-6">
           {article.content.split('\n').map((paragraph, i) => (
             <p key={i}>{paragraph}</p>
           ))}
         </div>
 
-        {/* Footer */}
+        {/* 底部信息 */}
         <div className="border-t border-[var(--border-light)] mt-8 pt-4">
           <div className="flex items-center justify-between text-50 text-sm">
             <div className="flex items-center gap-2">
@@ -83,7 +83,7 @@ export function ArticleDetailPage() {
             </div>
             <div className="flex items-center gap-2">
               <Icon icon="material-symbols:visibility-outline-rounded" className="text-base" />
-              {article.view_count} views
+              {article.view_count} 次浏览
             </div>
           </div>
         </div>

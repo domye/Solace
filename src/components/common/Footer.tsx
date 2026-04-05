@@ -5,7 +5,7 @@ export function Footer() {
     <footer className="card-base rounded-t-none p-6 mt-4">
       <div className="flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="text-50 text-sm">
-          Powered by React + TypeScript
+          由 React + TypeScript 驱动
         </div>
         <div className="flex items-center gap-4">
           <a

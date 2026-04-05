@@ -13,12 +13,18 @@ export type { OpenAPIConfig } from './core/OpenAPI';
 export type { handler_ErrorBody } from './models/handler_ErrorBody';
 export type { handler_Response } from './models/handler_Response';
 export { request_CreateArticleRequest } from './models/request_CreateArticleRequest';
+export type { request_CreateCategoryRequest } from './models/request_CreateCategoryRequest';
+export type { request_CreateTagRequest } from './models/request_CreateTagRequest';
 export type { request_LoginRequest } from './models/request_LoginRequest';
 export type { request_RefreshTokenRequest } from './models/request_RefreshTokenRequest';
 export type { request_RegisterRequest } from './models/request_RegisterRequest';
 export { request_UpdateArticleRequest } from './models/request_UpdateArticleRequest';
+export type { request_UpdateCategoryRequest } from './models/request_UpdateCategoryRequest';
+export type { request_UpdateTagRequest } from './models/request_UpdateTagRequest';
 export type { request_UpdateUserRequest } from './models/request_UpdateUserRequest';
 
 export { ArticleService } from './services/ArticleService';
 export { AuthService } from './services/AuthService';
+export { CategoryService } from './services/CategoryService';
+export { TagService } from './services/TagService';
 export { UserService } from './services/UserService';

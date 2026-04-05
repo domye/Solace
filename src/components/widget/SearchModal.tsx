@@ -1,43 +1,36 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
-import { useArticles } from '@/hooks';
+import { useSearch } from '@/hooks/useApi';
+import { useDebouncedCallback } from 'use-debounce';
 
 interface SearchModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface Article {
-  id: number;
-  title: string;
-  slug: string;
-  content: string;
-  summary?: string;
-}
-
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const navigate = useNavigate();
 
-  const { data } = useArticles({ page: 1, pageSize: 100 });
+  // Debounce search query
+  const debouncedSetQuery = useDebouncedCallback((value: string) => {
+    setDebouncedQuery(value);
+  }, 300);
 
-  // Client-side search filter
-  const searchResults = useMemo(() => {
-    if (!query.trim() || !data?.items) return [];
-    const lowerQuery = query.toLowerCase();
-    return data.items.filter(
-      (article: Article) =>
-        article.title.toLowerCase().includes(lowerQuery) ||
-        article.content.toLowerCase().includes(lowerQuery) ||
-        (article.summary && article.summary.toLowerCase().includes(lowerQuery))
-    );
-  }, [query, data?.items]);
+  const { data: searchResults, isLoading } = useSearch(debouncedQuery);
+
+  const handleQueryChange = useCallback((value: string) => {
+    setQuery(value);
+    debouncedSetQuery(value);
+  }, [debouncedSetQuery]);
 
   const handleSelect = useCallback((slug: string) => {
     navigate(`/articles/${slug}`);
     onClose();
     setQuery('');
+    setDebouncedQuery('');
   }, [navigate, onClose]);
 
   useEffect(() => {
@@ -53,6 +46,18 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
       document.body.style.overflow = '';
     };
   }, [isOpen, onClose]);
+
+  // Keyboard shortcut: Cmd/Ctrl + K
+  useEffect(() => {
+    const handleShortcut = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        // Toggle search modal
+      }
+    };
+    document.addEventListener('keydown', handleShortcut);
+    return () => document.removeEventListener('keydown', handleShortcut);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -72,11 +77,14 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
           <input
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             placeholder="Search articles..."
             className="input-base flex-1 border-none shadow-none focus:ring-0"
             autoFocus
           />
+          {isLoading && (
+            <div className="w-5 h-5 rounded-full border-2 border-[var(--primary)] border-t-transparent animate-spin" />
+          )}
           <button
             onClick={onClose}
             className="btn-plain rounded-[var(--radius-medium)] h-10 w-10 scale-animation ripple"
@@ -87,27 +95,35 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
         {/* Results */}
         <div className="max-h-[60vh] overflow-y-auto">
-          {query.trim() && searchResults.length === 0 && (
+          {query.trim() && !isLoading && searchResults?.items?.length === 0 && (
             <div className="p-8 text-center text-50">
               <Icon icon="material-symbols:search-off-rounded" className="text-4xl mb-2" />
               <p>No results found for "{query}"</p>
             </div>
           )}
 
-          {searchResults.length > 0 && (
+          {searchResults?.items && searchResults.items.length > 0 && (
             <div className="p-2">
-              {searchResults.slice(0, 10).map((article: Article) => (
+              {searchResults.items.map((article) => (
                 <button
                   key={article.id}
                   onClick={() => handleSelect(article.slug)}
                   className="w-full text-left p-3 rounded-[var(--radius-medium)] hover:bg-[var(--btn-plain-bg-hover)] transition-colors group"
                 >
-                  <div className="text-90 font-bold group-hover:text-[var(--primary)] transition-colors mb-1">
-                    {article.title}
+                  <div className="flex items-center gap-2">
+                    <div className="text-90 font-bold group-hover:text-[var(--primary)] transition-colors flex-1">
+                      {article.title}
+                    </div>
+                    <Icon
+                      icon="material-symbols:chevron-right-rounded"
+                      className="text-lg text-30 group-hover:text-[var(--primary)] group-hover:translate-x-1 transition-all"
+                    />
                   </div>
-                  <div className="text-50 text-sm line-clamp-1">
-                    {article.summary || article.content.slice(0, 100)}
-                  </div>
+                  {article.summary && (
+                    <div className="text-50 text-sm line-clamp-1 mt-1">
+                      {article.summary}
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
@@ -117,7 +133,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
             <div className="p-8 text-center text-50">
               <Icon icon="material-symbols:search-rounded" className="text-4xl mb-2 text-[var(--primary)]" />
               <p>Type to search articles</p>
-              <p className="text-xs mt-1">Search by title, content, or summary</p>
+              <p className="text-xs mt-1">Search by title or content</p>
             </div>
           )}
         </div>

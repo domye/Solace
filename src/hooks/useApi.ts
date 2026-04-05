@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient, setApiToken } from '@/api';
+import { apiClient } from '@/api';
 import { useAuthStore } from '@/stores';
 import type {
   request_CreateArticleRequest,
@@ -8,29 +8,33 @@ import type {
   request_RegisterRequest,
   request_UpdateUserRequest,
 } from '@/api';
+import type {
+  Article,
+  ArticleSummary,
+  Category,
+  Tag,
+  ArchiveGroup,
+  PagedResponse,
+} from '@/types';
 
-// Helper to extract data from API response
+// 从 API 响应中提取数据的辅助函数
 function extractData<T>(response: { success?: boolean; data?: T; error?: { message?: string } }): T {
   if (!response.success) {
-    throw new Error(response.error?.message || 'API request failed');
+    throw new Error(response.error?.message || 'API请求失败');
   }
   return response.data as T;
 }
 
-// Article hooks
+// ============ 文章相关钩子 ============
+
 export function useArticles(params: {
   page?: number;
   pageSize?: number;
   status?: string;
   authorId?: number;
+  category?: string;
+  tag?: string;
 }) {
-  const { accessToken, isAuthenticated } = useAuthStore();
-
-  // Set token if authenticated
-  if (isAuthenticated && accessToken) {
-    setApiToken(accessToken);
-  }
-
   return useQuery({
     queryKey: ['articles', params],
     queryFn: async () => {
@@ -38,107 +42,61 @@ export function useArticles(params: {
         params.page ?? 1,
         params.pageSize ?? 10,
         params.status,
-        params.authorId
+        params.authorId,
+        params.category,
+        params.tag
       );
-      return extractData<{
-        items: Array<{
-          id: number;
-          title: string;
-          slug: string;
-          content: string;
-          summary?: string;
-          cover_image?: string;
-          author_id: number;
-          author?: { id: number; username: string; nickname?: string };
-          status: string;
-          view_count: number;
-          is_top: boolean;
-          version: number;
-          published_at?: string;
-          created_at: string;
-          updated_at: string;
-        }>;
-        page: number;
-        pageSize: number;
-        total: number;
-      }>(response);
+      return extractData<PagedResponse<ArticleSummary>>(response);
     },
   });
 }
 
 export function useArticle(id: number) {
-  const { accessToken, isAuthenticated } = useAuthStore();
-
-  if (isAuthenticated && accessToken) {
-    setApiToken(accessToken);
-  }
-
   return useQuery({
     queryKey: ['article', id],
     queryFn: async () => {
       const response = await apiClient.article.getArticles1(id);
-      return extractData<{
-        id: number;
-        title: string;
-        slug: string;
-        content: string;
-        summary?: string;
-        cover_image?: string;
-        author_id: number;
-        author?: { id: number; username: string; nickname?: string };
-        status: string;
-        view_count: number;
-        is_top: boolean;
-        version: number;
-        published_at?: string;
-        created_at: string;
-        updated_at: string;
-      }>(response);
+      return extractData<Article>(response);
     },
     enabled: id > 0,
   });
 }
 
 export function useArticleBySlug(slug: string) {
-  const { accessToken, isAuthenticated } = useAuthStore();
-
-  if (isAuthenticated && accessToken) {
-    setApiToken(accessToken);
-  }
-
   return useQuery({
     queryKey: ['article', slug],
     queryFn: async () => {
       const response = await apiClient.article.getArticlesSlug(slug);
-      return extractData<{
-        id: number;
-        title: string;
-        slug: string;
-        content: string;
-        summary?: string;
-        cover_image?: string;
-        author_id: number;
-        author?: { id: number; username: string; nickname?: string };
-        status: string;
-        view_count: number;
-        is_top: boolean;
-        version: number;
-        published_at?: string;
-        created_at: string;
-        updated_at: string;
-      }>(response);
+      return extractData<Article>(response);
     },
     enabled: slug.length > 0,
   });
 }
 
+export function useArchive() {
+  return useQuery({
+    queryKey: ['archive'],
+    queryFn: async () => {
+      const response = await apiClient.article.getArticlesArchive();
+      return extractData<ArchiveGroup[]>(response);
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useSearch(query: string, page = 1, pageSize = 10) {
+  return useQuery({
+    queryKey: ['search', query, page, pageSize],
+    queryFn: async () => {
+      const response = await apiClient.article.getArticlesSearch(query, page, pageSize);
+      return extractData<PagedResponse<ArticleSummary>>(response);
+    },
+    enabled: query.length >= 2,
+  });
+}
+
 export function useCreateArticle() {
   const queryClient = useQueryClient();
-  const { accessToken } = useAuthStore();
-
-  if (accessToken) {
-    setApiToken(accessToken);
-  }
 
   return useMutation({
     mutationFn: async (data: request_CreateArticleRequest) => {
@@ -147,17 +105,13 @@ export function useCreateArticle() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.invalidateQueries({ queryKey: ['archive'] });
     },
   });
 }
 
 export function useUpdateArticle() {
   const queryClient = useQueryClient();
-  const { accessToken } = useAuthStore();
-
-  if (accessToken) {
-    setApiToken(accessToken);
-  }
 
   return useMutation({
     mutationFn: async ({ id, data }: { id: number; data: request_UpdateArticleRequest }) => {
@@ -167,17 +121,13 @@ export function useUpdateArticle() {
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
       queryClient.invalidateQueries({ queryKey: ['article', id] });
+      queryClient.invalidateQueries({ queryKey: ['archive'] });
     },
   });
 }
 
 export function useDeleteArticle() {
   const queryClient = useQueryClient();
-  const { accessToken } = useAuthStore();
-
-  if (accessToken) {
-    setApiToken(accessToken);
-  }
 
   return useMutation({
     mutationFn: async (id: number) => {
@@ -185,11 +135,60 @@ export function useDeleteArticle() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['articles'] });
+      queryClient.invalidateQueries({ queryKey: ['archive'] });
     },
   });
 }
 
-// Auth hooks
+// ============ 分类相关钩子 ============
+
+export function useCategories() {
+  return useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await apiClient.category.getCategories();
+      return extractData<Category[]>(response);
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+export function useCategoryBySlug(slug: string) {
+  return useQuery({
+    queryKey: ['category', slug],
+    queryFn: async () => {
+      const response = await apiClient.category.getCategoriesSlug(slug);
+      return extractData<Category>(response);
+    },
+    enabled: slug.length > 0,
+  });
+}
+
+// ============ 标签相关钩子 ============
+
+export function useTags() {
+  return useQuery({
+    queryKey: ['tags'],
+    queryFn: async () => {
+      const response = await apiClient.tag.getTags();
+      return extractData<Tag[]>(response);
+    },
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+export function useTagBySlug(slug: string) {
+  return useQuery({
+    queryKey: ['tag', slug],
+    queryFn: async () => {
+      const response = await apiClient.tag.getTagsSlug(slug);
+      return extractData<Tag>(response);
+    },
+    enabled: slug.length > 0,
+  });
+}
+
+// ============ 认证相关钩子 ============
 export function useLogin() {
   const { login } = useAuthStore();
 
@@ -208,7 +207,6 @@ export function useLogin() {
     },
     onSuccess: (response) => {
       login(response.access_token, response.refresh_token, response.user);
-      setApiToken(response.access_token);
     },
   });
 }
@@ -232,7 +230,6 @@ export function useRegister() {
     },
     onSuccess: (response) => {
       login(response.access_token, response.refresh_token, response.user);
-      setApiToken(response.access_token);
     },
   });
 }
@@ -248,18 +245,13 @@ export function useLogout() {
     },
     onSuccess: () => {
       logout();
-      setApiToken(null);
     },
   });
 }
 
-// User hooks
+// 用户相关钩子
 export function useCurrentUser() {
-  const { accessToken, isAuthenticated } = useAuthStore();
-
-  if (accessToken) {
-    setApiToken(accessToken);
-  }
+  const { isAuthenticated, accessToken } = useAuthStore();
 
   return useQuery({
     queryKey: ['currentUser'],
@@ -282,11 +274,7 @@ export function useCurrentUser() {
 
 export function useUpdateUser() {
   const queryClient = useQueryClient();
-  const { accessToken, setUser } = useAuthStore();
-
-  if (accessToken) {
-    setApiToken(accessToken);
-  }
+  const { setUser } = useAuthStore();
 
   return useMutation({
     mutationFn: async (data: request_UpdateUserRequest) => {

@@ -5,8 +5,8 @@ import { useAuthStore } from '@/stores';
 // 配置信息（可以从配置文件读取）
 const profileConfig = {
   avatar: '',
-  name: 'Blog Author',
-  bio: 'Welcome to my blog!',
+  name: '博客作者',
+  bio: '欢迎来到我的博客！',
   links: [
     { name: 'GitHub', icon: 'fa6-brands:github', url: 'https://github.com' },
   ],
@@ -22,7 +22,7 @@ export function Profile() {
 
   return (
     <div className="card-base p-3">
-      {/* Avatar */}
+      {/* 头像 */}
       <Link
         to="/about"
         className="group block relative mx-auto mt-1 lg:mx-0 lg:mt-0 mb-3
@@ -38,7 +38,7 @@ export function Profile() {
         {displayAvatar ? (
           <img
             src={displayAvatar}
-            alt="Profile"
+            alt="头像"
             className="mx-auto lg:w-full h-full object-cover rounded-xl"
           />
         ) : (
@@ -48,7 +48,7 @@ export function Profile() {
         )}
       </Link>
 
-      {/* Info */}
+      {/* 个人信息 */}
       <div className="px-2">
         <div className="font-bold text-xl text-center mb-1 text-90 transition">
           {displayName}
@@ -58,7 +58,7 @@ export function Profile() {
           {displayBio}
         </div>
 
-        {/* Social Links */}
+        {/* 社交链接 */}
         <div className="flex flex-wrap gap-2 justify-center mb-1">
           {isAuthenticated ? (
             <Link
@@ -66,7 +66,7 @@ export function Profile() {
               className="btn-regular rounded-lg h-10 gap-2 px-3 font-bold active:scale-95"
             >
               <Icon icon="material-symbols:dashboard-outline-rounded" className="text-[1.25rem]" />
-              Dashboard
+              管理后台
             </Link>
           ) : (
             <>

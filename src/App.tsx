@@ -5,6 +5,8 @@ import {
   HomePage,
   ArticleDetailPage,
   ArchivePage,
+  CategoryPage,
+  TagPage,
   LoginPage,
   RegisterPage,
   AdminArticlesPage,
@@ -14,7 +16,7 @@ import {
 import { useAuthStore, useThemeStore } from '@/stores';
 import { useEffect } from 'react';
 
-// Protected Route wrapper
+// 受保护路由包装器
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, accessToken } = useAuthStore();
 
@@ -25,7 +27,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-// Initialize theme
+// 初始化主题
 function ThemeInitializer() {
   const { theme } = useThemeStore();
 
@@ -40,11 +42,11 @@ function ThemeInitializer() {
   return null;
 }
 
-// Query client
+// 查询客户端
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
+      staleTime: 5 * 60 * 1000, // 5分钟
       retry: 1,
     },
   },
@@ -56,20 +58,22 @@ function App() {
       <BrowserRouter>
         <ThemeInitializer />
         <Routes>
-          {/* Public routes */}
+          {/* 公开路由 */}
           <Route element={<MainLayout />}>
             <Route path="/" element={<HomePage />} />
             <Route path="/articles/:slug" element={<ArticleDetailPage />} />
             <Route path="/archive" element={<ArchivePage />} />
+            <Route path="/categories/:slug" element={<CategoryPage />} />
+            <Route path="/tags/:slug" element={<TagPage />} />
           </Route>
 
-          {/* Auth routes */}
+          {/* 认证路由 */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
           </Route>
 
-          {/* Admin routes (protected) */}
+          {/* 管理后台路由（受保护） */}
           <Route
             element={
               <ProtectedRoute>
@@ -83,7 +87,7 @@ function App() {
             <Route path="/admin/profile" element={<AdminProfilePage />} />
           </Route>
 
-          {/* Fallback */}
+          {/* 回退路由 */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>

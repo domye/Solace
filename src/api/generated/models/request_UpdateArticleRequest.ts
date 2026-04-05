@@ -3,9 +3,12 @@
 /* tslint:disable */
 /* eslint-disable */
 export type request_UpdateArticleRequest = {
+  category_id?: number;
   content?: string;
+  cover_image?: string;
   status?: request_UpdateArticleRequest.status;
   summary?: string;
+  tag_ids?: Array<number>;
   title?: string;
   version: number;
 };

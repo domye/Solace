@@ -18,7 +18,7 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
 
-  // Actions
+  // 操作方法
   setTokens: (accessToken: string, refreshToken: string) => void;
   setUser: (user: User) => void;
   login: (accessToken: string, refreshToken: string, user: User) => void;

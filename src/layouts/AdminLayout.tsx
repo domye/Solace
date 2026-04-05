@@ -8,9 +8,9 @@ export function AdminLayout() {
   const { user } = useAuthStore();
 
   const navItems = [
-    { name: 'Articles', path: '/admin', icon: 'material-symbols:article-outline-rounded' },
-    { name: 'New Article', path: '/admin/articles/new', icon: 'material-symbols:add-rounded' },
-    { name: 'Profile', path: '/admin/profile', icon: 'material-symbols:person-outline-rounded' },
+    { name: '文章管理', path: '/admin', icon: 'material-symbols:article-outline-rounded' },
+    { name: '新建文章', path: '/admin/articles/new', icon: 'material-symbols:add-rounded' },
+    { name: '个人资料', path: '/admin/profile', icon: 'material-symbols:person-outline-rounded' },
   ];
 
   return (
@@ -19,10 +19,10 @@ export function AdminLayout() {
 
       <div className="flex-1 max-w-[var(--page-width)] mx-auto w-full px-4 py-4">
         <div className="flex flex-col md:flex-row gap-4">
-          {/* Admin Sidebar */}
+          {/* 管理后台侧边栏 */}
           <aside className="w-full md:w-56 shrink-0">
             <div className="card-base p-4 mb-4">
-              <div className="text-75 text-sm font-medium mb-2">Admin Dashboard</div>
+              <div className="text-75 text-sm font-medium mb-2">管理后台</div>
               {user && (
                 <div className="text-50 text-xs">
                   {user.nickname || user.username}
@@ -46,7 +46,7 @@ export function AdminLayout() {
             </div>
           </aside>
 
-          {/* Admin Content */}
+          {/* 管理后台内容区 */}
           <main className="flex-1 min-w-0">
             <Outlet />
           </main>

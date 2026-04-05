@@ -2,7 +2,7 @@ import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { formatDate } from '@/utils/date';
 
-// Article type matching API response
+// 文章类型（匹配 API 响应）
 interface Article {
   id: number;
   title: string;
@@ -37,13 +37,13 @@ export function PostCard({ article, class: className, style }: PostCardProps) {
         className={`card-base flex flex-col-reverse md:flex-col w-full rounded-[var(--radius-large)] overflow-hidden relative ${className || ''}`}
         style={style}
       >
-        {/* Content */}
+        {/* 内容区域 */}
         <div className={`pl-6 md:pl-9 pr-6 md:pr-2 pt-6 md:pt-7 pb-6 relative ${
           hasCover
             ? 'w-full md:w-[calc(100%-var(--coverWidth)-12px)]'
             : 'w-full md:w-[calc(100%-52px-12px)]'
         }`}>
-          {/* Title */}
+          {/* 标题 */}
           <Link
             to={`/articles/${article.slug}`}
             className="transition group w-full block font-bold mb-3 text-3xl text-90
@@ -63,21 +63,21 @@ export function PostCard({ article, class: className, style }: PostCardProps) {
             />
           </Link>
 
-          {/* Metadata */}
+          {/* 元信息 */}
           <PostMeta article={article} hideTagsForMobile />
 
-          {/* Summary */}
+          {/* 摘要 */}
           <div className="transition text-75 mb-3.5 pr-4 line-clamp-2 md:line-clamp-1">
-            {article.summary || 'No summary available'}
+            {article.summary || '暂无摘要'}
           </div>
 
-          {/* View count */}
+          {/* 浏览量 */}
           <div className="text-sm text-30 flex gap-4 transition">
-            <div>{article.view_count} views</div>
+            <div>{article.view_count} 次浏览</div>
           </div>
         </div>
 
-        {/* Cover Image */}
+        {/* 封面图片 */}
         {hasCover && (
           <Link
             to={`/articles/${article.slug}`}
@@ -100,7 +100,7 @@ export function PostCard({ article, class: className, style }: PostCardProps) {
           </Link>
         )}
 
-        {/* Enter Button (no cover) */}
+        {/* 进入按钮（无封面时） */}
         {!hasCover && (
           <Link
             to={`/articles/${article.slug}`}
@@ -115,7 +115,7 @@ export function PostCard({ article, class: className, style }: PostCardProps) {
         )}
       </div>
 
-      {/* Divider (mobile) */}
+      {/* 分隔线（移动端） */}
       <div className="transition border-t-[1px] border-dashed mx-6 border-[var(--border-medium)] last:border-t-0 md:hidden" />
 
       <style>{`:root { --coverWidth: ${coverWidth}; }`}</style>
@@ -134,7 +134,7 @@ export function PostMeta({ article, hideUpdateDate, hideTagsForMobile }: PostMet
 
   return (
     <div className={`flex flex-wrap text-50 items-center gap-4 gap-x-4 gap-y-2 mb-4 ${hideTagsForMobile ? '' : ''}`}>
-      {/* Published Date */}
+      {/* 发布日期 */}
       <div className="flex items-center">
         <div className="meta-icon">
           <Icon icon="material-symbols:calendar-today-outline-rounded" className="text-xl" />
@@ -142,7 +142,7 @@ export function PostMeta({ article, hideUpdateDate, hideTagsForMobile }: PostMet
         <span className="text-50 text-sm font-medium">{formatDate(article.published_at || article.created_at)}</span>
       </div>
 
-      {/* Updated Date */}
+      {/* 更新日期 */}
       {showUpdate && (
         <div className="flex items-center">
           <div className="meta-icon">
@@ -152,7 +152,7 @@ export function PostMeta({ article, hideUpdateDate, hideTagsForMobile }: PostMet
         </div>
       )}
 
-      {/* Author */}
+      {/* 作者 */}
       {article.author && (
         <div className="flex items-center">
           <div className="meta-icon">
@@ -162,13 +162,13 @@ export function PostMeta({ article, hideUpdateDate, hideTagsForMobile }: PostMet
         </div>
       )}
 
-      {/* Status (draft) */}
+      {/* 状态（草稿） */}
       {article.status === 'draft' && (
         <div className="flex items-center">
           <div className="meta-icon bg-amber-500/20 text-amber-600">
             <Icon icon="material-symbols:edit-note-rounded" className="text-xl" />
           </div>
-          <span className="text-50 text-sm font-medium">Draft</span>
+          <span className="text-50 text-sm font-medium">草稿</span>
         </div>
       )}
     </div>

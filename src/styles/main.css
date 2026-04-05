@@ -3,26 +3,35 @@
 @tailwind utilities;
 
 /* ========================================
-   动态色调系统 - 基于 oklch
+   动态色调系统 - 基于 oklch (匹配 Fuwari)
    ======================================== */
 
 :root {
   --hue: 250;
-  --primary: oklch(0.70 0.14 var(--hue));
-  --primary-light: oklch(0.80 0.12 var(--hue));
-  --primary-dark: oklch(0.55 0.16 var(--hue));
+  --radius-large: 1rem;
+  --page-width: 1200px;
+  --content-delay: 150ms;
 
-  /* 背景色 */
-  --bg-base: #fafafa;
-  --bg-card: #ffffff;
-  --bg-elevated: #ffffff;
+  /* 主色 */
+  --primary: oklch(0.70 0.14 var(--hue));
+  --title-active: oklch(0.6 0.1 var(--hue));
+
+  /* 页面背景 */
+  --page-bg: oklch(0.95 0.01 var(--hue));
+  --card-bg: #ffffff;
 
   /* 按钮背景 */
-  --btn-regular-bg: oklch(0.95 0.01 var(--hue));
-  --btn-regular-bg-hover: oklch(0.92 0.02 var(--hue));
-  --btn-regular-bg-active: oklch(0.88 0.02 var(--hue));
-  --btn-plain-bg-hover: oklch(0.95 0.01 var(--hue));
-  --btn-plain-bg-active: oklch(0.92 0.02 var(--hue));
+  --btn-content: oklch(0.55 0.12 var(--hue));
+  --btn-regular-bg: oklch(0.95 0.025 var(--hue));
+  --btn-regular-bg-hover: oklch(0.9 0.05 var(--hue));
+  --btn-regular-bg-active: oklch(0.85 0.08 var(--hue));
+  --btn-plain-bg-hover: oklch(0.95 0.025 var(--hue));
+  --btn-plain-bg-active: oklch(0.98 0.01 var(--hue));
+  --btn-card-bg-hover: oklch(0.98 0.005 var(--hue));
+  --btn-card-bg-active: oklch(0.9 0.03 var(--hue));
+
+  /* 浮动面板 */
+  --float-panel-bg: #ffffff;
 
   /* 文字颜色 */
   --text-90: rgba(0, 0, 0, 0.9);
@@ -30,42 +39,47 @@
   --text-50: rgba(0, 0, 0, 0.5);
   --text-30: rgba(0, 0, 0, 0.3);
 
-  /* 边框 */
+  /* 边框和分隔线 */
   --border-light: rgba(0, 0, 0, 0.06);
   --border-medium: rgba(0, 0, 0, 0.1);
+  --line-divider: rgba(0, 0, 0, 0.08);
+  --meta-divider: rgba(0, 0, 0, 0.2);
 
-  /* 深色文字（用于按钮内容） */
-  --btn-content: oklch(0.45 0.04 var(--hue));
-  --deep-text: #ffffff;
+  /* 深色文字 */
+  --deep-text: oklch(0.25 0.02 var(--hue));
 
-  /* 布局 */
-  --page-width: 1200px;
-  --navbar-height: 4.5rem;
-  --sidebar-width: 17.5rem;
-  --radius-large: 0.75rem;
+  /* 链接 */
+  --link-underline: oklch(0.93 0.04 var(--hue));
+  --link-hover: oklch(0.95 0.025 var(--hue));
+  --link-active: oklch(0.90 0.05 var(--hue));
 
-  /* 动画 */
-  --content-delay: 0ms;
+  /* 选择背景 */
+  --selection-bg: oklch(0.90 0.05 var(--hue));
 
   /* 代码块 */
-  --codeblock-bg: oklch(0.18 0.02 var(--hue));
-  --codeblock-topbar-bg: oklch(0.15 0.02 var(--hue));
+  --codeblock-bg: oklch(0.17 0.015 var(--hue));
+  --codeblock-topbar-bg: oklch(0.3 0.02 var(--hue));
+  --inline-code-bg: var(--btn-regular-bg);
+  --inline-code-color: var(--btn-content);
 }
 
 .dark {
   --primary: oklch(0.75 0.14 var(--hue));
-  --primary-light: oklch(0.82 0.10 var(--hue));
-  --primary-dark: oklch(0.60 0.16 var(--hue));
+  --title-active: oklch(0.6 0.1 var(--hue));
 
-  --bg-base: oklch(0.12 0.01 var(--hue));
-  --bg-card: oklch(0.15 0.01 var(--hue));
-  --bg-elevated: oklch(0.18 0.01 var(--hue));
+  --page-bg: oklch(0.16 0.014 var(--hue));
+  --card-bg: oklch(0.23 0.015 var(--hue));
 
-  --btn-regular-bg: oklch(0.22 0.02 var(--hue));
-  --btn-regular-bg-hover: oklch(0.26 0.02 var(--hue));
-  --btn-regular-bg-active: oklch(0.30 0.02 var(--hue));
-  --btn-plain-bg-hover: oklch(0.22 0.02 var(--hue));
-  --btn-plain-bg-active: oklch(0.26 0.02 var(--hue));
+  --btn-content: oklch(0.75 0.1 var(--hue));
+  --btn-regular-bg: oklch(0.33 0.035 var(--hue));
+  --btn-regular-bg-hover: oklch(0.38 0.04 var(--hue));
+  --btn-regular-bg-active: oklch(0.43 0.045 var(--hue));
+  --btn-plain-bg-hover: oklch(0.30 0.035 var(--hue));
+  --btn-plain-bg-active: oklch(0.27 0.025 var(--hue));
+  --btn-card-bg-hover: oklch(0.3 0.03 var(--hue));
+  --btn-card-bg-active: oklch(0.35 0.035 var(--hue));
+
+  --float-panel-bg: oklch(0.19 0.015 var(--hue));
 
   --text-90: rgba(255, 255, 255, 0.9);
   --text-75: rgba(255, 255, 255, 0.75);
@@ -74,11 +88,17 @@
 
   --border-light: rgba(255, 255, 255, 0.08);
   --border-medium: rgba(255, 255, 255, 0.12);
+  --line-divider: rgba(255, 255, 255, 0.08);
+  --meta-divider: rgba(255, 255, 255, 0.2);
 
-  --btn-content: rgba(255, 255, 255, 0.75);
+  --link-underline: oklch(0.40 0.08 var(--hue));
+  --link-hover: oklch(0.40 0.08 var(--hue));
+  --link-active: oklch(0.35 0.07 var(--hue));
 
-  --codeblock-bg: oklch(0.12 0.02 var(--hue));
-  --codeblock-topbar-bg: oklch(0.10 0.02 var(--hue));
+  --selection-bg: oklch(0.40 0.08 var(--hue));
+
+  --codeblock-bg: oklch(0.17 0.015 var(--hue));
+  --codeblock-topbar-bg: oklch(0.12 0.015 var(--hue));
 }
 
 /* ========================================
@@ -87,23 +107,27 @@
 
 @layer base {
   body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background-color: var(--bg-base);
+    font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--page-bg);
     color: var(--text-90);
-    @apply antialiased;
+    @apply antialiased transition;
   }
 
   ::selection {
-    background: oklch(0.85 0.10 var(--hue) / 0.4);
+    background-color: var(--selection-bg);
   }
 }
 
 @layer components {
   /* === 卡片基础 === */
   .card-base {
-    background: var(--bg-card);
+    background: var(--card-bg);
     border-radius: var(--radius-large);
-    @apply transition-all duration-200;
+    @apply overflow-hidden transition-all duration-200;
+  }
+
+  .card-shadow {
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.005));
   }
 
   /* === 文字层级 === */
@@ -112,24 +136,44 @@
   .text-50 { color: var(--text-50); }
   .text-30 { color: var(--text-30); }
 
-  /* === 按钮 === */
-  .btn-plain {
-    @apply flex items-center justify-center transition-all;
-    color: var(--text-75);
-    border-radius: 0.5rem;
+  /* === 按钮动画 (Fuwari expand-animation) === */
+  .expand-animation {
+    @apply relative before:ease-out before:transition z-0;
   }
-
-  .btn-plain:hover {
-    color: var(--primary);
+  .expand-animation::before {
+    content: '';
+    @apply absolute rounded-[inherit] inset-0 scale-[0.85] -z-10;
+    background: transparent;
+  }
+  .expand-animation:hover::before {
     background: var(--btn-plain-bg-hover);
+    @apply scale-100;
   }
-
-  .btn-plain:active {
+  .expand-animation:active::before {
     background: var(--btn-plain-bg-active);
   }
 
+  /* === 按钮样式 === */
+  .btn-plain {
+    @apply flex items-center justify-center transition relative;
+    color: var(--text-75);
+    border-radius: 0.5rem;
+    &:not(.scale-animation) {
+      @apply hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)];
+      &:hover {
+        color: var(--primary);
+      }
+    }
+    &.scale-animation {
+      @apply expand-animation;
+      &:hover {
+        color: var(--primary);
+      }
+    }
+  }
+
   .btn-regular {
-    @apply flex items-center justify-center transition-all;
+    @apply flex items-center justify-center transition;
     background: var(--btn-regular-bg);
     color: var(--btn-content);
     border-radius: 0.5rem;
@@ -143,23 +187,64 @@
     background: var(--btn-regular-bg-active);
   }
 
+  .btn-card {
+    @apply flex items-center justify-center transition;
+    background: var(--card-bg);
+  }
+
+  .btn-card:hover {
+    background: var(--btn-card-bg-hover);
+  }
+
+  .btn-card:active {
+    background: var(--btn-card-bg-active);
+  }
+
+  /* === 链接样式 === */
+  .link-underline {
+    @apply transition underline decoration-2 decoration-dashed;
+    text-decoration-color: var(--link-underline);
+    text-underline-offset: 0.25rem;
+  }
+  .link-underline:hover {
+    text-decoration-color: var(--link-hover);
+  }
+  .link-underline:active {
+    text-decoration-color: var(--link-active);
+  }
+
   /* === 图标徽章 === */
   .meta-icon {
-    @apply flex items-center justify-center;
+    @apply flex items-center justify-center transition;
     width: 2rem;
     height: 2rem;
-    border-radius: 0.5rem;
+    border-radius: 0.375rem;
     background: var(--btn-regular-bg);
     color: var(--btn-content);
     margin-right: 0.5rem;
   }
 
+  /* === 分隔符 === */
+  .with-divider::before {
+    content: '/';
+    margin-left: 0.375rem;
+    margin-right: 0.375rem;
+    color: var(--meta-divider);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .with-divider:first-of-type::before {
+    display: none;
+  }
+
   /* === 浮动面板 === */
   .float-panel {
-    background: var(--bg-elevated);
+    background: var(--float-panel-bg);
     border-radius: var(--radius-large);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    border: 1px solid var(--border-light);
+    @apply overflow-hidden transition shadow-xl;
+  }
+  .dark .float-panel {
+    @apply shadow-none;
   }
 
   .float-panel-closed {
@@ -168,12 +253,13 @@
 
   /* === 输入框 === */
   .input-base {
-    @apply w-full transition-all;
-    padding: 0.75rem 1rem;
+    @apply w-full transition;
+    padding: 0.5rem 1rem;
     border-radius: 0.5rem;
-    background: var(--bg-card);
-    border: 1px solid var(--border-medium);
+    background: var(--card-bg);
+    border: none;
     color: var(--text-90);
+    box-shadow: none;
   }
 
   .input-base::placeholder {
@@ -182,12 +268,21 @@
 
   .input-base:focus {
     outline: none;
-    border-color: var(--primary);
+    @apply ring-0;
+  }
+
+  /* === 滚动条隐藏 === */
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 
 /* ========================================
-   动画效果
+   动画效果 (匹配 Fuwari)
    ======================================== */
 
 .onload-animation {
@@ -198,6 +293,21 @@
   from {
     opacity: 0;
     transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.2s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
@@ -221,6 +331,28 @@
 @keyframes breathing {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-4px); }
+}
+
+/* Ripple 效果 */
+.ripple {
+  @apply relative overflow-hidden;
+}
+
+.ripple::after {
+  content: '';
+  @apply absolute inset-0 pointer-events-none;
+  background: radial-gradient(circle, var(--primary) 10%, transparent 10.01%);
+  background-repeat: no-repeat;
+  background-position: 50%;
+  transform: scale(10);
+  opacity: 0;
+  transition: transform 0.5s, opacity 0.5s;
+}
+
+.ripple:active::after {
+  transform: scale(0);
+  opacity: 0.2;
+  transition: 0s;
 }
 
 /* ========================================

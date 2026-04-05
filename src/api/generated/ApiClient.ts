@@ -7,11 +7,15 @@ import type { OpenAPIConfig } from './core/OpenAPI';
 import { FetchHttpRequest } from './core/FetchHttpRequest';
 import { ArticleService } from './services/ArticleService';
 import { AuthService } from './services/AuthService';
+import { CategoryService } from './services/CategoryService';
+import { TagService } from './services/TagService';
 import { UserService } from './services/UserService';
 type HttpRequestConstructor = new (config: OpenAPIConfig) => BaseHttpRequest;
 export class ApiClient {
   public readonly article: ArticleService;
   public readonly auth: AuthService;
+  public readonly category: CategoryService;
+  public readonly tag: TagService;
   public readonly user: UserService;
   public readonly request: BaseHttpRequest;
   constructor(config?: Partial<OpenAPIConfig>, HttpRequest: HttpRequestConstructor = FetchHttpRequest) {
@@ -28,6 +32,8 @@ export class ApiClient {
     });
     this.article = new ArticleService(this.request);
     this.auth = new AuthService(this.request);
+    this.category = new CategoryService(this.request);
+    this.tag = new TagService(this.request);
     this.user = new UserService(this.request);
   }
 }
