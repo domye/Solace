@@ -3,12 +3,15 @@
  *
  * 结构：
  * ┌─────────────────────────────────┐
- * │  侧边栏  │      主内容区        │
- * │  (导航)  │     (Outlet)         │
- * └─────────────────────────────────┘
+ * │           Navbar                │
+ * ├─────────┬───────────────────────┤
+ * │ 侧边栏  │      主内容区         │
+ * │ (导航)  │     (Outlet)          │
+ * └─────────┴───────────────────────┘
  */
 
 import { Outlet, useLocation } from 'react-router-dom';
+import { Navbar, Footer } from '@/components/common';
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores';
@@ -35,6 +38,9 @@ export function AdminLayout() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* 顶部导航栏 */}
+      <Navbar />
+
       <div className="flex-1 max-w-[var(--page-width)] mx-auto w-full px-4 py-4">
         <div className="flex flex-col md:flex-row gap-4">
           {/* 侧边栏 */}
@@ -76,6 +82,9 @@ export function AdminLayout() {
           </main>
         </div>
       </div>
+
+      {/* 底部页脚 */}
+      <Footer />
     </div>
   );
 }

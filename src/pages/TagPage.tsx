@@ -38,16 +38,14 @@ export function TagPage() {
       ) : articlesData?.data && articlesData.data.length > 0 ? (
         <>
           {isFetching && !isLoading && <InlineLoader />}
-          <div className="space-y-0">
-            {articlesData.data.map((article, index) => (
-              <PostCard
-                key={article.id}
-                article={toPostCardArticle(article)}
-                className="content-appear"
-                style={{ animationDelay: `${index * 40}ms` }}
-              />
-            ))}
-          </div>
+          {articlesData.data.map((article, index) => (
+            <PostCard
+              key={article.id}
+              article={toPostCardArticle(article)}
+              className="content-appear"
+              style={{ animationDelay: `${index * 40}ms` }}
+            />
+          ))}
           {articlesData.total > pageSize && (
             <Pagination
               page={page}
