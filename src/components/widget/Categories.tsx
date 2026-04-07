@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useCategories } from '@/hooks/useApi';
+import { useCategories } from '@/hooks';
 
 interface CategoriesProps {
   className?: string;

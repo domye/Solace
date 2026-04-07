@@ -27,8 +27,8 @@ export interface User {
   bio?: string;
   github_url?: string;
   role: string;
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Owner Types (站长公开信息)

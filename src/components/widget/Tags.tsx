@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useTags } from '@/hooks/useApi';
+import { useTags } from '@/hooks';
 
 interface TagsProps {
   className?: string;

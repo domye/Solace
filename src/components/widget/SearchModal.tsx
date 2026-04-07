@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
-import { useSearch } from '@/hooks/useApi';
+import { useSearch } from '@/hooks';
 import { useDebouncedCallback } from 'use-debounce';
 
 interface SearchModalProps {

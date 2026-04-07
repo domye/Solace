@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useArchive } from '@/hooks/useApi';
+import { useArchive } from '@/hooks';
 
 function formatDate(dateStr: string | undefined) {
   if (!dateStr) return '';

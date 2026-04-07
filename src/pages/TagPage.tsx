@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useTagBySlug, useArticles } from '@/hooks/useApi';
+import { useTagBySlug, useArticles } from '@/hooks';
 import { PostCard } from '@/components/common/PostCard';
 import { PostCardSkeletonList } from '@/components/common/PostCardSkeleton';
 import { Pagination } from '@/components/control/Pagination';
