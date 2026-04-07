@@ -1,6 +1,7 @@
 export { Navbar } from './Navbar';
 export { PostCard, PostMeta } from './PostCard';
 export { PostCardSkeleton, PostCardSkeletonList } from './PostCardSkeleton';
+export { ArticleDetailSkeleton } from './ArticleDetailSkeleton';
 export { MarkdownRenderer } from './MarkdownRenderer';
 export { ThemeToggle } from './ThemeToggle';
 export { Footer } from './Footer';

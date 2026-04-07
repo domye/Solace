@@ -1,23 +1,20 @@
-import type { ArticleSummary } from '@/types';
-
 /**
- * Converts ArticleSummary from API to PostCard's expected Article format.
- * PostCard expects additional fields that ArticleSummary doesn't have.
+ * 文章数据转换工具
  */
-export function toPostCardArticle(article: ArticleSummary) {
+
+import type { ArticleSummary, PostCardArticle } from '@/types';
+
+/** 将 ArticleSummary 转换为 PostCard 组件所需格式 */
+export function toPostCardArticle(article: ArticleSummary): PostCardArticle {
   return {
     id: article.id,
     title: article.title,
     slug: article.slug,
-    content: '', // not needed for list view
     summary: article.summary,
     cover_image: article.cover_image,
-    author_id: article.author?.id || 0,
     author: article.author,
     status: article.status,
     view_count: article.view_count,
-    is_top: false,
-    version: 1,
     published_at: article.published_at,
     created_at: article.created_at,
     updated_at: article.created_at,

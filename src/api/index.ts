@@ -174,9 +174,9 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
 export const apiClient = new ApiClient();
 
 // Export utility functions
-export function setApiToken(_token: string | null) {
-  // Token is now handled via OpenAPI.TOKEN resolver and fetch interceptor
-}
+// Note: Token is now handled via OpenAPI.TOKEN resolver and fetch interceptor
+// This function is kept for API compatibility but does nothing
+export const setApiToken = (): void => { /* no-op */ };
 
 // Re-export generated types and services
 export * from './generated';

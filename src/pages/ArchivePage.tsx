@@ -1,19 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useArchive } from '@/hooks';
 import { ErrorDisplay, InlineLoader, EmptyState } from '@/components';
-
-function formatDate(dateStr: string | undefined) {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${month}-${day}`;
-}
-
-function formatTag(tags: { id: number; name: string }[] | undefined) {
-  if (!tags || tags.length === 0) return '';
-  return tags.map((t) => `#${t.name}`).join(' ');
-}
+import { formatShortDate, formatTags } from '@/utils';
 
 export function ArchivePage() {
   const { data: groups, isLoading, isFetching, error } = useArchive();
@@ -100,7 +88,7 @@ export function ArchivePage() {
                 >
                   <div className="flex flex-row justify-start items-center h-full">
                     <div className="w-[15%] md:w-[10%] transition text-sm text-right text-50">
-                      {formatDate(post.published_at || post.created_at)}
+                      {formatShortDate(post.published_at || post.created_at)}
                     </div>
                     <div className="w-[15%] md:w-[10%] relative dash-line h-full flex items-center">
                       <div className="transition-all mx-auto w-1 h-1 rounded group-hover:h-5 bg-[oklch(0.5_0.05_var(--hue))] group-hover:bg-[var(--primary)] outline outline-4 z-50 outline-[var(--card-bg)] group-hover:outline-[var(--btn-plain-bg-hover)] group-active:outline-[var(--btn-plain-bg-active)]" />
@@ -109,7 +97,7 @@ export function ArchivePage() {
                       {post.title}
                     </div>
                     <div className="hidden md:block md:w-[15%] text-left text-sm transition whitespace-nowrap overflow-ellipsis overflow-hidden text-30">
-                      {formatTag(post.tags)}
+                      {formatTags(post.tags)}
                     </div>
                   </div>
                 </Link>

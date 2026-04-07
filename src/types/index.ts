@@ -1,4 +1,12 @@
-// API Response Types
+/**
+ * 全局类型定义
+ *
+ * 包含 API 响应、数据模型、组件属性等类型
+ */
+
+// ============ API 响应类型 ============
+
+/** 通用 API 响应 */
 export interface ApiResponse<T> {
   success: boolean;
   data: T;
@@ -9,6 +17,7 @@ export interface ApiResponse<T> {
   };
 }
 
+/** 分页响应 */
 export interface PagedResponse<T> {
   data: T[];
   page: number;
@@ -17,7 +26,9 @@ export interface PagedResponse<T> {
   totalPages: number;
 }
 
-// User Types
+// ============ 用户类型 ============
+
+/** 用户信息 */
 export interface User {
   id: number;
   username: string;
@@ -31,7 +42,7 @@ export interface User {
   updated_at?: string;
 }
 
-// Owner Types (站长公开信息)
+/** 站长公开信息 */
 export interface Owner {
   nickname?: string;
   avatar_url?: string;
@@ -39,7 +50,9 @@ export interface Owner {
   github_url?: string;
 }
 
-// Category Types
+// ============ 分类类型 ============
+
+/** 分类 */
 export interface Category {
   id: number;
   name: string;
@@ -52,7 +65,9 @@ export interface Category {
   updated_at: string;
 }
 
-// Tag Types
+// ============ 标签类型 ============
+
+/** 标签 */
 export interface Tag {
   id: number;
   name: string;
@@ -62,7 +77,9 @@ export interface Tag {
   updated_at: string;
 }
 
-// Article Types
+// ============ 文章类型 ============
+
+/** 文章详情 */
 export interface Article {
   id: number;
   title: string;
@@ -87,11 +104,13 @@ export interface Article {
   updated_at: string;
 }
 
+/** 文章导航（上一篇/下一篇） */
 export interface ArticleNav {
   title: string;
   slug: string;
 }
 
+/** 文章摘要（列表项） */
 export interface ArticleSummary {
   id: number;
   title: string;
@@ -107,14 +126,16 @@ export interface ArticleSummary {
   created_at: string;
 }
 
-// Archive Types (按年份分组)
+/** 归档分组（按年份） */
 export interface ArchiveGroup {
   year: number;
   count: number;
   posts: ArticleSummary[];
 }
 
-// Component Props Types
+// ============ 组件属性类型 ============
+
+/** 分页组件属性 */
 export interface PaginationProps {
   page: number;
   pageSize: number;
@@ -122,12 +143,15 @@ export interface PaginationProps {
   onPageChange: (page: number) => void;
 }
 
+/** 搜索组件属性 */
 export interface SearchProps {
   onSearch: (query: string) => void;
   initialValue?: string;
 }
 
-// Request Types
+// ============ 请求类型 ============
+
+/** 创建文章请求 */
 export interface CreateArticleRequest {
   title: string;
   content: string;
@@ -138,6 +162,7 @@ export interface CreateArticleRequest {
   status?: 'draft' | 'published';
 }
 
+/** 更新文章请求 */
 export interface UpdateArticleRequest {
   title?: string;
   content?: string;
@@ -147,4 +172,21 @@ export interface UpdateArticleRequest {
   tag_ids?: number[];
   status?: 'draft' | 'published';
   version: number;
+}
+
+// ============ 展示类型 ============
+
+/** 文章卡片展示数据（精简字段） */
+export interface PostCardArticle {
+  id: number;
+  title: string;
+  slug: string;
+  summary?: string;
+  cover_image?: string;
+  author?: { id: number; username: string; nickname?: string };
+  status: string;
+  view_count: number;
+  published_at?: string;
+  created_at: string;
+  updated_at: string;
 }

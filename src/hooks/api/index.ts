@@ -1,4 +1,10 @@
-// Article hooks
+/**
+ * API Hooks 导出
+ *
+ * 按功能模块导出所有 API 相关的 React Query hooks
+ */
+
+// 文章相关
 export {
   useArticles,
   useArticle,
@@ -10,7 +16,7 @@ export {
   useDeleteArticle,
 } from './articles';
 
-// Category hooks
+// 分类相关
 export {
   useCategories,
   useCategoryBySlug,
@@ -19,7 +25,7 @@ export {
   useDeleteCategory,
 } from './categories';
 
-// Tag hooks
+// 标签相关
 export {
   useTags,
   useTagBySlug,
@@ -28,14 +34,14 @@ export {
   useDeleteTag,
 } from './tags';
 
-// User hooks
+// 用户相关
 export {
   useCurrentUser,
   useUpdateUser,
 } from './users';
 
-// Owner hooks
+// 站长信息
 export { useOwner } from './owner';
 
-// Auth hooks
+// 认证相关
 export { useLogin, useLogout } from './auth';

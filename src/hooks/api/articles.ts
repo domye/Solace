@@ -1,12 +1,16 @@
+/**
+ * 文章相关 API Hooks
+ *
+ * 提供文章的查询、创建、更新、删除等操作
+ */
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api';
 import { extractData, extractPagedData } from './utils';
 import type { Article, ArticleSummary, ArchiveGroup } from '@/types';
 import type { request_CreateArticleRequest, request_UpdateArticleRequest } from '@/api';
 
-/**
- * 获取文章列表（分页）
- */
+/** 获取文章列表（分页） */
 export function useArticles(params: {
   page?: number;
   pageSize?: number;
@@ -26,14 +30,12 @@ export function useArticles(params: {
         params.category,
         params.tag
       );
-      return extractPagedData<ArticleSummary>(response as any);
+      return extractPagedData<ArticleSummary>(response);
     },
   });
 }
 
-/**
- * 获取单个文章（按 ID）
- */
+/** 获取单篇文章（按 ID） */
 export function useArticle(id: number) {
   return useQuery({
     queryKey: ['article', id],
@@ -45,9 +47,7 @@ export function useArticle(id: number) {
   });
 }
 
-/**
- * 获取单个文章（按 slug）
- */
+/** 获取单篇文章（按 slug） */
 export function useArticleBySlug(slug: string) {
   return useQuery({
     queryKey: ['article', slug],
@@ -59,9 +59,7 @@ export function useArticleBySlug(slug: string) {
   });
 }
 
-/**
- * 获取归档列表
- */
+/** 获取归档列表 */
 export function useArchive() {
   return useQuery({
     queryKey: ['archive'],
@@ -73,23 +71,19 @@ export function useArchive() {
   });
 }
 
-/**
- * 搜索文章
- */
+/** 搜索文章 */
 export function useSearch(query: string, page = 1, pageSize = 10) {
   return useQuery({
     queryKey: ['search', query, page, pageSize],
     queryFn: async () => {
       const response = await apiClient.article.getArticlesSearch(query, page, pageSize);
-      return extractPagedData<ArticleSummary>(response as any);
+      return extractPagedData<ArticleSummary>(response);
     },
     enabled: query.length >= 2,
   });
 }
 
-/**
- * 创建文章
- */
+/** 创建文章 */
 export function useCreateArticle() {
   const queryClient = useQueryClient();
 
@@ -105,9 +99,7 @@ export function useCreateArticle() {
   });
 }
 
-/**
- * 更新文章
- */
+/** 更新文章 */
 export function useUpdateArticle() {
   const queryClient = useQueryClient();
 
@@ -124,9 +116,7 @@ export function useUpdateArticle() {
   });
 }
 
-/**
- * 删除文章
- */
+/** 删除文章 */
 export function useDeleteArticle() {
   const queryClient = useQueryClient();
 

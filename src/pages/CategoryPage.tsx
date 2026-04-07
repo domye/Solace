@@ -44,7 +44,7 @@ export function CategoryPage() {
               <PostCard
                 key={article.id}
                 article={toPostCardArticle(article)}
-                class="content-appear"
+                className="content-appear"
                 style={{ animationDelay: `${index * 40}ms` }}
               />
             ))}
