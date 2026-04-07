@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useArticle, useCreateArticle, useUpdateArticle, useCategories, useTags } from '@/hooks';
-import { LoadingButton, InputField, TextAreaField } from '@/components';
-import { Icon } from '@iconify/react';
+import { PageHeader, LoadingButton, InputField, TextAreaField } from '@/components';
 import { request_CreateArticleRequest } from '@/api';
 
 export function ArticleEditorPage() {
@@ -91,17 +90,10 @@ export function ArticleEditorPage() {
 
   return (
     <div className="space-y-4">
-      {/* 头部 */}
-      <div className="card-base p-6 fade-in-up">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--klein-blue)] to-[var(--sky-blue)] flex items-center justify-center">
-            <Icon icon={isEdit ? 'material-symbols:edit-outline-rounded' : 'material-symbols:add-rounded'} className="text-xl text-white" />
-          </div>
-          <h1 className="text-90 text-xl font-bold">
-            {isEdit ? '编辑文章' : '新建文章'}
-          </h1>
-        </div>
-      </div>
+      <PageHeader
+        title={isEdit ? '编辑文章' : '新建文章'}
+        icon={isEdit ? 'material-symbols:edit-outline-rounded' : 'material-symbols:add-rounded'}
+      />
 
       {/* 表单 */}
       <form onSubmit={handleSubmit} className="card-base p-6 fade-in-up" style={{ animationDelay: '0.1s' }}>
@@ -111,29 +103,9 @@ export function ArticleEditorPage() {
           </div>
         )}
 
-        <InputField
-          label="标题"
-          value={title}
-          onChange={setTitle}
-          placeholder="文章标题"
-          required
-        />
-
-        <InputField
-          label="封面图片"
-          value={coverImage}
-          onChange={setCoverImage}
-          placeholder="https://example.com/cover.jpg"
-          type="url"
-        />
-
-        <TextAreaField
-          label="摘要"
-          value={summary}
-          onChange={setSummary}
-          placeholder="文章简要摘要"
-          rows={2}
-        />
+        <InputField label="标题" value={title} onChange={setTitle} placeholder="文章标题" required />
+        <InputField label="封面图片" value={coverImage} onChange={setCoverImage} placeholder="https://example.com/cover.jpg" type="url" />
+        <TextAreaField label="摘要" value={summary} onChange={setSummary} placeholder="文章简要摘要" rows={2} />
 
         {/* 分类选择 */}
         <div className="mb-4">
@@ -145,9 +117,7 @@ export function ArticleEditorPage() {
           >
             <option value="">无分类</option>
             {categories?.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
+              <option key={cat.id} value={cat.id}>{cat.name}</option>
             ))}
           </select>
         </div>
@@ -176,14 +146,7 @@ export function ArticleEditorPage() {
           </div>
         </div>
 
-        <TextAreaField
-          label="内容"
-          value={content}
-          onChange={setContent}
-          placeholder="在这里撰写文章内容..."
-          rows={20}
-          required
-        />
+        <TextAreaField label="内容" value={content} onChange={setContent} placeholder="在这里撰写文章内容..." rows={20} required />
 
         {/* 状态 */}
         <div className="mb-6">
@@ -200,10 +163,6 @@ export function ArticleEditorPage() {
                     : 'btn-regular'
                 }`}
               >
-                <Icon
-                  icon={s === 'published' ? 'material-symbols:public-rounded' : 'material-symbols:edit-note-rounded'}
-                  className="mr-1"
-                />
                 {s === 'published' ? '发布' : '草稿'}
               </button>
             ))}

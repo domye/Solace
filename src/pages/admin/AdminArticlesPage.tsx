@@ -1,8 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useArticles, useDeleteArticle } from '@/hooks';
-import { Pagination } from '@/components';
-import { Icon } from '@iconify/react';
+import {
+  Pagination,
+  PageHeader,
+  AdminListSkeleton,
+  ErrorDisplay,
+  EmptyState,
+  ActionButton,
+} from '@/components';
 import { useAuthStore } from '@/stores';
 import { formatDate } from '@/utils';
 
@@ -29,49 +35,33 @@ export function AdminArticlesPage() {
     }
   };
 
-  if (!isAuthenticated || !accessToken) {
-    return null;
-  }
+  if (!isAuthenticated || !accessToken) return null;
 
   if (error) {
-    return (
-      <div className="card-base p-8 text-center fade-in-up">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 mx-auto mb-4 flex items-center justify-center">
-          <Icon icon="material-symbols:error-outline-rounded" className="text-3xl text-red-500" />
-        </div>
-        <p className="text-75">加载文章列表失败</p>
-      </div>
-    );
+    return <ErrorDisplay message="加载文章列表失败" />;
   }
 
   const articles = data?.data ?? [];
   const total = data?.total ?? 0;
 
+  const statusLabels = {
+    all: '全部',
+    published: '已发布',
+    draft: '草稿',
+  };
+
   return (
     <div className="space-y-4">
-      {/* 头部 */}
-      <div className="card-base p-6 fade-in-up">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--klein-blue)] to-[var(--sky-blue)] flex items-center justify-center">
-              <Icon icon="material-symbols:article-outline-rounded" className="text-xl text-white" />
-            </div>
-            <div>
-              <h1 className="text-90 text-xl font-bold">文章管理</h1>
-              <p className="text-50 text-sm">共 {total} 篇文章</p>
-            </div>
-          </div>
-          <Link
-            to="/admin/articles/new"
-            className="btn-regular rounded-[var(--radius-medium)] py-2 px-4 font-medium scale-animation ripple"
-          >
-            <Icon icon="material-symbols:add-rounded" className="mr-1" />
-            新建
-          </Link>
-        </div>
+      <PageHeader
+        title="文章管理"
+        count={total}
+        icon="material-symbols:article-outline-rounded"
+        action={{ label: '新建', href: '/admin/articles/new' }}
+      />
 
-        {/* 筛选器 */}
-        <div className="flex gap-2 mt-4">
+      {/* 状态筛选 */}
+      <div className="card-base p-4 fade-in-up" style={{ animationDelay: '0.05s' }}>
+        <div className="flex gap-2">
           {(['all', 'published', 'draft'] as const).map((status) => (
             <button
               key={status}
@@ -82,7 +72,7 @@ export function AdminArticlesPage() {
                   : 'btn-regular'
               }`}
             >
-              {status === 'all' ? '全部' : status === 'published' ? '已发布' : '草稿'}
+              {statusLabels[status]}
             </button>
           ))}
         </div>
@@ -90,92 +80,66 @@ export function AdminArticlesPage() {
 
       {/* 文章列表 */}
       {isLoading ? (
-        <div className="card-base animate-pulse" style={{ animationDelay: '0.1s' }}>
-          {[...Array(5)].map((_, index) => (
-            <div key={index} className="p-4 flex items-center gap-4 border-b border-[var(--border-light)] last:border-b-0">
-              <div className="flex-1">
-                <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2" />
-                <div className="flex gap-2">
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-20" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-16" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-24" />
-                </div>
-              </div>
-              <div className="flex gap-1">
-                <div className="h-9 w-9 bg-gray-200 dark:bg-gray-700 rounded" />
-                <div className="h-9 w-9 bg-gray-200 dark:bg-gray-700 rounded" />
-                <div className="h-9 w-9 bg-gray-200 dark:bg-gray-700 rounded" />
-              </div>
-            </div>
-          ))}
-        </div>
+        <AdminListSkeleton count={pageSize} />
+      ) : articles.length === 0 ? (
+        <EmptyState
+          icon="material-symbols:article-outline-rounded"
+          message="未找到文章"
+        />
       ) : (
         <div className="card-base fade-in-up" style={{ animationDelay: '0.1s' }}>
-          {articles.length === 0 ? (
-            <div className="p-8 text-center text-50">
-              <Icon icon="material-symbols:article-outline-rounded" className="text-4xl mb-4" />
-              <p>未找到文章</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-[var(--border-light)]">
-              {articles.map((article) => (
-                <div key={article.id} className="p-4 flex items-center gap-4 hover:bg-[var(--btn-plain-bg-hover)] transition-colors">
-                  {/* 信息 */}
-                  <div className="flex-1 min-w-0">
-                    <Link
-                      to={`/admin/articles/${article.id}/edit`}
-                      className="text-90 font-bold hover:text-[var(--primary)] transition-colors block mb-1"
-                    >
-                      {article.title}
-                    </Link>
-                    <div className="flex items-center gap-2 text-50 text-xs">
-                      <span>{formatDate(article.created_at)}</span>
-                      <span>•</span>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
-                        article.status === 'published'
-                          ? 'bg-green-500/10 text-green-600 dark:text-green-400'
-                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                      }`}>
-                        {article.status === 'published' ? '已发布' : '草稿'}
-                      </span>
-                      <span>•</span>
-                      <span>{article.view_count} 次浏览</span>
-                    </div>
-                  </div>
-
-                  {/* 操作按钮 */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    <Link
-                      to={`/articles/${article.slug}`}
-                      className="btn-plain rounded-[var(--radius-medium)] h-9 w-9 scale-animation ripple"
-                      title="查看"
-                    >
-                      <Icon icon="material-symbols:visibility-outline-rounded" className="text-lg" />
-                    </Link>
-                    <Link
-                      to={`/admin/articles/${article.id}/edit`}
-                      className="btn-plain rounded-[var(--radius-medium)] h-9 w-9 scale-animation ripple"
-                      title="编辑"
-                    >
-                      <Icon icon="material-symbols:edit-outline-rounded" className="text-lg" />
-                    </Link>
-                    <button
-                      onClick={() => handleDelete(article.id)}
-                      disabled={deleteMutation.isPending}
-                      className="btn-plain rounded-[var(--radius-medium)] h-9 w-9 text-red-500 hover:bg-red-500/10 scale-animation ripple"
-                      title="删除"
-                    >
-                      <Icon icon="material-symbols:delete-outline-rounded" className="text-lg" />
-                    </button>
+          <div className="divide-y divide-[var(--border-light)]">
+            {articles.map((article) => (
+              <div
+                key={article.id}
+                className="p-4 flex items-center gap-4 hover:bg-[var(--btn-plain-bg-hover)] transition-colors"
+              >
+                <div className="flex-1 min-w-0">
+                  <Link
+                    to={`/admin/articles/${article.id}/edit`}
+                    className="text-90 font-bold hover:text-[var(--primary)] transition-colors block mb-1"
+                  >
+                    {article.title}
+                  </Link>
+                  <div className="flex items-center gap-2 text-50 text-xs">
+                    <span>{formatDate(article.created_at)}</span>
+                    <span>•</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                      article.status === 'published'
+                        ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                    }`}>
+                      {article.status === 'published' ? '已发布' : '草稿'}
+                    </span>
+                    <span>•</span>
+                    <span>{article.view_count} 次浏览</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="flex items-center gap-1 shrink-0">
+                  <ActionButton
+                    icon="material-symbols:visibility-outline-rounded"
+                    title="查看"
+                    href={`/articles/${article.slug}`}
+                  />
+                  <ActionButton
+                    icon="material-symbols:edit-outline-rounded"
+                    title="编辑"
+                    href={`/admin/articles/${article.id}/edit`}
+                  />
+                  <ActionButton
+                    icon="material-symbols:delete-outline-rounded"
+                    title="删除"
+                    onClick={() => handleDelete(article.id)}
+                    disabled={deleteMutation.isPending}
+                    danger
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* 分页 */}
       <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />
     </div>
   );

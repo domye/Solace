@@ -1,8 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useCategoryBySlug, useArticles } from '@/hooks';
-import { PostCard } from '@/components/common/PostCard';
-import { PostCardSkeletonList } from '@/components/common/PostCardSkeleton';
-import { Pagination } from '@/components/control/Pagination';
+import { PostCard, PostCardSkeletonList, Pagination, EmptyState, InlineLoader, NotFoundDisplay } from '@/components';
 import { useState } from 'react';
 import { toPostCardArticle } from '@/utils/article';
 
@@ -19,7 +17,7 @@ export function CategoryPage() {
   });
 
   if (!slug) {
-    return <div className="card-base p-8 text-center text-50">Category not found</div>;
+    return <NotFoundDisplay message="分类不存在" />;
   }
 
   return (
@@ -28,9 +26,7 @@ export function CategoryPage() {
       {category && (
         <div className="card-base p-6 onload-animation">
           <h1 className="text-2xl font-bold text-90 mb-2">{category.name}</h1>
-          {category.description && (
-            <p className="text-50">{category.description}</p>
-          )}
+          {category.description && <p className="text-50">{category.description}</p>}
           {category.article_count !== undefined && (
             <p className="text-30 text-sm mt-2">{category.article_count} articles</p>
           )}
@@ -39,17 +35,10 @@ export function CategoryPage() {
 
       {/* Articles List */}
       {isLoading ? (
-        <div className="space-y-0">
-          <PostCardSkeletonList count={pageSize} />
-        </div>
+        <PostCardSkeletonList count={pageSize} />
       ) : articlesData?.data && articlesData.data.length > 0 ? (
         <>
-          {/* 后台刷新时显示加载指示器 */}
-          {isFetching && !isLoading && (
-            <div className="flex justify-center py-2">
-              <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          )}
+          {isFetching && !isLoading && <InlineLoader />}
           <div className="space-y-0">
             {articlesData.data.map((article, index) => (
               <PostCard
@@ -60,8 +49,6 @@ export function CategoryPage() {
               />
             ))}
           </div>
-
-          {/* Pagination */}
           {articlesData.total > pageSize && (
             <Pagination
               page={page}
@@ -72,9 +59,7 @@ export function CategoryPage() {
           )}
         </>
       ) : (
-        <div className="card-base p-8 text-center text-50 onload-animation">
-          No articles in this category
-        </div>
+        <EmptyState message="该分类下暂无文章" />
       )}
     </div>
   );

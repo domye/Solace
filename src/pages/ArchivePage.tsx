@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useArchive } from '@/hooks';
+import { ErrorDisplay, InlineLoader, EmptyState } from '@/components';
 
 function formatDate(dateStr: string | undefined) {
   if (!dateStr) return '';
@@ -18,11 +19,7 @@ export function ArchivePage() {
   const { data: groups, isLoading, isFetching, error } = useArchive();
 
   if (error) {
-    return (
-      <div className="card-base p-8 text-center onload-animation">
-        <p className="text-75">加载归档失败</p>
-      </div>
-    );
+    return <ErrorDisplay message="加载归档失败" />;
   }
 
   if (isLoading) {
@@ -38,7 +35,6 @@ export function ArchivePage() {
             </div>
           </div>
         </div>
-
         {/* Timeline Skeleton */}
         <div className="card-base px-8 py-6 animate-pulse">
           {[...Array(5)].map((_, index) => (
@@ -50,15 +46,6 @@ export function ArchivePage() {
                 </div>
                 <div className="w-[70%] md:w-[80%] h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
               </div>
-              {[...Array(2)].map((_, postIndex) => (
-                <div key={postIndex} className="flex flex-row justify-start items-center h-10 mb-2">
-                  <div className="w-[15%] md:w-[10%] h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="w-[15%] md:w-[10%] flex justify-center">
-                    <div className="w-1 h-1 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-                  </div>
-                  <div className="w-[70%] md:w-[65%] h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                </div>
-              ))}
             </div>
           ))}
         </div>
@@ -70,12 +57,7 @@ export function ArchivePage() {
 
   return (
     <div className="space-y-4">
-      {/* 后台刷新时显示加载指示器 */}
-      {isFetching && !isLoading && (
-        <div className="flex justify-center py-2">
-          <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      )}
+      {isFetching && !isLoading && <InlineLoader />}
 
       {/* Header */}
       <div className="card-base p-6 onload-animation">
@@ -90,7 +72,7 @@ export function ArchivePage() {
         </div>
       </div>
 
-      {/* Timeline - 完全匹配 Fuwari ArchivePanel.svelte */}
+      {/* Timeline */}
       <div className="card-base px-8 py-6 onload-animation" style={{ animationDelay: '50ms' }}>
         {groups && groups.length > 0 ? (
           groups.map((group) => (
@@ -101,10 +83,7 @@ export function ArchivePage() {
                   {group.year}
                 </div>
                 <div className="w-[15%] md:w-[10%]">
-                  <div
-                    className="h-3 w-3 bg-none rounded-full outline outline-[var(--primary)] mx-auto
-                      -outline-offset-[2px] z-50 outline-3"
-                  />
+                  <div className="h-3 w-3 bg-none rounded-full outline outline-[var(--primary)] mx-auto -outline-offset-[2px] z-50 outline-3" />
                 </div>
                 <div className="w-[70%] md:w-[80%] transition text-left text-50">
                   {group.count} {group.count === 1 ? '篇文章' : '篇文章'}
@@ -120,37 +99,16 @@ export function ArchivePage() {
                   className="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
                 >
                   <div className="flex flex-row justify-start items-center h-full">
-                    {/* date */}
                     <div className="w-[15%] md:w-[10%] transition text-sm text-right text-50">
                       {formatDate(post.published_at || post.created_at)}
                     </div>
-
-                    {/* dot and line */}
                     <div className="w-[15%] md:w-[10%] relative dash-line h-full flex items-center">
-                      <div
-                        className="transition-all mx-auto w-1 h-1 rounded group-hover:h-5
-                          bg-[oklch(0.5_0.05_var(--hue))] group-hover:bg-[var(--primary)]
-                          outline outline-4 z-50
-                          outline-[var(--card-bg)]
-                          group-hover:outline-[var(--btn-plain-bg-hover)]
-                          group-active:outline-[var(--btn-plain-bg-active)]"
-                      />
+                      <div className="transition-all mx-auto w-1 h-1 rounded group-hover:h-5 bg-[oklch(0.5_0.05_var(--hue))] group-hover:bg-[var(--primary)] outline outline-4 z-50 outline-[var(--card-bg)] group-hover:outline-[var(--btn-plain-bg-hover)] group-active:outline-[var(--btn-plain-bg-active)]" />
                     </div>
-
-                    {/* post title */}
-                    <div
-                      className="w-[70%] md:max-w-[65%] md:w-[65%] text-left font-bold
-                        group-hover:translate-x-1 transition-all group-hover:text-[var(--primary)]
-                        text-75 pr-8 whitespace-nowrap overflow-ellipsis overflow-hidden"
-                    >
+                    <div className="w-[70%] md:max-w-[65%] md:w-[65%] text-left font-bold group-hover:translate-x-1 transition-all group-hover:text-[var(--primary)] text-75 pr-8 whitespace-nowrap overflow-ellipsis overflow-hidden">
                       {post.title}
                     </div>
-
-                    {/* tag list */}
-                    <div
-                      className="hidden md:block md:w-[15%] text-left text-sm transition
-                        whitespace-nowrap overflow-ellipsis overflow-hidden text-30"
-                    >
+                    <div className="hidden md:block md:w-[15%] text-left text-sm transition whitespace-nowrap overflow-ellipsis overflow-hidden text-30">
                       {formatTag(post.tags)}
                     </div>
                   </div>
@@ -159,9 +117,7 @@ export function ArchivePage() {
             </div>
           ))
         ) : (
-          <div className="text-center py-8 text-50">
-            <p>暂无文章</p>
-          </div>
+          <EmptyState message="暂无文章" />
         )}
       </div>
     </div>

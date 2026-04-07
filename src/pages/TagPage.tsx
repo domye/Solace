@@ -1,8 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useTagBySlug, useArticles } from '@/hooks';
-import { PostCard } from '@/components/common/PostCard';
-import { PostCardSkeletonList } from '@/components/common/PostCardSkeleton';
-import { Pagination } from '@/components/control/Pagination';
+import { PostCard, PostCardSkeletonList, Pagination, EmptyState, InlineLoader, NotFoundDisplay } from '@/components';
 import { useState } from 'react';
 import { toPostCardArticle } from '@/utils/article';
 
@@ -19,7 +17,7 @@ export function TagPage() {
   });
 
   if (!slug) {
-    return <div className="card-base p-8 text-center text-50">Tag not found</div>;
+    return <NotFoundDisplay message="标签不存在" />;
   }
 
   return (
@@ -36,17 +34,10 @@ export function TagPage() {
 
       {/* Articles List */}
       {isLoading ? (
-        <div className="space-y-0">
-          <PostCardSkeletonList count={pageSize} />
-        </div>
+        <PostCardSkeletonList count={pageSize} />
       ) : articlesData?.data && articlesData.data.length > 0 ? (
         <>
-          {/* 后台刷新时显示加载指示器 */}
-          {isFetching && !isLoading && (
-            <div className="flex justify-center py-2">
-              <div className="animate-spin w-5 h-5 border-2 border-primary border-t-transparent rounded-full"></div>
-            </div>
-          )}
+          {isFetching && !isLoading && <InlineLoader />}
           <div className="space-y-0">
             {articlesData.data.map((article, index) => (
               <PostCard
@@ -57,8 +48,6 @@ export function TagPage() {
               />
             ))}
           </div>
-
-          {/* Pagination */}
           {articlesData.total > pageSize && (
             <Pagination
               page={page}
@@ -69,9 +58,7 @@ export function TagPage() {
           )}
         </>
       ) : (
-        <div className="card-base p-8 text-center text-50 onload-animation">
-          No articles with this tag
-        </div>
+        <EmptyState message="该标签下暂无文章" />
       )}
     </div>
   );
