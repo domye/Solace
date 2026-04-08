@@ -16,3 +16,4 @@ export { PageHeader } from "./PageHeader";
 export { AdminListSkeleton } from "./AdminListSkeleton";
 export { ActionButton, EditDeleteButtons } from "./ActionButtons";
 export { MetaItem } from "./MetaItem";
+export { LazyImage } from "./LazyImage";

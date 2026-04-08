@@ -86,7 +86,7 @@ function CoverImage({ article }: { article: PostCardArticle }) {
   return (
     <Link
       to={`/articles/${article.slug}`}
-      className="group max-h-[20vh] md:max-h-none mx-4 mt-4 -mb-2 md:mb-0 md:mx-0 md:mt-0
+      className="group aspect-video md:aspect-auto md:max-h-none mx-4 mt-4 -mb-2 md:mb-0 md:mx-0 md:mt-0
         md:w-[var(--coverWidth)] relative md:absolute md:top-3 md:bottom-3 md:right-3
         rounded-xl overflow-hidden active:scale-95"
     >

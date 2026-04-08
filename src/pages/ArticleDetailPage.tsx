@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useArticleBySlug } from '@/hooks';
-import { PostMeta, MarkdownRenderer, ErrorDisplay, NotFoundDisplay, ArticleDetailSkeleton } from '@/components';
+import { PostMeta, MarkdownRenderer, ErrorDisplay, NotFoundDisplay, ArticleDetailSkeleton, LazyImage } from '@/components';
 import { type TocHeading } from '@/components/widget/TableOfContents';
 import { Icon } from '@iconify/react';
 import { formatDate } from '@/utils';
@@ -36,27 +36,32 @@ export function ArticleDetailPage() {
 
   return (
     <article className="flex-1 min-w-0 space-y-4">
-      {/* 封面图片 */}
-      {article.cover_image && (
-        <div className="card-base overflow-hidden fade-in-up">
-          <img
-            src={article.cover_image}
-            alt={article.title}
-            className="w-full h-[280px] md:h-[360px] object-cover"
-          />
-        </div>
-      )}
-
       {/* 文章内容 */}
-      <div className="card-base p-6 md:p-8 fade-in-up" style={{ animationDelay: '50ms' }}>
+      <div className="card-base p-6 md:p-8 fade-in-up">
         <h1 className="text-90 text-2xl md:text-3xl font-bold mb-4">{article.title}</h1>
         <PostMeta article={article} />
+
+        {/* 分隔线（无封面时显示） */}
+        {!article.cover_image && (
+          <div className="border-[var(--border-light)] border-dashed border-b mb-5" />
+        )}
 
         {/* 摘要 */}
         {article.summary && (
           <div className="text-50 border-l-2 border-[var(--primary)] pl-4 mb-6 bg-[var(--btn-regular-bg)] rounded-r-[var(--radius-medium)] py-2 italic">
             {article.summary}
           </div>
+        )}
+
+        {/* 封面图片 - 在标题下方 */}
+        {article.cover_image && (
+          <LazyImage
+            src={article.cover_image}
+            alt={article.title}
+            className="w-full h-full object-cover rounded-xl"
+            wrapperClassName="w-full aspect-video rounded-xl overflow-hidden mb-6"
+            effect="blur"
+          />
         )}
 
         {/* 正文内容 */}

@@ -27,7 +27,7 @@ export function Pagination({ page, pageSize, total, onPageChange }: PaginationPr
   }
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-2 mt-2">
       {/* 上一页 */}
       <button
         onClick={() => onPageChange(page - 1)}
