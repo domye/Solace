@@ -52,9 +52,7 @@ export function MainLayout() {
       </div>
 
       {/* 底部页脚 */}
-      <div className="max-w-[var(--page-width)] mx-auto w-full px-0 md:px-4">
-        <Footer />
-      </div>
+      <Footer />
     </div>
   );
 }

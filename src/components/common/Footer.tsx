@@ -1,24 +1,51 @@
 /**
- * 页脚组件
+ * 页脚组件 - Fuwari 风格
+ * 统一用于归档页和管理页
  */
 
-import { Icon } from '@iconify/react';
-
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="card-base rounded-t-none p-6 mt-4">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="text-50 text-sm">
-          由 React + TypeScript 驱动
-        </div>
-        <div className="flex items-center gap-4">
+    <footer className="w-full">
+      {/* 虚线分隔线 */}
+      <div className="transition border-t border-black/10 dark:border-white/15 my-8 border-dashed" />
+
+      {/* 版权信息容器 */}
+      <div className="transition rounded-2xl mb-8 flex flex-col items-center justify-center px-6">
+        <div className="transition text-50 text-sm text-center leading-relaxed">
+          &copy; {currentYear} Blog. All Rights Reserved. /
           <a
-            href="https://github.com"
+            className="transition link text-[var(--primary)] font-medium hover:underline"
             target="_blank"
             rel="noopener noreferrer"
-            className="btn-plain rounded-lg h-9 w-9"
+            href="https://github.com"
           >
-            <Icon icon="fa6-brands:github" className="text-lg" />
+            GitHub
+          </a>
+          {' '}
+          /
+          {' '}
+          Powered by
+          {' '}
+          <a
+            className="transition link text-[var(--primary)] font-medium hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://react.dev"
+          >
+            React
+          </a>
+          {' '}
+          &
+          {' '}
+          <a
+            className="transition link text-[var(--primary)] font-medium hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://github.com/saicaca/fuwari"
+          >
+            Fuwari
           </a>
         </div>
       </div>
