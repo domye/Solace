@@ -145,7 +145,7 @@ function ViewCount({ count }: { count: number }) {
 /** 分隔线（移动端） */
 function Divider() {
   return (
-    <div className="transition-smooth border-t-[1px] border-dashed mx-6 border-[var(--border-medium)] last:border-t-0 md:hidden" />
+    <div className="transition-smooth border-t-[1px] border-dashed mx-6 my-4 border-[var(--border-medium)] last:border-t-0 md:hidden" />
   );
 }
 

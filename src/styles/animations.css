@@ -135,22 +135,25 @@
 }
 
 /* === 卡片悬浮效果 (Fuwari 风格) === */
-.card-hover {
-  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
-              box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-}
+/* 仅桌面端生效，移动端无悬浮效果 */
+@media (min-width: 768px) {
+  .card-hover {
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+                box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  }
 
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 28px -6px oklch(0.5 0.1 var(--hue) / 0.15);
-}
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px -6px oklch(0.5 0.1 var(--hue) / 0.15);
+  }
 
-.dark .card-hover:hover {
-  box-shadow: 0 12px 28px -6px oklch(0 0 0 / 0.4);
-}
+  .dark .card-hover:hover {
+    box-shadow: 0 12px 28px -6px oklch(0 0 0 / 0.4);
+  }
 
-.card-hover:active {
-  transform: translateY(-1px) scale(0.99);
+  .card-hover:active {
+    transform: translateY(-1px) scale(0.99);
+  }
 }
 
 /* === 缩放动画 (按钮按压) === */

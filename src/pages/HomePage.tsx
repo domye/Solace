@@ -37,14 +37,18 @@ export function HomePage() {
   return (
     <>
       {isFetching && !isLoading && <InlineLoader />}
-      {articles.map((article, index) => (
-        <PostCard
-          key={article.id}
-          article={toPostCardArticle(article)}
-          className="content-appear"
-          style={{ animationDelay: `${index * 40}ms` }}
-        />
-      ))}
+      {/* 文章列表容器 */}
+      <div className="flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4">
+        {articles.map((article, index) => (
+          <PostCard
+            key={article.id}
+            article={toPostCardArticle(article)}
+            className="content-appear"
+            style={{ animationDelay: `${index * 40}ms` }}
+          />
+        ))}
+      </div>
+      {/* 分页 - 在容器外 */}
       <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />
     </>
   );

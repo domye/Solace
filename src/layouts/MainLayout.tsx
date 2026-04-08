@@ -34,10 +34,8 @@ export function MainLayout() {
           </aside>
 
           {/* 主内容区 */}
-          <main className="min-w-0">
-            <div className="flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4 lg:mb-0">
-              <Outlet />
-            </div>
+          <main className="min-w-0 flex flex-col gap-4">
+            <Outlet />
           </main>
         </div>
 
