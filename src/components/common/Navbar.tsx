@@ -19,7 +19,7 @@ import { useAuthStore } from '@/stores';
 import { ThemeToggle } from './ThemeToggle';
 import { SearchModal } from '../widget/SearchModal';
 import { HuePicker } from '../widget/HuePicker';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 /** 导航链接配置 */
 const navLinks = [
@@ -65,6 +65,80 @@ function MenuItem({
     >
       {content}
     </Link>
+  );
+}
+
+/** 用户菜单组件（已登录状态） */
+function UserMenu({ onLogout }: { onLogout: () => void }) {
+  const { user } = useAuthStore();
+  const [isOpen, setIsOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 点击外部关闭菜单
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div ref={menuRef} className="relative">
+      {/* 用户头像按钮 */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 h-9 rounded-[var(--radius-medium)]
+          bg-[var(--btn-regular-bg)] hover:bg-[var(--btn-regular-bg-hover)]
+          transition-colors font-medium text-sm"
+      >
+        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[var(--klein-blue)] to-[var(--sky-blue)]
+          flex items-center justify-center overflow-hidden">
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt={user.nickname || user.username} className="w-full h-full object-cover" />
+          ) : (
+            <Icon icon="material-symbols:person-outline-rounded" className="text-white text-sm" />
+          )}
+        </div>
+        <span className="text-[var(--text-75)] max-w-[80px] truncate">
+          {user?.nickname || user?.username || '用户'}
+        </span>
+        <Icon
+          icon={isOpen ? 'material-symbols:expand-less-rounded' : 'material-symbols:expand-more-rounded'}
+          className="text-base text-[var(--text-50)]"
+        />
+      </button>
+
+      {/* 下拉菜单 */}
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-48 py-2 rounded-[var(--radius-medium)]
+          bg-[var(--card-bg)] shadow-lg border border-[var(--border-medium)] z-50 fade-in-down">
+          <Link
+            to="/admin"
+            onClick={() => setIsOpen(false)}
+            className="flex items-center gap-2 px-4 py-2.5 hover:bg-[var(--btn-plain-bg-hover)]
+              transition-colors text-sm text-[var(--text-75)]"
+          >
+            <Icon icon="material-symbols:admin-panel-settings-outline-rounded" className="text-lg text-[var(--primary)]" />
+            管理后台
+          </Link>
+          <div className="h-px bg-[var(--line-divider)] mx-2 my-1" />
+          <button
+            onClick={() => {
+              setIsOpen(false);
+              onLogout();
+            }}
+            className="w-full flex items-center gap-2 px-4 py-2.5 hover:bg-[var(--btn-plain-bg-hover)]
+              transition-colors text-sm text-[var(--text-75)] text-left"
+          >
+            <Icon icon="material-symbols:logout-rounded" className="text-lg text-[var(--primary)]" />
+            退出登录
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -127,7 +201,7 @@ export function Navbar() {
           </div>
 
           {/* 工具栏 */}
-          <div className="flex">
+          <div className="flex items-center gap-1">
             {/* 搜索按钮 */}
             <button
               onClick={() => setShowSearch(true)}
@@ -153,21 +227,19 @@ export function Navbar() {
             <ThemeToggle />
 
             {/* 认证按钮（桌面端） */}
-            {isAuthenticated ? (
-              <button
-                onClick={handleLogout}
-                className="btn-plain scale-animation rounded-lg h-11 px-3 active:scale-95 text-sm hidden md:block"
-              >
-                退出登录
-              </button>
-            ) : (
-              <Link
-                to="/login"
-                className="btn-plain scale-animation rounded-lg h-11 px-3 active:scale-95 text-sm hidden md:block"
-              >
-                登录
-              </Link>
-            )}
+            <div className="hidden md:block relative">
+              {isAuthenticated ? (
+                <UserMenu onLogout={handleLogout} />
+              ) : (
+                <Link
+                  to="/login"
+                  className="btn-regular px-4 h-9 rounded-[var(--radius-medium)] font-medium text-sm flex items-center gap-1.5 hover:shadow-sm transition-shadow"
+                >
+                  <Icon icon="material-symbols:login-rounded" className="text-lg" />
+                  登录
+                </Link>
+              )}
+            </div>
 
             {/* 移动端菜单按钮 */}
             <button

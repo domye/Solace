@@ -69,13 +69,14 @@ function updateStoredTokens(accessToken: string, refreshToken: string) {
 }
 
 /**
- * 清除认证存储并重定向到登录页
+ * 清除认证存储
+ * 只在管理页面才重定向到登录页，公开页面不需要强制登录
  */
 export function clearAuthStorage() {
   localStorage.removeItem('auth-storage');
   window.dispatchEvent(new CustomEvent('auth:logout'));
-  // 重定向到登录页（排除登录和注册页面）
-  if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+  // 只有在管理页面才跳转到登录页
+  if (window.location.pathname.startsWith('/admin')) {
     window.location.href = '/login';
   }
 }
@@ -127,6 +128,7 @@ async function doRefreshToken(): Promise<string | null> {
 /**
  * 获取或刷新 Token（带去重机制）
  * 如果正在刷新，等待刷新完成；如果 Token 存在，直接返回
+ * 未登录用户返回空字符串，不触发刷新
  */
 async function getOrRefreshToken(): Promise<string | null> {
   // 如果正在刷新，等待刷新结果
@@ -135,18 +137,25 @@ async function getOrRefreshToken(): Promise<string | null> {
   }
 
   const token = getStoredToken();
+  const refreshToken = getStoredRefreshToken();
+
+  // 已登录：返回 Token 或刷新
   if (token) {
     return token;
   }
 
-  // Token 不存在，尝试刷新
-  isRefreshing = true;
-  refreshPromise = doRefreshToken().finally(() => {
-    isRefreshing = false;
-    refreshPromise = null;
-  });
+  // 有 refreshToken 但 accessToken 过期：尝试刷新
+  if (refreshToken) {
+    isRefreshing = true;
+    refreshPromise = doRefreshToken().finally(() => {
+      isRefreshing = false;
+      refreshPromise = null;
+    });
+    return refreshPromise;
+  }
 
-  return refreshPromise;
+  // 未登录：返回空字符串，不触发刷新和跳转
+  return '';
 }
 
 // 配置 OpenAPI 动态 Token 解析器
@@ -157,13 +166,13 @@ OpenAPI.TOKEN = async (): Promise<string> => {
 
 /**
  * 拦截 fetch 请求，处理 401 响应
- * 对于非认证接口的 401，尝试刷新 Token 并重试请求
+ * 只在已登录用户 Token 过期时尝试刷新，未登录用户直接返回 401
  */
 const originalFetch = window.fetch;
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
   const response = await originalFetch(input, init);
 
-  // 检查是否为 401 响应且非认证接口
+  // 检查是否为 401 响应
   if (response.status === 401) {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
 
@@ -172,7 +181,15 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
       return response;
     }
 
-    // 尝试刷新 Token
+    // 检查是否有 refreshToken（已登录用户）
+    const refreshToken = getStoredRefreshToken();
+
+    if (!refreshToken) {
+      // 未登录用户：直接返回原始 401 响应，不触发跳转
+      return response;
+    }
+
+    // 已登录用户 Token 过期：尝试刷新 Token
     const newToken = await doRefreshToken();
 
     if (newToken && init?.headers) {
@@ -185,7 +202,7 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
         headers,
       });
     } else {
-      // Token 刷新失败，清除认证并返回错误响应
+      // Token 刷新失败：清除认证并返回错误响应
       clearAuthStorage();
       return new Response(JSON.stringify({ success: false, error: { code: 'SESSION_EXPIRED', message: '会话已过期，请重新登录' } }), {
         status: 401,
