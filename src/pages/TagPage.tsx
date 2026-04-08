@@ -21,7 +21,7 @@ export function TagPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-3 md:gap-4">
       {/* Tag Header */}
       {tag && (
         <div className="card-base p-6 onload-animation">

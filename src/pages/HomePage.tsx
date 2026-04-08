@@ -38,7 +38,7 @@ export function HomePage() {
     <>
       {isFetching && !isLoading && <InlineLoader />}
       {/* 文章列表容器 */}
-      <div className="flex flex-col md:gap-4">
+      <div className="flex flex-col gap-3 md:gap-4">
         {articles.map((article, index) => (
           <PostCard
             key={article.id}

@@ -21,7 +21,7 @@ export function CategoryPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-3 md:gap-4">
       {/* Category Header */}
       {category && (
         <div className="card-base p-6 onload-animation">

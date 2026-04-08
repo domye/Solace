@@ -2,7 +2,7 @@
  * 文章卡片组件
  *
  * 用于文章列表页展示文章摘要信息
- * 移动端：wing 风格（标题单独一行，摘要+封面水平并排，底部时间+阅读全文）
+ * 移动端：卡片式布局，标题+摘要+封面，底部元信息
  * 桌面端：原布局（内容在上，封面在右侧）
  */
 
@@ -15,9 +15,9 @@ import type { PostCardArticle } from '@/types';
 /** 桌面端封面图宽度百分比 */
 const COVER_WIDTH_CSS = '28%';
 
-/** 移动端封面图固定尺寸（4:3比例） */
-const MOBILE_COVER_WIDTH = '200px';
-const MOBILE_COVER_HEIGHT = '80px';
+/** 移动端封面图尺寸（更大方） */
+const MOBILE_COVER_WIDTH = '120px';
+const MOBILE_COVER_HEIGHT = '90px';
 
 interface PostCardProps {
   article: PostCardArticle;
@@ -31,70 +31,70 @@ export function PostCard({ article, className, style }: PostCardProps) {
 
   return (
     <article
-      className={`card-base card-hover w-full rounded-[var(--radius-large)] overflow-hidden relative ${className || ''}`}
+      className={`card-base w-full rounded-[var(--radius-large)] overflow-hidden relative ${className || ''}`}
       style={{
         ...style,
         '--coverWidth': COVER_WIDTH_CSS,
       } as React.CSSProperties}
     >
-      {/* 移动端：wing 风格布局 */}
+      {/* 移动端：卡片式布局 */}
       <MobileLayout article={article} hasCover={hasCover} />
 
-      {/* 桌面端：原布局 */}
-      <DesktopLayout article={article} hasCover={hasCover} />
+      {/* 桌面端：原布局 + 悬浮效果 */}
+      <div className="hidden md:block">
+        <DesktopLayout article={article} hasCover={hasCover} />
+      </div>
+
+      {/* 桌面端悬浮效果 */}
+      <div className="hidden md:block absolute inset-0 pointer-events-none card-hover-overlay rounded-[var(--radius-large)]" />
     </article>
   );
 }
 
-/** 移动端布局（wing 风格） */
+/** 移动端布局（卡片式） */
 function MobileLayout({ article, hasCover }: { article: PostCardArticle; hasCover: boolean }) {
   const formattedDate = formatDate(article.published_at || article.created_at);
 
   return (
     <Link
       to={`/articles/${article.slug}`}
-      className="md:hidden flex flex-col gap-3 px-5 py-4 border-b border-solid border-[var(--border-light)] last:border-b-0"
+      className="md:hidden flex gap-3 p-4 active:scale-[0.98] transition-transform duration-150"
     >
-      {/* 标题单独一行 */}
-      <h2 className="font-semibold text-lg text-150 leading-snug">
-        {article.title}
-      </h2>
-
-      {/* 摘要和封面水平并排 */}
-      <div className="flex gap-3 items-start">
-        {/* 摘要 */}
-        <p className="text-sm text-50 line-clamp-3 flex-1 leading-relaxed">
+      {/* 左侧：标题 + 摘要 + 底部元信息 */}
+      <div className="flex-1 min-w-0 flex flex-col">
+        <h2 className="font-semibold text-[1.0625rem] text-150 leading-snug line-clamp-1 mb-1.5">
+          {article.title}
+        </h2>
+        <p className="text-sm text-50 line-clamp-2 leading-relaxed flex-1">
           {article.summary || '暂无摘要'}
         </p>
-
-        {/* 封面图 */}
-        {hasCover && (
-          <div
-            className="flex-shrink-0 rounded-lg overflow-hidden bg-[var(--bg-secondary)]"
-            style={{ width: MOBILE_COVER_WIDTH, height: MOBILE_COVER_HEIGHT }}
-          >
-            <LazyImage
-              src={article.cover_image || ''}
-              alt={article.title}
-              className="w-full h-full object-cover"
-              wrapperClassName="w-full h-full"
-              effect="blur"
-            />
-          </div>
-        )}
+        <div className="flex items-center gap-3 text-xs text-30 pt-2">
+          <span className="flex items-center gap-1">
+            <Icon icon="material-symbols:calendar-today-outline-rounded" className="text-sm" />
+            {formattedDate}
+          </span>
+          <span className="flex items-center gap-1">
+            <Icon icon="material-symbols:visibility-outline-rounded" className="text-sm" />
+            {article.view_count}
+          </span>
+        </div>
       </div>
 
-      {/* 底部：时间 + 阅读全文 */}
-      <div className="flex items-center justify-between text-xs text-30 mt-1 pt-2">
-        <span className="flex items-center gap-1">
-          <Icon icon="material-symbols:calendar-today-outline-rounded" className="text-base" />
-          {formattedDate}
-        </span>
-        <span className="text-[var(--primary)] font-medium flex items-center gap-0.5 hover:gap-1 transition-all">
-          阅读全文
-          <Icon icon="material-symbols:chevron-right-rounded" className="text-base" />
-        </span>
-      </div>
+      {/* 右侧：封面图 - 底部与元信息齐平 */}
+      {hasCover && (
+        <div
+          className="flex-shrink-0 self-end rounded-lg overflow-hidden"
+          style={{ width: MOBILE_COVER_WIDTH, height: MOBILE_COVER_HEIGHT }}
+        >
+          <LazyImage
+            src={article.cover_image || ''}
+            alt={article.title}
+            className="w-full h-full object-cover"
+            wrapperClassName="w-full h-full"
+            effect="blur"
+          />
+        </div>
+      )}
     </Link>
   );
 }

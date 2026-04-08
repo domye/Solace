@@ -154,6 +154,19 @@
   .card-hover:active {
     transform: translateY(-1px) scale(0.99);
   }
+
+  /* 桌面端卡片悬浮叠加层 */
+  .card-hover-overlay {
+    transition: box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  article:hover .card-hover-overlay {
+    box-shadow: 0 12px 28px -6px oklch(0.5 0.1 var(--hue) / 0.15);
+  }
+
+  .dark article:hover .card-hover-overlay {
+    box-shadow: 0 12px 28px -6px oklch(0 0 0 / 0.4);
+  }
 }
 
 /* === 缩放动画 (按钮按压) === */

@@ -6,18 +6,19 @@
  * │            Navbar                   │
  * ├─────────┬───────────────┬───────────┤
  * │ SideBar │   MainContent │   TOC     │
- * │ or TOC  │   (Outlet)    │ (optional)│
+ * │         │   (Outlet)    │ (optional)│
  * └─────────┴───────────────┴───────────┤
  * │              Footer                 │
  * └─────────────────────────────────────┘
  *
- * 文章详情页：左侧显示 TOC（若有），无 TOC 则显示 SideBar
- * 其他页面：左侧显示 SideBar
+ * 文章详情页：Profile + TOC（有标题时）或 Profile + 分类/标签
+ * 其他页面：Profile + 分类 + 标签
  */
 
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar, Footer } from '@/components/common';
-import { SideBar, TableOfContents } from '@/components/widget';
+import { TableOfContents } from '@/components/widget';
+import { Profile, Categories, Tags } from '@/components/widget';
 import { useTocStore } from '@/stores';
 import { useMemo } from 'react';
 
@@ -30,8 +31,8 @@ export function MainLayout() {
     return /^\/articles\//.test(location.pathname);
   }, [location.pathname]);
 
-  // 文章详情页优先显示 TOC，无 TOC 时显示 SideBar
-  const showTocInSidebar = isArticlePage && headings.length > 0;
+  // 文章详情页有 TOC 时显示 TOC，否则显示分类/标签
+  const showToc = isArticlePage && headings.length > 0;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -39,16 +40,25 @@ export function MainLayout() {
       <Navbar />
 
       {/* 主内容区域 */}
-      <div className="flex-1 max-w-[var(--page-width)] mx-auto w-full px-3 md:px-4 py-4 relative">
+      <div className="flex-1 max-w-[var(--page-width)] mx-auto w-full px-6 md:px-8 py-4 relative">
         <div className="grid grid-cols-1 lg:grid-cols-[17.5rem_1fr] gap-4">
           {/* 左侧边栏 - 仅桌面端显示 */}
           <aside className="hidden lg:block">
-            {showTocInSidebar ? (
-              <div className="sticky top-4">
+            {/* 个人信息（始终显示） */}
+            <div className="flex flex-col w-full gap-4 mb-4">
+              <Profile />
+            </div>
+
+            {/* 文章详情页：TOC 或 分类/标签 */}
+            {showToc ? (
+              <div className="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
                 <TableOfContents headings={headings} />
               </div>
             ) : (
-              <SideBar />
+              <div className="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
+                <Categories className="onload-animation" style={{ animationDelay: '150ms' }} />
+                <Tags className="onload-animation" style={{ animationDelay: '200ms' }} />
+              </div>
             )}
           </aside>
 
@@ -58,7 +68,7 @@ export function MainLayout() {
           </main>
         </div>
 
-        {/* 右侧目录 - 仅超宽屏且非文章页显示（文章页已在左侧显示） */}
+        {/* 右侧目录 - 仅超宽屏且非文章页显示 */}
         {!isArticlePage && headings.length > 0 && (
           <div className="hidden 2xl:block absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] h-full">
             <div className="sticky top-20">
