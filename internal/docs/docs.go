@@ -1091,6 +1091,11 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 500
                 },
+                "slug": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
                 "status": {
                     "type": "string",
                     "enum": [
@@ -1194,6 +1199,11 @@ const docTemplate = `{
                 "cover_image": {
                     "type": "string",
                     "maxLength": 500
+                },
+                "slug": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
                 },
                 "status": {
                     "type": "string",

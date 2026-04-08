@@ -3,6 +3,7 @@ package request
 // CreateArticleRequest 创建文章请求体
 type CreateArticleRequest struct {
 	Title      string `json:"title" validate:"required,min=1,max=200"`
+	Slug       string `json:"slug" validate:"omitempty,min=1,max=200"`
 	Content    string `json:"content" validate:"required,min=1"`
 	Summary    string `json:"summary" validate:"omitempty,max=500"`
 	CoverImage string `json:"cover_image" validate:"omitempty,max=500"`
@@ -14,6 +15,7 @@ type CreateArticleRequest struct {
 // UpdateArticleRequest 更新文章请求体
 type UpdateArticleRequest struct {
 	Title      string `json:"title" validate:"omitempty,min=1,max=200"`
+	Slug       string `json:"slug" validate:"omitempty,min=1,max=200"`
 	Content    string `json:"content" validate:"omitempty,min=1"`
 	Summary    string `json:"summary" validate:"omitempty,max=500"`
 	CoverImage string `json:"cover_image" validate:"omitempty,max=500"`

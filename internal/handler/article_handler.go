@@ -48,6 +48,7 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 	article, err := h.articleService.Create(
 		c.Request.Context(),
 		req.Title,
+		req.Slug,
 		req.Content,
 		req.Summary,
 		req.CoverImage,
@@ -247,6 +248,7 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 		userID,
 		req.Version,
 		req.Title,
+		req.Slug,
 		req.Content,
 		req.Summary,
 		req.CoverImage,

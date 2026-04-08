@@ -27,13 +27,13 @@ var (
 
 // ArticleService 文章业务逻辑接口
 type ArticleService interface {
-	Create(ctx context.Context, title, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string, authorID uint) (*response.ArticleResponse, error)
+	Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string, authorID uint) (*response.ArticleResponse, error)
 	GetByID(ctx context.Context, id uint) (*response.ArticleResponse, error)
 	GetBySlug(ctx context.Context, slug string) (*response.ArticleResponse, error)
 	GetList(ctx context.Context, page, pageSize int, status string, authorID *uint, categorySlug, tagSlug string) (*response.ArticleListResponse, error)
 	GetArchive(ctx context.Context) (*response.ArchiveResponse, error)
 	Search(ctx context.Context, query string, page, pageSize int) (*response.ArticleListResponse, error)
-	Update(ctx context.Context, id uint, userID uint, version int, title, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error)
+	Update(ctx context.Context, id uint, userID uint, version int, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error)
 	Delete(ctx context.Context, id uint, userID uint) error
 }
 
@@ -98,7 +98,7 @@ func NewArticleService(articleRepo articleRepository, categoryRepo categoryRepos
 	}
 }
 
-func (s *articleService) Create(ctx context.Context, title, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string, authorID uint) (*response.ArticleResponse, error) {
+func (s *articleService) Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string, authorID uint) (*response.ArticleResponse, error) {
 	// 验证分类是否存在
 	if categoryID != nil {
 		if _, err := s.categoryRepo.FindByID(ctx, *categoryID); err != nil {
@@ -114,19 +114,22 @@ func (s *articleService) Create(ctx context.Context, title, content, summary, co
 		}
 	}
 
-	// 生成 slug
-	articleSlug := slug.Generate(title)
-
-	// 检查 slug 唯一性
-	existing, err := s.articleRepo.FindBySlug(ctx, articleSlug)
+	// 生成或使用自定义 slug
+	finalSlug := articleSlug
+	if finalSlug == "" {
+		// 没有提供 slug，从标题自动生成
+		finalSlug = slug.Generate(title)
+	}
+	// 检查 slug 唯一性，如果冲突则添加时间戳
+	existing, err := s.articleRepo.FindBySlug(ctx, finalSlug)
 	if err == nil && existing != nil {
-		articleSlug = slug.GenerateWithTimestamp(title)
+		finalSlug = slug.GenerateWithTimestamp(title)
 	}
 
 	now := time.Now()
 	article := &model.Article{
 		Title:      title,
-		Slug:       articleSlug,
+		Slug:       finalSlug,
 		Content:    content,
 		Summary:    summary,
 		CoverImage: coverImage,
@@ -304,7 +307,7 @@ func (s *articleService) Search(ctx context.Context, query string, page, pageSiz
 	}, nil
 }
 
-func (s *articleService) Update(ctx context.Context, id uint, userID uint, version int, title, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
+func (s *articleService) Update(ctx context.Context, id uint, userID uint, version int, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
 	article, err := s.articleRepo.FindByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -333,11 +336,15 @@ func (s *articleService) Update(ctx context.Context, id uint, userID uint, versi
 	// 更新字段
 	if title != "" {
 		article.Title = title
-		newSlug := slug.Generate(title)
+	}
+	// 更新 slug（仅当提供了新 slug 时）
+	if articleSlug != "" {
+		newSlug := slug.Generate(articleSlug)
 		if newSlug != article.Slug {
+			// 检查新 slug 是否已被其他文章使用
 			existing, err := s.articleRepo.FindBySlug(ctx, newSlug)
 			if err == nil && existing != nil && existing.ID != article.ID {
-				newSlug = slug.GenerateWithTimestamp(title)
+				newSlug = slug.GenerateWithTimestamp(articleSlug)
 			}
 			article.Slug = newSlug
 		}
