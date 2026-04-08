@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useCategoryBySlug, useArticles } from '@/hooks';
-import { PostCard, PostCardSkeletonList, Pagination, EmptyState, InlineLoader, NotFoundDisplay } from '@/components';
+import { PostCardList, PostCardSkeletonList, Pagination, EmptyState, InlineLoader, NotFoundDisplay } from '@/components';
 import { useState } from 'react';
 import { toPostCardArticle } from '@/utils/article';
 
@@ -39,14 +39,7 @@ export function CategoryPage() {
       ) : articlesData?.data && articlesData.data.length > 0 ? (
         <>
           {isFetching && !isLoading && <InlineLoader />}
-          {articlesData.data.map((article, index) => (
-            <PostCard
-              key={article.id}
-              article={toPostCardArticle(article)}
-              className="content-appear"
-              style={{ animationDelay: `${index * 40}ms` }}
-            />
-          ))}
+          <PostCardList articles={articlesData.data.map(toPostCardArticle)} />
           {articlesData.total > pageSize && (
             <Pagination
               page={page}

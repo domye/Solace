@@ -37,8 +37,12 @@ export function PostCard({ article, className, style }: PostCardProps) {
         '--coverWidth': COVER_WIDTH_CSS,
       } as React.CSSProperties}
     >
-      {/* 移动端：卡片式布局 */}
-      <MobileLayout article={article} hasCover={hasCover} />
+      {/* 移动端：根据是否有封面选择布局 */}
+      {hasCover ? (
+        <MobileLayoutWithCover article={article} />
+      ) : (
+        <MobileLayoutNoCover article={article} />
+      )}
 
       {/* 桌面端：原布局 + 悬浮效果 */}
       <div className="hidden md:block">
@@ -51,8 +55,8 @@ export function PostCard({ article, className, style }: PostCardProps) {
   );
 }
 
-/** 移动端布局（卡片式） */
-function MobileLayout({ article, hasCover }: { article: PostCardArticle; hasCover: boolean }) {
+/** 移动端布局（有封面图） */
+function MobileLayoutWithCover({ article }: { article: PostCardArticle }) {
   const formattedDate = formatDate(article.published_at || article.created_at);
 
   return (
@@ -81,20 +85,47 @@ function MobileLayout({ article, hasCover }: { article: PostCardArticle; hasCove
       </div>
 
       {/* 右侧：封面图 - 底部与元信息齐平 */}
-      {hasCover && (
-        <div
-          className="flex-shrink-0 self-end rounded-lg overflow-hidden"
-          style={{ width: MOBILE_COVER_WIDTH, height: MOBILE_COVER_HEIGHT }}
-        >
-          <LazyImage
-            src={article.cover_image || ''}
-            alt={article.title}
-            className="w-full h-full object-cover"
-            wrapperClassName="w-full h-full"
-            effect="blur"
-          />
-        </div>
-      )}
+      <div
+        className="flex-shrink-0 self-end rounded-lg overflow-hidden"
+        style={{ width: MOBILE_COVER_WIDTH, height: MOBILE_COVER_HEIGHT }}
+      >
+        <LazyImage
+          src={article.cover_image || ''}
+          alt={article.title}
+          className="w-full h-full object-cover"
+          wrapperClassName="w-full h-full"
+          effect="blur"
+        />
+      </div>
+    </Link>
+  );
+}
+
+/** 移动端布局（无封面图） */
+function MobileLayoutNoCover({ article }: { article: PostCardArticle }) {
+  const formattedDate = formatDate(article.published_at || article.created_at);
+
+  return (
+    <Link
+      to={`/articles/${article.slug}`}
+      className="md:hidden flex flex-col gap-2 p-4 active:scale-[0.98] transition-transform duration-150"
+    >
+      <h2 className="font-semibold text-[1.0625rem] text-150 leading-snug line-clamp-2">
+        {article.title}
+      </h2>
+      <p className="text-sm text-50 line-clamp-2 leading-relaxed flex-1">
+        {article.summary || '暂无摘要'}
+      </p>
+      <div className="flex items-center gap-3 text-xs text-30">
+        <span className="flex items-center gap-1">
+          <Icon icon="material-symbols:calendar-today-outline-rounded" className="text-sm" />
+          {formattedDate}
+        </span>
+        <span className="flex items-center gap-1">
+          <Icon icon="material-symbols:visibility-outline-rounded" className="text-sm" />
+          {article.view_count}
+        </span>
+      </div>
     </Link>
   );
 }

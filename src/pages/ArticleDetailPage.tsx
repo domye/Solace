@@ -10,13 +10,20 @@ import { useTocStore } from '@/stores';
 export function ArticleDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: article, isLoading, error } = useArticleBySlug(slug ?? '');
-  const { setHeadings, clearHeadings } = useTocStore();
+  const { setHeadings, clearHeadings, setArticleLoading } = useTocStore();
 
+  // 文章加载状态变化时同步到 store
+  useEffect(() => {
+    setArticleLoading(isLoading);
+  }, [isLoading, setArticleLoading]);
+
+  // 离开页面时清理
   useEffect(() => {
     return () => {
       clearHeadings();
+      setArticleLoading(false);
     };
-  }, [clearHeadings]);
+  }, [clearHeadings, setArticleLoading]);
 
   const handleHeadingsExtracted = useCallback((extractedHeadings: TocHeading[]) => {
     setHeadings(extractedHeadings);

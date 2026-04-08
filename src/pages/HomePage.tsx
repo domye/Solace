@@ -6,7 +6,7 @@
 
 import { useState } from 'react';
 import { useArticles } from '@/hooks';
-import { PostCard, PostCardSkeletonList, Pagination, EmptyState, InlineLoader } from '@/components';
+import { PostCardList, PostCardSkeletonList, Pagination, EmptyState, InlineLoader } from '@/components';
 import { toPostCardArticle } from '@/utils/article';
 
 export function HomePage() {
@@ -37,17 +37,8 @@ export function HomePage() {
   return (
     <>
       {isFetching && !isLoading && <InlineLoader />}
-      {/* 文章列表容器 */}
-      <div className="flex flex-col gap-3 md:gap-4">
-        {articles.map((article, index) => (
-          <PostCard
-            key={article.id}
-            article={toPostCardArticle(article)}
-            className="content-appear"
-            style={{ animationDelay: `${index * 40}ms` }}
-          />
-        ))}
-      </div>
+      {/* 文章列表 */}
+      <PostCardList articles={articles.map(toPostCardArticle)} />
       {/* 分页 - 在容器外 */}
       <Pagination page={page} pageSize={pageSize} total={total} onPageChange={setPage} />
     </>

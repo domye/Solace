@@ -22,8 +22,23 @@ import { Profile, Categories, Tags } from '@/components/widget';
 import { useTocStore } from '@/stores';
 import { useMemo } from 'react';
 
+/** 侧边栏骨架屏 */
+function SidebarSkeleton() {
+  return (
+    <div className="card-base pb-4 animate-pulse">
+      <div className="h-6 bg-[var(--btn-regular-bg)] rounded mx-4 mt-4 mb-3 w-16" />
+      <div className="px-4 space-y-2">
+        <div className="h-9 bg-[var(--btn-regular-bg)] rounded-lg" />
+        <div className="h-9 bg-[var(--btn-regular-bg)] rounded-lg w-3/4" />
+        <div className="h-9 bg-[var(--btn-regular-bg)] rounded-lg w-5/6" />
+        <div className="h-9 bg-[var(--btn-regular-bg)] rounded-lg w-2/3" />
+      </div>
+    </div>
+  );
+}
+
 export function MainLayout() {
-  const { headings } = useTocStore();
+  const { headings, isArticleLoading } = useTocStore();
   const location = useLocation();
 
   // 判断是否为文章详情页
@@ -31,8 +46,10 @@ export function MainLayout() {
     return /^\/articles\//.test(location.pathname);
   }, [location.pathname]);
 
-  // 文章详情页有 TOC 时显示 TOC，否则显示分类/标签
+  // 文章详情页：加载中显示骨架屏，加载完成后根据 headings 决定显示内容
+  // 其他页面：始终显示分类和标签
   const showToc = isArticlePage && headings.length > 0;
+  const showSidebarLoading = isArticlePage && isArticleLoading && headings.length === 0;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -49,8 +66,12 @@ export function MainLayout() {
               <Profile />
             </div>
 
-            {/* 文章详情页：TOC 或 分类/标签 */}
-            {showToc ? (
+            {/* 文章详情页：骨架屏 / TOC / 分类标签 */}
+            {showSidebarLoading ? (
+              <div className="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
+                <SidebarSkeleton />
+              </div>
+            ) : showToc ? (
               <div className="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
                 <TableOfContents headings={headings} />
               </div>

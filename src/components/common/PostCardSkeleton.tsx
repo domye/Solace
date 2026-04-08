@@ -23,7 +23,7 @@ export const PostCardSkeleton = memo(function PostCardSkeleton({ hasCover = fals
           <div className="flex-1 min-w-0 flex flex-col">
             <div className="skeleton h-6 rounded-lg w-11/12 mb-1.5"></div>
             <div className="skeleton h-4 rounded w-full mb-1"></div>
-            <div className="skeleton h-4 rounded w-4/5 flex-1"></div>
+            <div className="skeleton h-4 rounded w-3/4 flex-1"></div>
             <div className="flex items-center gap-3 pt-2">
               <div className="skeleton h-3 rounded w-16"></div>
               <div className="skeleton h-3 rounded w-12"></div>
@@ -107,16 +107,16 @@ export const PostCardSkeleton = memo(function PostCardSkeleton({ hasCover = fals
 /** 骨架屏列表 */
 export function PostCardSkeletonList({ count = 5, hasCover = false }: { count?: number; hasCover?: boolean }) {
   return (
-    <>
+    <div className="grid grid-cols-2 md:grid-cols-1 gap-3 md:gap-4">
       {[...Array(count)].map((_, index) => (
         <div
           key={`skeleton-wrapper-${index}`}
-          className="content-appear"
+          className={`content-appear ${hasCover ? 'col-span-2 md:col-span-1' : 'md:col-span-1'}`}
           style={{ animationDelay: `${index * 40}ms` }}
         >
           <PostCardSkeleton hasCover={hasCover} />
         </div>
       ))}
-    </>
+    </div>
   );
 }
