@@ -7,9 +7,9 @@
  * ├─────────┬───────────────┬───────────┤
  * │ SideBar │   MainContent │   TOC     │
  * │         │   (Outlet)    │ (optional)│
- * │         ├───────────────┤           │
- * │         │    Footer     │           │
- * └─────────┴───────────────┴───────────┘
+ * └─────────┴───────────────┴───────────┤
+ * │              Footer                 │
+ * └─────────────────────────────────────┘
  */
 
 import { Outlet } from 'react-router-dom';
@@ -38,10 +38,6 @@ export function MainLayout() {
             <div className="flex flex-col rounded-[var(--radius-large)] bg-[var(--card-bg)] py-1 md:py-0 md:bg-transparent md:gap-4 mb-4 lg:mb-0">
               <Outlet />
             </div>
-            {/* 桌面端页脚 */}
-            <div className="hidden lg:block mt-4">
-              <Footer />
-            </div>
           </main>
         </div>
 
@@ -53,11 +49,11 @@ export function MainLayout() {
             </div>
           </div>
         )}
+      </div>
 
-        {/* 移动端页脚 */}
-        <div className="block lg:hidden mt-4">
-          <Footer />
-        </div>
+      {/* 底部页脚 */}
+      <div className="max-w-[var(--page-width)] mx-auto w-full px-0 md:px-4">
+        <Footer />
       </div>
     </div>
   );

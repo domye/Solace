@@ -3,6 +3,7 @@
  */
 
 import type { ArticleSummary, PostCardArticle } from '@/types';
+import { processArticleCoverImage } from './image';
 
 /** 将 ArticleSummary 转换为 PostCard 组件所需格式 */
 export function toPostCardArticle(article: ArticleSummary): PostCardArticle {
@@ -11,7 +12,7 @@ export function toPostCardArticle(article: ArticleSummary): PostCardArticle {
     title: article.title,
     slug: article.slug,
     summary: article.summary,
-    cover_image: article.cover_image,
+    cover_image: processArticleCoverImage(article.cover_image),
     author: article.author,
     status: article.status,
     view_count: article.view_count,
