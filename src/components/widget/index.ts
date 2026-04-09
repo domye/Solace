@@ -4,7 +4,6 @@
  * 侧边栏相关组件：个人信息、分类、标签、搜索、目录等
  */
 
-export { ThemeToggle } from "../common/ThemeToggle";
 export { HuePicker } from "./HuePicker";
 export { Profile } from "./Profile";
 export { Categories } from "./Categories";

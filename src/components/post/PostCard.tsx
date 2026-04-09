@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
-import { LazyImage } from './LazyImage';
+import { LazyImage } from '@/components/common/ui';
 import { PostMeta } from './PostMeta';
 import type { PostCardArticle } from '@/types';
 

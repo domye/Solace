@@ -6,9 +6,8 @@ import { Icon } from '@iconify/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores';
 import { useClickOutside } from '@/hooks';
-import { ThemeToggle } from './ThemeToggle';
-import { SearchModal } from '../widget/SearchModal';
-import { HuePicker } from '../widget/HuePicker';
+import { ThemeToggle } from '@/components/common/ui';
+import { SearchModal, HuePicker } from '@/components/widget';
 import { useState, useRef, useMemo } from 'react';
 
 const navLinks = [

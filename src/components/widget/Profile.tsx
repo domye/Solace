@@ -6,7 +6,7 @@ import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { useAuthStore } from '@/stores';
 import { useOwner } from '@/hooks';
-import { LazyImage } from '@/components/common/LazyImage';
+import { LazyImage } from '@/components/common/ui';
 
 export function Profile() {
   const { isAuthenticated } = useAuthStore();

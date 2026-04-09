@@ -12,8 +12,8 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import React, { memo, useEffect, useMemo } from 'react';
 import type { TocHeading } from '@/components/widget/TableOfContents';
-import { CodeBlock } from './CodeBlock';
-import { LazyImage } from './LazyImage';
+import { CodeBlock } from '@/components/common/ui';
+import { LazyImage } from '@/components/common/ui';
 
 interface MarkdownRendererProps {
   content: string;

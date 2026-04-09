@@ -102,12 +102,6 @@ export function CategoryBar({ className }: CategoryBarProps) {
     scroll.scrollLeft += e.deltaY;
   };
 
-  // 计算总文章数
-  const totalPosts = useMemo(() => {
-    if (!categories) return 0;
-    return categories.reduce((sum, cat) => sum + (cat.article_count || 0), 0);
-  }, [categories]);
-
   return (
     <div className={`card-base p-3 onload-animation${className || ''}`}>
       <div className="flex gap-2">
@@ -137,7 +131,6 @@ export function CategoryBar({ className }: CategoryBarProps) {
           data-active={isArchive && !activeCategory || undefined}
         >
           归档
-          <span className="text-xs opacity-60 ml-1">{totalPosts}</span>
         </Link>
 
         {/* 分隔线 */}
@@ -180,9 +173,6 @@ export function CategoryBar({ className }: CategoryBarProps) {
                   data-active={activeCategory === category.slug || activeCategory === category.name || undefined}
                 >
                   {category.name}
-                  {category.article_count !== undefined && (
-                    <span className="text-xs opacity-60 ml-1">{category.article_count}</span>
-                  )}
                 </Link>
               ))
             )}

@@ -5,7 +5,7 @@
 import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { formatDate } from '@/utils/date';
-import { MetaItem } from './MetaItem';
+import { MetaItem } from '@/components/common/ui';
 import type { PostCardArticle } from '@/types';
 
 export function PostMeta({ article }: { article: PostCardArticle }) {
