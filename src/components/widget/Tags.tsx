@@ -1,9 +1,3 @@
-/**
- * 标签列表组件
- *
- * 展示所有标签
- */
-
 import { Link } from 'react-router-dom';
 import { useTags } from '@/hooks';
 
@@ -12,37 +6,30 @@ interface TagsProps {
   style?: React.CSSProperties;
 }
 
+/** 侧边栏标题样式 */
+const sidebarTitleStyle = 'font-bold text-lg text-90 relative ml-8 mt-4 mb-2 before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)] before:absolute before:-left-4 before:top-[5.5px]';
+
 export function Tags({ className, style }: TagsProps) {
   const { data: tags, isLoading, error } = useTags();
 
   if (isLoading) {
     return (
       <div className={`card-base pb-4 ${className || ''}`} style={style}>
-        <div className="font-bold text-lg text-90 relative ml-8 mt-4 mb-2
-          before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
-          before:absolute before:-left-4 before:top-[5.5px]">
-          标签
-        </div>
+        <div className={sidebarTitleStyle}>标签</div>
         <div className="px-4 flex gap-2 flex-wrap">
-          {[...Array(6)].map((_, index) => (
-            <div key={index} className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           ))}
         </div>
       </div>
     );
   }
 
-  if (error || !tags || tags.length === 0) {
-    return null;
-  }
+  if (error || !tags?.length) return null;
 
   return (
     <div className={`card-base pb-4 onload-animation ${className || ''}`} style={style}>
-      <div className="font-bold text-lg text-90 relative ml-8 mt-4 mb-2
-        before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
-        before:absolute before:-left-4 before:top-[5.5px]">
-        标签
-      </div>
+      <div className={sidebarTitleStyle}>标签</div>
       <div className="px-4 flex gap-2 flex-wrap">
         {tags.map((tag) => (
           <Link

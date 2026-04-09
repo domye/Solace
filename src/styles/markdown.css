@@ -4,186 +4,190 @@
 
 /* === 基础排版 === */
 .custom-md {
-  font-size: 1rem;
-  line-height: 1.75;
+	font-size: 1rem;
+	line-height: 1.75;
 }
 
 .custom-md > *:first-child {
-  margin-top: 0;
+	margin-top: 0;
 }
 
 .custom-md > *:last-child {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 /* === CodeBlock 组件样式 === */
 .code-block {
-  width: 100%;
+	width: 100%;
 }
 
 .code-block pre {
-  margin: 0 !important;
-  width: 100%;
-  overflow-x: auto;
+	margin: 0 !important;
+	width: 100%;
+	overflow-x: auto;
 }
 
 .code-block code {
-  font-family: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+	font-family:
+		"JetBrains Mono Variable", ui-monospace, SFMono-Regular, Menlo, Monaco,
+		Consolas, monospace !important;
 }
 
 /* === 行内代码 === */
 .custom-md code:not(.hljs) {
-  background: var(--inline-code-bg);
-  color: var(--inline-code-color);
-  padding: 0.125rem 0.375rem;
-  border-radius: var(--radius-small);
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  font-size: 0.875em;
+	background: var(--inline-code-bg);
+	color: var(--inline-code-color);
+	padding: 0.125rem 0.375rem;
+	border-radius: var(--radius-small);
+	font-family:
+		"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+		monospace;
+	font-size: 0.875em;
 }
 
 /* === 引用块 === */
 .custom-md blockquote {
-  position: relative;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  margin: 1.5rem 0;
-  font-style: normal;
-  background: var(--btn-regular-bg);
-  border-radius: var(--radius-medium);
-  border-left: 3px solid var(--primary);
+	position: relative;
+	padding-left: 1rem;
+	padding-right: 1rem;
+	margin: 1.5rem 0;
+	font-style: normal;
+	background: var(--btn-regular-bg);
+	border-radius: var(--radius-medium);
+	border-left: 3px solid var(--primary);
 }
 
 .custom-md blockquote p:last-child {
-  margin-bottom: 0;
+	margin-bottom: 0;
 }
 
 /* === 列表样式 === */
 .custom-md ul,
 .custom-md ol {
-  margin: 1rem 0;
-  padding-left: 1.5rem;
+	margin: 1rem 0;
+	padding-left: 1.5rem;
 }
 
 .custom-md ul {
-  list-style-type: disc;
+	list-style-type: disc;
 }
 
 .custom-md ol {
-  list-style-type: decimal;
+	list-style-type: decimal;
 }
 
 .custom-md li {
-  margin: 0.5rem 0;
+	margin: 0.5rem 0;
 }
 
 .custom-md li::marker {
-  color: var(--primary);
+	color: var(--primary);
 }
 
 .custom-md ul ul,
 .custom-md ol ol,
 .custom-md ul ol,
 .custom-md ol ul {
-  margin: 0.5rem 0;
+	margin: 0.5rem 0;
 }
 
 /* === 链接样式 === */
 .custom-md a {
-  color: var(--primary);
-  text-decoration: underline;
-  text-decoration-color: var(--link-underline);
-  text-decoration-style: dashed;
-  text-underline-offset: 0.25rem;
-  transition: all 0.2s ease;
+	color: var(--primary);
+	text-decoration: underline;
+	text-decoration-color: var(--link-underline);
+	text-decoration-style: dashed;
+	text-underline-offset: 0.25rem;
+	transition: all 0.2s ease;
 }
 
 .custom-md a:hover {
-  background: var(--btn-plain-bg-hover);
-  text-decoration: none;
-  border-radius: 0.125rem;
+	background: var(--btn-plain-bg-hover);
+	text-decoration: none;
+	border-radius: 0.125rem;
 }
 
 /* === 图片样式 === */
 .custom-md img {
-  max-width: 100%;
-  height: auto;
-  border-radius: var(--radius-large);
-  margin: 1.5rem auto;
-  display: block;
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--radius-large);
+	margin: 1.5rem auto;
+	display: block;
 }
 
 /* === 表格样式 === */
 .custom-md table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 1.5rem 0;
-  font-size: 0.9375rem;
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1.5rem 0;
+	font-size: 0.9375rem;
 }
 
 .custom-md th {
-  background: var(--btn-regular-bg);
-  font-weight: 600;
-  text-align: left;
-  padding: 0.75rem 1rem;
-  border-bottom: 2px solid var(--border-medium);
+	background: var(--btn-regular-bg);
+	font-weight: 600;
+	text-align: left;
+	padding: 0.75rem 1rem;
+	border-bottom: 2px solid var(--border-medium);
 }
 
 .custom-md td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-light);
+	padding: 0.75rem 1rem;
+	border-bottom: 1px solid var(--border-light);
 }
 
 .custom-md tr:hover td {
-  background: var(--btn-plain-bg-hover);
+	background: var(--btn-plain-bg-hover);
 }
 
 /* === 分隔线 === */
 .custom-md hr {
-  border: none;
-  border-top: 1px dashed var(--border-medium);
-  margin: 2rem 0;
+	border: none;
+	border-top: 1px dashed var(--border-medium);
+	margin: 2rem 0;
 }
 
 /* === 删除线 === */
 .custom-md del {
-  opacity: 0.6;
+	opacity: 0.6;
 }
 
 /* === 强调 === */
 .custom-md strong {
-  font-weight: 600;
-  color: var(--text-90);
+	font-weight: 600;
+	color: var(--text-90);
 }
 
 .custom-md em {
-  font-style: italic;
+	font-style: italic;
 }
 
 /* === 任务列表 === */
 .custom-md input[type="checkbox"] {
-  appearance: none;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid var(--primary);
-  border-radius: var(--radius-small);
-  margin-right: 0.5rem;
-  vertical-align: middle;
-  cursor: pointer;
-  position: relative;
+	appearance: none;
+	width: 1rem;
+	height: 1rem;
+	border: 2px solid var(--primary);
+	border-radius: var(--radius-small);
+	margin-right: 0.5rem;
+	vertical-align: middle;
+	cursor: pointer;
+	position: relative;
 }
 
 .custom-md input[type="checkbox"]:checked {
-  background: var(--primary);
+	background: var(--primary);
 }
 
 .custom-md input[type="checkbox"]:checked::after {
-  content: '';
-  position: absolute;
-  left: 0.25rem;
-  top: 0.125rem;
-  width: 0.375rem;
-  height: 0.5rem;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
+	content: "";
+	position: absolute;
+	left: 0.25rem;
+	top: 0.125rem;
+	width: 0.375rem;
+	height: 0.5rem;
+	border: solid white;
+	border-width: 0 2px 2px 0;
+	transform: rotate(45deg);
 }

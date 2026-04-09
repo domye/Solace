@@ -5,28 +5,28 @@
 
 /* 隐藏部分特定区域的滚动条但允许滚动 */
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
 }
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+	display: none;
 }
 
 /* 细滚动条 - 用于 TOC 等侧边栏组件 */
 .scrollbar-thin {
-  scrollbar-width: thin;
-  scrollbar-color: oklch(0.70 0.05 var(--hue) / 0.3) transparent;
+	scrollbar-width: thin;
+	scrollbar-color: oklch(0.7 0.05 var(--hue) / 0.3) transparent;
 }
 .scrollbar-thin::-webkit-scrollbar {
-  width: 4px;
+	width: 4px;
 }
 .scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
+	background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: oklch(0.70 0.05 var(--hue) / 0.2);
-  border-radius: 4px;
+	background: oklch(0.7 0.05 var(--hue) / 0.2);
+	border-radius: 4px;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: var(--primary);
+	background: var(--primary);
 }

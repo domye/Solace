@@ -4,78 +4,80 @@
    ======================================== */
 
 :root {
-  /* === 布局 === */
-  --hue: 250;
-  --radius-large: 1.25rem; /* 增大圆角，更符合 Fuwari 风格 */
-  --radius-medium: 0.75rem;
-  --radius-small: 0.5rem;
-  --page-width: 1400px; /* 三栏布局需要更宽的页面宽度 */
-  --sidebar-width: 17.5rem; /* 侧边栏宽度 */
-  --content-delay: 50ms;
+	/* === 布局 === */
+	--hue: 250;
+	--radius-large: 1.25rem; /* 增大圆角，更符合 Fuwari 风格 */
+	--radius-medium: 0.75rem;
+	--radius-small: 0.5rem;
+	--page-width: 1400px; /* 三栏布局需要更宽的页面宽度 */
+	--sidebar-width: 17.5rem; /* 侧边栏宽度 */
+	--content-delay: 50ms;
 
-  /* === 主色 === */
-  --primary: oklch(0.68 0.16 var(--hue)); /* 稍微提升亮度和饱和度 */
-  --title-active: oklch(0.6 0.1 var(--hue));
+	/* === 主色 === */
+	--primary: oklch(0.68 0.16 var(--hue)); /* 稍微提升亮度和饱和度 */
+	--title-active: oklch(0.6 0.1 var(--hue));
 
-  /* === Klein Blue (渐变色) === */
-  --klein-blue: oklch(0.55 0.2 var(--hue));
-  --klein-blue-light: oklch(0.70 0.15 var(--hue));
-  --sky-blue: oklch(0.75 0.12 var(--hue));
+	/* === Klein Blue (渐变色) === */
+	--klein-blue: oklch(0.55 0.2 var(--hue));
+	--klein-blue-light: oklch(0.7 0.15 var(--hue));
+	--sky-blue: oklch(0.75 0.12 var(--hue));
 
-  /* === 背景色 === */
-  --page-bg: oklch(0.97 0.015 var(--hue)); /* 稍微增加一点背景的颜色倾向 */
-  --card-bg: #ffffff;
-  --float-panel-bg: #ffffff;
+	/* === 背景色 === */
+	--page-bg: oklch(0.97 0.015 var(--hue)); /* 稍微增加一点背景的颜色倾向 */
+	--card-bg: #ffffff;
+	--float-panel-bg: #ffffff;
 
-  /* === 按钮色 === */
-  --btn-content: oklch(0.55 0.12 var(--hue));
-  --btn-regular-bg: oklch(0.95 0.025 var(--hue));
-  --btn-regular-bg-hover: oklch(0.92 0.04 var(--hue));
-  --btn-regular-bg-active: oklch(0.88 0.06 var(--hue));
-  --btn-plain-bg-hover: oklch(0.95 0.025 var(--hue));
-  --btn-plain-bg-active: oklch(0.92 0.04 var(--hue));
-  --btn-card-bg-hover: oklch(0.98 0.005 var(--hue));
-  --btn-card-bg-active: oklch(0.9 0.03 var(--hue));
+	/* === 按钮色 === */
+	--btn-content: oklch(0.55 0.12 var(--hue));
+	--btn-regular-bg: oklch(0.95 0.025 var(--hue));
+	--btn-regular-bg-hover: oklch(0.92 0.04 var(--hue));
+	--btn-regular-bg-active: oklch(0.88 0.06 var(--hue));
+	--btn-plain-bg-hover: oklch(0.95 0.025 var(--hue));
+	--btn-plain-bg-active: oklch(0.92 0.04 var(--hue));
+	--btn-card-bg-hover: oklch(0.98 0.005 var(--hue));
+	--btn-card-bg-active: oklch(0.9 0.03 var(--hue));
 
-  /* === 文字色 (透明度层级) === */
-  --text-90: rgba(25, 25, 25, 0.95); /* 稍微偏暖黑，不那么刺眼 */
-  --text-75: rgba(45, 45, 45, 0.85);
-  --text-50: rgba(100, 100, 100, 0.65);
-  --text-30: rgba(150, 150, 150, 0.4);
+	/* === 文字色 (透明度层级) === */
+	--text-90: rgba(25, 25, 25, 0.95); /* 稍微偏暖黑，不那么刺眼 */
+	--text-75: rgba(45, 45, 45, 0.85);
+	--text-50: rgba(100, 100, 100, 0.65);
+	--text-30: rgba(150, 150, 150, 0.4);
 
-  /* === 边框与分隔线 === */
-  --border-light: rgba(0, 0, 0, 0.05); /* 更轻的边框 */
-  --border-medium: rgba(0, 0, 0, 0.08);
-  --line-divider: rgba(0, 0, 0, 0.06);
-  --line-color: rgba(0, 0, 0, 0.08);
-  --meta-divider: rgba(0, 0, 0, 0.15);
+	/* === 边框与分隔线 === */
+	--border-light: rgba(0, 0, 0, 0.05); /* 更轻的边框 */
+	--border-medium: rgba(0, 0, 0, 0.08);
+	--line-divider: rgba(0, 0, 0, 0.06);
+	--line-color: rgba(0, 0, 0, 0.08);
+	--meta-divider: rgba(0, 0, 0, 0.15);
 
-  /* === 链接 === */
-  --link-underline: oklch(0.85 0.08 var(--hue));
-  --link-hover: oklch(0.92 0.04 var(--hue));
-  --link-active: oklch(0.88 0.06 var(--hue));
+	/* === 链接 === */
+	--link-underline: oklch(0.85 0.08 var(--hue));
+	--link-hover: oklch(0.92 0.04 var(--hue));
+	--link-active: oklch(0.88 0.06 var(--hue));
 
-  /* === 其他 === */
-  --deep-text: oklch(0.25 0.02 var(--hue));
-  --selection-bg: oklch(0.90 0.08 var(--hue));
-  --codeblock-bg: oklch(0.97 0.015 var(--hue)); /* 浅色模式下代码块背景调整为浅色，更护眼 */
-  --codeblock-header-bg: oklch(0.94 0.02 var(--hue));
-  --codeblock-line-bg: oklch(0.95 0.02 var(--hue));
-  --codeblock-border: rgba(0, 0, 0, 0.06);
-  --codeblock-lang-color: oklch(0.45 0.08 var(--hue));
-  --codeblock-line-color: oklch(0.5 0.02 var(--hue));
-  --codeblock-btn-bg: oklch(0.92 0.03 var(--hue));
-  --codeblock-btn-hover: oklch(0.88 0.05 var(--hue));
-  --codeblock-btn-color: oklch(0.5 0.08 var(--hue));
-  --codeblock-topbar-bg: oklch(0.93 0.025 var(--hue));
-  --inline-code-bg: var(--btn-regular-bg);
-  --inline-code-color: oklch(0.5 0.15 var(--hue));
+	/* === 其他 === */
+	--deep-text: oklch(0.25 0.02 var(--hue));
+	--selection-bg: oklch(0.9 0.08 var(--hue));
+	--codeblock-bg: oklch(
+		0.97 0.015 var(--hue)
+	); /* 浅色模式下代码块背景调整为浅色，更护眼 */
+	--codeblock-header-bg: oklch(0.94 0.02 var(--hue));
+	--codeblock-line-bg: oklch(0.95 0.02 var(--hue));
+	--codeblock-border: rgba(0, 0, 0, 0.06);
+	--codeblock-lang-color: oklch(0.45 0.08 var(--hue));
+	--codeblock-line-color: oklch(0.5 0.02 var(--hue));
+	--codeblock-btn-bg: oklch(0.92 0.03 var(--hue));
+	--codeblock-btn-hover: oklch(0.88 0.05 var(--hue));
+	--codeblock-btn-color: oklch(0.5 0.08 var(--hue));
+	--codeblock-topbar-bg: oklch(0.93 0.025 var(--hue));
+	--inline-code-bg: var(--btn-regular-bg);
+	--inline-code-color: oklch(0.5 0.15 var(--hue));
 
-  /* === TOC 目录 === */
-  --toc-width: 15rem; /* 稍微加宽一点 TOC */
-  --toc-btn-hover: oklch(0.95 0.025 var(--hue));
-  --toc-btn-active: oklch(0.90 0.05 var(--hue));
-  --toc-badge-bg: oklch(0.90 0.05 var(--hue));
+	/* === TOC 目录 === */
+	--toc-width: 15rem; /* 稍微加宽一点 TOC */
+	--toc-btn-hover: oklch(0.95 0.025 var(--hue));
+	--toc-btn-active: oklch(0.9 0.05 var(--hue));
+	--toc-badge-bg: oklch(0.9 0.05 var(--hue));
 }
 
 /* ========================================
@@ -83,66 +85,66 @@
    ======================================== */
 
 .dark {
-  /* === 主色 === */
-  --primary: oklch(0.75 0.16 var(--hue));
-  --title-active: oklch(0.8 0.12 var(--hue));
+	/* === 主色 === */
+	--primary: oklch(0.75 0.16 var(--hue));
+	--title-active: oklch(0.8 0.12 var(--hue));
 
-  /* === Klein Blue (渐变色 - 深色模式更亮) === */
-  --klein-blue: oklch(0.65 0.18 var(--hue));
-  --klein-blue-light: oklch(0.75 0.14 var(--hue));
-  --sky-blue: oklch(0.80 0.10 var(--hue));
+	/* === Klein Blue (渐变色 - 深色模式更亮) === */
+	--klein-blue: oklch(0.65 0.18 var(--hue));
+	--klein-blue-light: oklch(0.75 0.14 var(--hue));
+	--sky-blue: oklch(0.8 0.1 var(--hue));
 
-  /* === 背景色 === */
-  --page-bg: oklch(0.15 0.012 var(--hue)); /* 更深的背景，对比度更好 */
-  --card-bg: oklch(0.20 0.015 var(--hue));
-  --float-panel-bg: oklch(0.22 0.018 var(--hue));
+	/* === 背景色 === */
+	--page-bg: oklch(0.15 0.012 var(--hue)); /* 更深的背景，对比度更好 */
+	--card-bg: oklch(0.2 0.015 var(--hue));
+	--float-panel-bg: oklch(0.22 0.018 var(--hue));
 
-  /* === 按钮色 === */
-  --btn-content: oklch(0.8 0.1 var(--hue));
-  --btn-regular-bg: oklch(0.28 0.025 var(--hue));
-  --btn-regular-bg-hover: oklch(0.32 0.035 var(--hue));
-  --btn-regular-bg-active: oklch(0.36 0.045 var(--hue));
-  --btn-plain-bg-hover: oklch(0.26 0.025 var(--hue));
-  --btn-plain-bg-active: oklch(0.3 0.035 var(--hue));
-  --btn-card-bg-hover: oklch(0.25 0.02 var(--hue));
-  --btn-card-bg-active: oklch(0.3 0.03 var(--hue));
+	/* === 按钮色 === */
+	--btn-content: oklch(0.8 0.1 var(--hue));
+	--btn-regular-bg: oklch(0.28 0.025 var(--hue));
+	--btn-regular-bg-hover: oklch(0.32 0.035 var(--hue));
+	--btn-regular-bg-active: oklch(0.36 0.045 var(--hue));
+	--btn-plain-bg-hover: oklch(0.26 0.025 var(--hue));
+	--btn-plain-bg-active: oklch(0.3 0.035 var(--hue));
+	--btn-card-bg-hover: oklch(0.25 0.02 var(--hue));
+	--btn-card-bg-active: oklch(0.3 0.03 var(--hue));
 
-  /* === 文字色 (透明度层级) === */
-  --text-90: rgba(245, 245, 245, 0.95);
-  --text-75: rgba(220, 220, 220, 0.85);
-  --text-50: rgba(160, 160, 160, 0.65);
-  --text-30: rgba(100, 100, 100, 0.4);
+	/* === 文字色 (透明度层级) === */
+	--text-90: rgba(245, 245, 245, 0.95);
+	--text-75: rgba(220, 220, 220, 0.85);
+	--text-50: rgba(160, 160, 160, 0.65);
+	--text-30: rgba(100, 100, 100, 0.4);
 
-  /* === 边框与分隔线 === */
-  --border-light: rgba(255, 255, 255, 0.06);
-  --border-medium: rgba(255, 255, 255, 0.1);
-  --line-divider: rgba(255, 255, 255, 0.06);
-  --line-color: rgba(255, 255, 255, 0.08);
-  --meta-divider: rgba(255, 255, 255, 0.15);
+	/* === 边框与分隔线 === */
+	--border-light: rgba(255, 255, 255, 0.06);
+	--border-medium: rgba(255, 255, 255, 0.1);
+	--line-divider: rgba(255, 255, 255, 0.06);
+	--line-color: rgba(255, 255, 255, 0.08);
+	--meta-divider: rgba(255, 255, 255, 0.15);
 
-  /* === 链接 === */
-  --link-underline: oklch(0.40 0.1 var(--hue));
-  --link-hover: oklch(0.45 0.12 var(--hue));
-  --link-active: oklch(0.35 0.08 var(--hue));
+	/* === 链接 === */
+	--link-underline: oklch(0.4 0.1 var(--hue));
+	--link-hover: oklch(0.45 0.12 var(--hue));
+	--link-active: oklch(0.35 0.08 var(--hue));
 
-  /* === 其他 === */
-  --selection-bg: oklch(0.35 0.1 var(--hue));
-  --codeblock-bg: #282c34; /* One Dark 背景色 */
-  --codeblock-header-bg: #21252b;
-  --codeblock-line-bg: #21252b;
-  --codeblock-border: rgba(255, 255, 255, 0.08);
-  --codeblock-lang-color: #abb2bf;
-  --codeblock-line-color: #5c6370;
-  --codeblock-btn-bg: #3e4451;
-  --codeblock-btn-hover: #4e5666;
-  --codeblock-btn-color: #abb2bf;
-  --codeblock-topbar-bg: oklch(0.15 0.012 var(--hue));
-  --inline-code-color: oklch(0.8 0.15 var(--hue));
+	/* === 其他 === */
+	--selection-bg: oklch(0.35 0.1 var(--hue));
+	--codeblock-bg: #282c34; /* One Dark 背景色 */
+	--codeblock-header-bg: #21252b;
+	--codeblock-line-bg: #21252b;
+	--codeblock-border: rgba(255, 255, 255, 0.08);
+	--codeblock-lang-color: #abb2bf;
+	--codeblock-line-color: #5c6370;
+	--codeblock-btn-bg: #3e4451;
+	--codeblock-btn-hover: #4e5666;
+	--codeblock-btn-color: #abb2bf;
+	--codeblock-topbar-bg: oklch(0.15 0.012 var(--hue));
+	--inline-code-color: oklch(0.8 0.15 var(--hue));
 
-  /* === TOC 目录 === */
-  --toc-btn-hover: oklch(0.26 0.025 var(--hue));
-  --toc-btn-active: oklch(0.32 0.035 var(--hue));
-  --toc-badge-bg: oklch(0.32 0.035 var(--hue));
+	/* === TOC 目录 === */
+	--toc-btn-hover: oklch(0.26 0.025 var(--hue));
+	--toc-btn-active: oklch(0.32 0.035 var(--hue));
+	--toc-badge-bg: oklch(0.32 0.035 var(--hue));
 }
 
 /* ========================================
@@ -150,7 +152,7 @@
    ======================================== */
 
 @media (max-width: 1024px) {
-  :root {
-    --radius-large: 1rem; /* 移动端减小圆角 */
-  }
+	:root {
+		--radius-large: 1rem; /* 移动端减小圆角 */
+	}
 }

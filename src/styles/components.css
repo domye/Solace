@@ -5,178 +5,188 @@
 @tailwind components;
 
 @layer components {
-  /* === 卡片 === */
-  .card-base {
-    background: var(--card-bg);
-    border-radius: var(--radius-large);
-    @apply overflow-hidden transition-all duration-300;
-  }
+	/* === 卡片 === */
+	.card-base {
+		background: var(--card-bg);
+		border-radius: var(--radius-large);
+		@apply overflow-hidden transition-all duration-300;
+	}
 
-  .card-shadow {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  }
-  .dark .card-shadow {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  }
+	.card-shadow {
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+	}
+	.dark .card-shadow {
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+	}
 
-  /* === 文字层级 === */
-  .text-90 { color: var(--text-90); }
-  .text-75 { color: var(--text-75); font-weight: 400; }
-  .text-50 { color: var(--text-50); font-weight: 400; }
-  .text-30 { color: var(--text-30); }
+	/* === 文字层级 === */
+	.text-90 {
+		color: var(--text-90);
+	}
+	.text-75 {
+		color: var(--text-75);
+		font-weight: 400;
+	}
+	.text-50 {
+		color: var(--text-50);
+		font-weight: 400;
+	}
+	.text-30 {
+		color: var(--text-30);
+	}
 
-  /* === 按钮动画 (Fuwari expand-animation) === */
-  .expand-animation {
-    @apply relative before:ease-out before:transition-all before:duration-300 z-0;
-  }
+	/* === 按钮动画 (Fuwari expand-animation) === */
+	.expand-animation {
+		@apply relative before:ease-out before:transition-all before:duration-300 z-0;
+	}
 
-  .expand-animation::before {
-    content: '';
-    @apply absolute rounded-[inherit] inset-0 scale-[0.85] opacity-0 -z-10;
-    background: var(--btn-plain-bg-hover);
-  }
+	.expand-animation::before {
+		content: "";
+		@apply absolute rounded-[inherit] inset-0 scale-[0.85] opacity-0 -z-10;
+		background: var(--btn-plain-bg-hover);
+	}
 
-  .expand-animation:hover::before {
-    @apply scale-100 opacity-100;
-  }
+	.expand-animation:hover::before {
+		@apply scale-100 opacity-100;
+	}
 
-  .expand-animation:active::before {
-    background: var(--btn-plain-bg-active);
-    @apply scale-95;
-  }
+	.expand-animation:active::before {
+		background: var(--btn-plain-bg-active);
+		@apply scale-95;
+	}
 
-  /* === 按钮样式 === */
-  .btn-plain {
-    @apply transition-colors duration-200 relative flex items-center justify-center bg-transparent cursor-pointer select-none;
-    color: var(--text-75);
-  }
-  .btn-plain:hover {
-    color: var(--primary);
-  }
-  .btn-plain:not(.scale-animation) {
-    @apply hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)];
-  }
-  .btn-plain.scale-animation {
-    @apply expand-animation;
-  }
+	/* === 按钮样式 === */
+	.btn-plain {
+		@apply transition-colors duration-200 relative flex items-center justify-center bg-transparent cursor-pointer select-none;
+		color: var(--text-75);
+	}
+	.btn-plain:hover {
+		color: var(--primary);
+	}
+	.btn-plain:not(.scale-animation) {
+		@apply hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)];
+	}
+	.btn-plain.scale-animation {
+		@apply expand-animation;
+	}
 
-  .btn-regular {
-    @apply flex items-center justify-center transition-all duration-200 cursor-pointer select-none font-medium;
-    background: var(--btn-regular-bg);
-    color: var(--btn-content);
-    border-radius: var(--radius-medium);
-  }
+	.btn-regular {
+		@apply flex items-center justify-center transition-all duration-200 cursor-pointer select-none font-medium;
+		background: var(--btn-regular-bg);
+		color: var(--btn-content);
+		border-radius: var(--radius-medium);
+	}
 
-  .btn-regular:hover {
-    background: var(--btn-regular-bg-hover);
-    color: var(--primary);
-  }
+	.btn-regular:hover {
+		background: var(--btn-regular-bg-hover);
+		color: var(--primary);
+	}
 
-  .btn-regular:active {
-    background: var(--btn-regular-bg-active);
-    transform: scale(0.96);
-  }
+	.btn-regular:active {
+		background: var(--btn-regular-bg-active);
+		transform: scale(0.96);
+	}
 
-  .btn-card {
-    @apply flex items-center justify-center transition-all duration-200 cursor-pointer select-none;
-    background: var(--card-bg);
-  }
+	.btn-card {
+		@apply flex items-center justify-center transition-all duration-200 cursor-pointer select-none;
+		background: var(--card-bg);
+	}
 
-  .btn-card:hover {
-    background: var(--btn-card-bg-hover);
-  }
+	.btn-card:hover {
+		background: var(--btn-card-bg-hover);
+	}
 
-  .btn-card:active {
-    background: var(--btn-card-bg-active);
-    transform: scale(0.96);
-  }
+	.btn-card:active {
+		background: var(--btn-card-bg-active);
+		transform: scale(0.96);
+	}
 
-  /* === 链接样式 === */
-  .link-underline {
-    @apply transition-colors duration-200 underline decoration-2 decoration-dashed cursor-pointer;
-    text-decoration-color: var(--link-underline);
-    text-underline-offset: 0.3em;
-  }
+	/* === 链接样式 === */
+	.link-underline {
+		@apply transition-colors duration-200 underline decoration-2 decoration-dashed cursor-pointer;
+		text-decoration-color: var(--link-underline);
+		text-underline-offset: 0.3em;
+	}
 
-  .link-underline:hover {
-    text-decoration-color: var(--primary);
-    color: var(--primary);
-    text-decoration-style: solid;
-  }
+	.link-underline:hover {
+		text-decoration-color: var(--primary);
+		color: var(--primary);
+		text-decoration-style: solid;
+	}
 
-  .link-underline:active {
-    text-decoration-color: var(--link-active);
-  }
+	.link-underline:active {
+		text-decoration-color: var(--link-active);
+	}
 
-  /* === 图标徽章 === */
-  .meta-icon {
-    @apply flex items-center justify-center transition-colors duration-200;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: var(--radius-small);
-    background: var(--btn-regular-bg);
-    color: var(--btn-content);
-    margin-right: 0.75rem;
-  }
+	/* === 图标徽章 === */
+	.meta-icon {
+		@apply flex items-center justify-center transition-colors duration-200;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: var(--radius-small);
+		background: var(--btn-regular-bg);
+		color: var(--btn-content);
+		margin-right: 0.75rem;
+	}
 
-  /* === 分隔符 === */
-  .with-divider::before {
-    content: '·'; /* 使用中间点代替斜杠更优雅 */
-    margin-left: 0.5rem;
-    margin-right: 0.5rem;
-    color: var(--meta-divider);
-    font-weight: 700;
-  }
+	/* === 分隔符 === */
+	.with-divider::before {
+		content: "·"; /* 使用中间点代替斜杠更优雅 */
+		margin-left: 0.5rem;
+		margin-right: 0.5rem;
+		color: var(--meta-divider);
+		font-weight: 700;
+	}
 
-  .with-divider:first-of-type::before {
-    display: none;
-  }
+	.with-divider:first-of-type::before {
+		display: none;
+	}
 
-  /* === 浮动面板 === */
-  .float-panel {
-    background: var(--float-panel-bg);
-    border-radius: var(--radius-large);
-    @apply overflow-hidden transition-all duration-300;
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
-    border: 1px solid var(--border-light);
-  }
+	/* === 浮动面板 === */
+	.float-panel {
+		background: var(--float-panel-bg);
+		border-radius: var(--radius-large);
+		@apply overflow-hidden transition-all duration-300;
+		box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1);
+		border: 1px solid var(--border-light);
+	}
 
-  .dark .float-panel {
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
-  }
+	.dark .float-panel {
+		box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+	}
 
-  .float-panel-closed {
-    @apply -translate-y-2 opacity-0 pointer-events-none scale-95;
-  }
+	.float-panel-closed {
+		@apply -translate-y-2 opacity-0 pointer-events-none scale-95;
+	}
 
-  /* === 输入框 === */
-  .input-base {
-    @apply w-full transition-all duration-200;
-    padding: 0.625rem 1.25rem;
-    border-radius: var(--radius-medium);
-    background: var(--card-bg);
-    border: 1px solid var(--border-light);
-    color: var(--text-90);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) inset;
-  }
+	/* === 输入框 === */
+	.input-base {
+		@apply w-full transition-all duration-200;
+		padding: 0.625rem 1.25rem;
+		border-radius: var(--radius-medium);
+		background: var(--card-bg);
+		border: 1px solid var(--border-light);
+		color: var(--text-90);
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) inset;
+	}
 
-  .input-base::placeholder {
-    color: var(--text-50);
-  }
+	.input-base::placeholder {
+		color: var(--text-50);
+	}
 
-  .input-base:focus {
-    outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 3px oklch(0.70 0.14 var(--hue) / 0.15); /* Primary color with opacity */
-  }
+	.input-base:focus {
+		outline: none;
+		border-color: var(--primary);
+		box-shadow: 0 0 0 3px oklch(0.7 0.14 var(--hue) / 0.15); /* Primary color with opacity */
+	}
 
-  /* === 滚动条隐藏 === */
-  .hide-scrollbar {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
+	/* === 滚动条隐藏 === */
+	.hide-scrollbar {
+		scrollbar-width: none;
+		-ms-overflow-style: none;
+	}
 
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
+	.hide-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
 }

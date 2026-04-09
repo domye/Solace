@@ -4,204 +4,219 @@
 
 /* === 骨架屏 Shimmer 效果 === */
 .skeleton {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(
-    90deg,
-    oklch(0.95 0.01 var(--hue)) 0%,
-    oklch(0.98 0.005 var(--hue)) 50%,
-    oklch(0.95 0.01 var(--hue)) 100%
-  );
+	position: relative;
+	overflow: hidden;
+	background: linear-gradient(
+		90deg,
+		oklch(0.95 0.01 var(--hue)) 0%,
+		oklch(0.98 0.005 var(--hue)) 50%,
+		oklch(0.95 0.01 var(--hue)) 100%
+	);
 }
 
 .dark .skeleton {
-  background: linear-gradient(
-    90deg,
-    oklch(0.28 0.02 var(--hue)) 0%,
-    oklch(0.35 0.03 var(--hue)) 50%,
-    oklch(0.28 0.02 var(--hue)) 100%
-  );
+	background: linear-gradient(
+		90deg,
+		oklch(0.28 0.02 var(--hue)) 0%,
+		oklch(0.35 0.03 var(--hue)) 50%,
+		oklch(0.28 0.02 var(--hue)) 100%
+	);
 }
 
 .skeleton::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    oklch(1 0 0 / 0.4) 50%,
-    transparent 100%
-  );
-  animation: shimmer 1.5s ease-in-out infinite;
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		oklch(1 0 0 / 0.4) 50%,
+		transparent 100%
+	);
+	animation: shimmer 1.5s ease-in-out infinite;
 }
 
 .dark .skeleton::after {
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    oklch(1 0 0 / 0.15) 50%,
-    transparent 100%
-  );
+	background: linear-gradient(
+		90deg,
+		transparent 0%,
+		oklch(1 0 0 / 0.15) 50%,
+		transparent 100%
+	);
 }
 
 @keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
 }
 
 /* === 页面/内容出现动画 (Fuwari 丝滑缓动) === */
 .onload-animation {
-  opacity: 0;
-  animation: slideUpFade 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+	opacity: 0;
+	animation: slideUpFade 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 /* 添加延迟类支持 staggered 动画 */
-.delay-100 { animation-delay: 100ms; }
-.delay-200 { animation-delay: 200ms; }
-.delay-300 { animation-delay: 300ms; }
-.delay-400 { animation-delay: 400ms; }
-.delay-500 { animation-delay: 500ms; }
+.delay-100 {
+	animation-delay: 100ms;
+}
+.delay-200 {
+	animation-delay: 200ms;
+}
+.delay-300 {
+	animation-delay: 300ms;
+}
+.delay-400 {
+	animation-delay: 400ms;
+}
+.delay-500 {
+	animation-delay: 500ms;
+}
 
 .content-appear {
-  opacity: 0;
-  animation: slideUpFade 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+	opacity: 0;
+	animation: slideUpFade 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 @keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* === 淡入上移 (弹窗/下拉) === */
 .fade-in-up {
-  opacity: 0;
-  animation: fadeInUp 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+	opacity: 0;
+	animation: fadeInUp 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* === 淡入下移 (Toast/通知) === */
 .fade-in-down {
-  opacity: 0;
-  animation: fadeInDown 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+	opacity: 0;
+	animation: fadeInDown 0.3s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
 
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 
 /* === 缩放淡入 (模态框) === */
 .scale-fade-in {
-  opacity: 0;
-  animation: scaleFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+	opacity: 0;
+	animation: scaleFadeIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 @keyframes scaleFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+	from {
+		opacity: 0;
+		transform: scale(0.92);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
 }
 
 /* === 卡片悬浮效果 (Fuwari 风格) === */
 /* 仅桌面端生效，移动端无悬浮效果 */
 @media (min-width: 768px) {
-  .card-hover {
-    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
-                box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  }
+	.card-hover {
+		transition:
+			transform 0.3s cubic-bezier(0.23, 1, 0.32, 1),
+			box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+	}
 
-  .card-hover:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 12px 28px -6px oklch(0.5 0.1 var(--hue) / 0.15);
-  }
+	.card-hover:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 12px 28px -6px oklch(0.5 0.1 var(--hue) / 0.15);
+	}
 
-  .dark .card-hover:hover {
-    box-shadow: 0 12px 28px -6px oklch(0 0 0 / 0.4);
-  }
+	.dark .card-hover:hover {
+		box-shadow: 0 12px 28px -6px oklch(0 0 0 / 0.4);
+	}
 
-  .card-hover:active {
-    transform: translateY(-1px) scale(0.99);
-  }
+	.card-hover:active {
+		transform: translateY(-1px) scale(0.99);
+	}
 
-  /* 桌面端卡片悬浮叠加层 */
-  .card-hover-overlay {
-    transition: box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-  }
+	/* 桌面端卡片悬浮叠加层 */
+	.card-hover-overlay {
+		transition: box-shadow 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+	}
 
-  article:hover .card-hover-overlay {
-    box-shadow: 0 12px 28px -6px oklch(0.5 0.1 var(--hue) / 0.15);
-  }
+	article:hover .card-hover-overlay {
+		box-shadow: 0 12px 28px -6px oklch(0.5 0.1 var(--hue) / 0.15);
+	}
 
-  .dark article:hover .card-hover-overlay {
-    box-shadow: 0 12px 28px -6px oklch(0 0 0 / 0.4);
-  }
+	.dark article:hover .card-hover-overlay {
+		box-shadow: 0 12px 28px -6px oklch(0 0 0 / 0.4);
+	}
 }
 
 /* === 缩放动画 (按钮按压) === */
 .scale-animation {
-  @apply transition-transform duration-200;
-  transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+	@apply transition-transform duration-200;
+	transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .scale-animation:active {
-  transform: scale(0.95);
+	transform: scale(0.95);
 }
 
 /* === 图像悬浮放大 === */
 .img-hover-scale {
-  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+	transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
 }
 .img-hover-scale:hover {
-  transform: scale(1.05);
+	transform: scale(1.05);
 }
 
 /* === 加载旋转指示器 === */
 .spinner {
-  animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+	animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* === 过渡工具类 === */
 .transition-smooth {
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+	transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .transition-bounce {
-  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+	transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }

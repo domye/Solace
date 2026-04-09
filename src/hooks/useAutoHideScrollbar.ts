@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 /**
  * 自动隐藏滚动条 Hook
@@ -9,38 +9,38 @@ import { useEffect, useState } from 'react';
  * @param hideDelay - 隐藏延迟时间（毫秒），默认 5000ms
  */
 export function useAutoHideScrollbar(hideDelay: number = 5000) {
-  const [isScrolling, setIsScrolling] = useState(false);
+	const [isScrolling, setIsScrolling] = useState(false);
 
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
+	useEffect(() => {
+		let timeoutId: ReturnType<typeof setTimeout>;
 
-    const handleScroll = () => {
-      // 显示滚动条
-      setIsScrolling(true);
-      document.documentElement.classList.add('scrolling');
+		const handleScroll = () => {
+			// 显示滚动条
+			setIsScrolling(true);
+			document.documentElement.classList.add("scrolling");
 
-      // 清除之前的定时器
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+			// 清除之前的定时器
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
 
-      // 设置新的隐藏定时器
-      timeoutId = setTimeout(() => {
-        setIsScrolling(false);
-        document.documentElement.classList.remove('scrolling');
-      }, hideDelay);
-    };
+			// 设置新的隐藏定时器
+			timeoutId = setTimeout(() => {
+				setIsScrolling(false);
+				document.documentElement.classList.remove("scrolling");
+			}, hideDelay);
+		};
 
-    // 监听滚动
-    window.addEventListener('scroll', handleScroll, { passive: true });
+		// 监听滚动
+		window.addEventListener("scroll", handleScroll, { passive: true });
 
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-    };
-  }, [hideDelay]);
+		return () => {
+			window.removeEventListener("scroll", handleScroll);
+			if (timeoutId) {
+				clearTimeout(timeoutId);
+			}
+		};
+	}, [hideDelay]);
 
-  return isScrolling;
+	return isScrolling;
 }
