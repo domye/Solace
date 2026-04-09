@@ -25,7 +25,7 @@ import {
   AdminTagsPage,
 } from '@/pages';
 import { useAuthStore, useThemeStore } from '@/stores';
-import { useCurrentUser } from '@/hooks';
+import { useCurrentUser, useAutoHideScrollbar } from '@/hooks';
 import { useEffect } from 'react';
 
 /** 受保护路由 - 未登录时跳转到登录页 */
@@ -68,6 +68,12 @@ function UserInitializer() {
   return null;
 }
 
+/** 滚动条控制器 - 滚动时显示，闲置后隐藏 */
+function ScrollbarController() {
+  useAutoHideScrollbar(5000); // 5秒后隐藏
+  return null;
+}
+
 /** React Query 客户端配置 */
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -84,6 +90,7 @@ function App() {
       <BrowserRouter>
         <ThemeInitializer />
         <UserInitializer />
+        <ScrollbarController />
         <Routes>
           {/* 公开路由 - 主布局 */}
           <Route element={<MainLayout />}>

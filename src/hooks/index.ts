@@ -14,3 +14,4 @@ export * from './useTocScroll';
 export * from './useActiveIndicator';
 export * from './useClickOutside';
 export * from './useEscapeKey';
+export * from './useAutoHideScrollbar';

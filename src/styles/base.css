@@ -5,6 +5,61 @@
 @tailwind base;
 
 @layer base {
+	/* 强制保留滚动条空间，防止页面切换时左右偏移 */
+	html {
+		overflow-y: scroll;
+	}
+
+	/* 默认透明滚动条 - 浅色模式 */
+	html {
+		scrollbar-width: thin;
+		scrollbar-color: transparent transparent;
+	}
+
+	html::-webkit-scrollbar {
+		width: 6px;
+	}
+
+	html::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	html::-webkit-scrollbar-thumb {
+		background: transparent;
+		border-radius: 6px;
+	}
+
+	/* 滚动时显示滚动条 - 浅色模式 */
+	html.scrolling {
+		scrollbar-color: oklch(0.50 0.08 var(--hue) / 0.5) transparent;
+	}
+
+	html.scrolling::-webkit-scrollbar-thumb {
+		background: oklch(0.50 0.08 var(--hue) / 0.5);
+		transition: background-color 0.3s ease;
+	}
+
+	html.scrolling::-webkit-scrollbar-thumb:hover {
+		background: oklch(0.50 0.12 var(--hue) / 0.8);
+	}
+
+	/* 深色模式滚动条 */
+	html.dark {
+		scrollbar-color: transparent transparent;
+	}
+
+	html.dark.scrolling {
+		scrollbar-color: oklch(0.70 0.10 var(--hue) / 0.6) transparent;
+	}
+
+	html.dark.scrolling::-webkit-scrollbar-thumb {
+		background: oklch(0.70 0.10 var(--hue) / 0.6);
+	}
+
+	html.dark.scrolling::-webkit-scrollbar-thumb:hover {
+		background: oklch(0.75 0.12 var(--hue) / 0.9);
+	}
+
 	body {
 		font-family:
 			"MaokenZhuyuanTi",
