@@ -217,16 +217,70 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
     setCurrentMonth(today.getMonth());
   };
 
+  // 骨架屏日历格子（模拟真实日历结构）
+  const renderSkeletonCalendar = () => {
+    // 模拟当前月份的周数（通常 4-6 周）
+    const weeksCount = 5;
+    const totalCells = weeksCount * 7;
+
+    return (
+      <>
+        {/* 标题栏骨架 */}
+        <div className="flex justify-between items-center mb-2 mt-2 px-4">
+          <div className="font-bold text-base text-90 relative ml-4 flex items-center before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)] before:absolute before:-left-4 before:top-[5.5px]">
+            <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          </div>
+          <div className="flex items-center gap-1 shrink-0 ml-2">
+            <div className="p-1.5 rounded-md">
+              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+            <div className="p-1.5 rounded-md">
+              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+            <div className="p-1.5 rounded-md">
+              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            </div>
+          </div>
+        </div>
+
+        {/* 日历网格 */}
+        <div className="px-4">
+          {/* 星期标签骨架 */}
+          <div className="grid grid-cols-7 gap-1 mb-1">
+            {WEEK_DAYS.map((day) => (
+              <div key={day} className="text-center text-[10px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5">
+                {day}
+              </div>
+            ))}
+          </div>
+
+          {/* 日期格子骨架 */}
+          <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: totalCells }).map((_, idx) => (
+              <div
+                key={idx}
+                className="aspect-square flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800"
+              >
+                <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 底部统计骨架 */}
+        <div className="px-4 mt-2 flex items-center justify-between">
+          <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+      </>
+    );
+  };
+
   // Owner 加载中
   if (ownerLoading) {
     return (
       <div className={`card-base pb-4 ${className || ''}`} style={style}>
-        <div className="font-bold text-base text-90 relative ml-8 mt-4 mb-2 before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)] before:absolute before:-left-4 before:top-[5.5px]">
-          贡献
-        </div>
-        <div className="px-4 py-2">
-          <div className="h-[15rem] bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        </div>
+        {renderSkeletonCalendar()}
       </div>
     );
   }
@@ -238,12 +292,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
   if (isLoading) {
     return (
       <div className={`card-base pb-4 ${className || ''}`} style={style}>
-        <div className="font-bold text-base text-90 relative ml-8 mt-4 mb-2 before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)] before:absolute before:-left-4 before:top-[5.5px]">
-          贡献
-        </div>
-        <div className="px-4 py-2">
-          <div className="h-[15rem] bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        </div>
+        {renderSkeletonCalendar()}
       </div>
     );
   }
