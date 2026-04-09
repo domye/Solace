@@ -58,15 +58,12 @@ function LeftSidebar({ isArticlePage, headings, isLoading }: LeftSidebarProps) {
 
       {/* 吸顶组件区域 */}
       <div className="sticky top-4 flex flex-col w-full gap-4">
-        {/* 文章详情页显示 TOC，否则显示 Tags */}
-        {isArticlePage ? (
-          isLoading && headings.length === 0 ? (
-            <SidebarSkeleton />
-          ) : headings.length > 0 ? (
-            <TableOfContents headings={headings} />
-          ) : null
-        ) : (
-          <Tags className="onload-animation" style={{ animationDelay: '150ms' }} />
+        {/* Tags 始终显示 */}
+        <Tags className="onload-animation" style={{ animationDelay: '150ms' }} />
+
+        {/* 文章详情页显示 TOC（只在有标题时显示） */}
+        {isArticlePage && headings.length > 0 && (
+          <TableOfContents headings={headings} />
         )}
       </div>
     </aside>

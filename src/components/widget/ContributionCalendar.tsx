@@ -171,22 +171,22 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
   const getCellBg = useMemo(() => {
     return (cell: CalendarCell): string => {
       if (cell.count > 0) {
-        // 有贡献的格子，根据 level 显示不同深度的主题色（更淡）
+        // 有贡献的格子，根据 level 显示不同深度的主题色
         if (isDark) {
-          // 深色模式：level 越高越亮，但饱和度保持较低
-          const lightness = 0.30 + cell.level * 0.06;
-          const chroma = 0.025 + cell.level * 0.01;
+          // 深色模式：level 越高越亮
+          const lightness = 0.35 + cell.level * 0.08;
+          const chroma = 0.03 + cell.level * 0.015;
           return `oklch(${lightness} ${chroma} ${hue})`;
         } else {
           // 浅色模式：level 越高越深，但保持淡雅
-          const lightness = 0.94 - cell.level * 0.05;
-          const chroma = 0.02 + cell.level * 0.008;
+          const lightness = 0.92 - cell.level * 0.06;
+          const chroma = 0.025 + cell.level * 0.01;
           return `oklch(${lightness} ${chroma} ${hue})`;
         }
       }
 
       // 无贡献的格子
-      return isDark ? 'oklch(0.22 0.005 ' + hue + ')' : 'oklch(0.97 0.005 ' + hue + ')';
+      return isDark ? 'oklch(0.25 0.008 ' + hue + ')' : 'oklch(0.96 0.008 ' + hue + ')';
     };
   }, [isDark, hue]);
 
