@@ -40,7 +40,7 @@ export function Categories({ className, style }: CategoriesProps) {
           >
             <span className="truncate">{cat.name}</span>
             {cat.article_count !== undefined && (
-              <span className="px-2 h-7 ml-4 min-w-[2rem] rounded-lg text-sm font-bold
+              <span className="flex items-center justify-center px-2 h-7 ml-4 min-w-[2rem] rounded-lg text-sm font-bold
                 text-[var(--btn-content)] bg-[var(--btn-regular-bg)]
                 group-hover:bg-[var(--primary)] group-hover:text-white transition">
                 {cat.article_count}
