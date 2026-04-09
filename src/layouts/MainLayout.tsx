@@ -1,24 +1,28 @@
 /**
  * 主布局组件
  *
- * 结构：
- * ┌─────────────────────────────────────┐
- * │            Navbar                   │
- * ├─────────┬───────────────┬───────────┤
- * │ SideBar │   MainContent │   TOC     │
- * │         │   (Outlet)    │ (optional)│
- * └─────────┴───────────────┴───────────┤
- * │              Footer                 │
- * └─────────────────────────────────────┘
+ * 三栏布局结构（参考 Mizuki 主题）：
+ * ┌─────────────────────────────────────────────────────────┐
+ * │                       Navbar                            │
+ * ├─────────────┬─────────────────────┬─────────────────────┤
+ * │  LeftSide   │     MainContent     │     RightSide       │
+ * │  Profile    │      (Outlet)       │    Categories       │
+ * │  TOC        │                     │       Tags          │
+ * │ (文章详情页) │                     │                     │
+ * └─────────────┴─────────────────────┴─────────────────────┤
+ * │                       Footer                            │
+ * └─────────────────────────────────────────────────────────┘
  *
- * 文章详情页：Profile + TOC（有标题时）或 Profile + 分类/标签
- * 其他页面：Profile + 分类 + 标签
+ * 响应式：
+ * - 移动端：单栏（主内容）
+ * - 平板：双栏（左侧边栏 + 主内容）
+ * - 桌面：三栏（左侧边栏 + 主内容 + 右侧边栏）
  */
 
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar, Footer } from '@/components/common';
 import { TableOfContents } from '@/components/widget';
-import { Profile, Categories, Tags } from '@/components/widget';
+import { Profile, Categories, Tags, ContributionCalendar } from '@/components/widget';
 import { useTocStore } from '@/stores';
 import { useMemo } from 'react';
 
@@ -37,6 +41,50 @@ function SidebarSkeleton() {
   );
 }
 
+/** 左侧边栏组件 */
+interface LeftSidebarProps {
+  isArticlePage: boolean;
+  headings: { id: string; text: string; depth: number }[];
+  isLoading: boolean;
+}
+
+function LeftSidebar({ isArticlePage, headings, isLoading }: LeftSidebarProps) {
+  return (
+    <aside className="hidden lg:block w-64 flex-shrink-0">
+      {/* 顶部组件区域 - Profile 始终显示 */}
+      <div className="flex flex-col w-full gap-4 mb-4">
+        <Profile />
+      </div>
+
+      {/* 吸顶组件区域 */}
+      <div className="sticky top-4 flex flex-col w-full gap-4">
+        {/* 文章详情页显示 TOC，否则显示 Tags */}
+        {isArticlePage ? (
+          isLoading && headings.length === 0 ? (
+            <SidebarSkeleton />
+          ) : headings.length > 0 ? (
+            <TableOfContents headings={headings} />
+          ) : null
+        ) : (
+          <Tags className="onload-animation" style={{ animationDelay: '150ms' }} />
+        )}
+      </div>
+    </aside>
+  );
+}
+
+/** 右侧边栏组件 - 显示分类 */
+function RightSidebar() {
+  return (
+    <aside className="hidden xl:block w-64 flex-shrink-0">
+      <div className="sticky top-4 flex flex-col w-full gap-4">
+        <ContributionCalendar className="onload-animation" style={{ animationDelay: '100ms' }} />
+        <Categories className="onload-animation" style={{ animationDelay: '150ms' }} />
+      </div>
+    </aside>
+  );
+}
+
 export function MainLayout() {
   const { headings, isArticleLoading } = useTocStore();
   const location = useLocation();
@@ -46,57 +94,29 @@ export function MainLayout() {
     return /^\/articles\//.test(location.pathname);
   }, [location.pathname]);
 
-  // 文章详情页：加载中显示骨架屏，加载完成后根据 headings 决定显示内容
-  // 其他页面：始终显示分类和标签
-  const showToc = isArticlePage && headings.length > 0;
-  const showSidebarLoading = isArticlePage && isArticleLoading && headings.length === 0;
-
   return (
     <div className="min-h-screen flex flex-col">
       {/* 顶部导航栏 */}
       <Navbar />
 
-      {/* 主内容区域 */}
-      <div className="flex-1 max-w-[var(--page-width)] mx-auto w-full px-6 md:px-8 py-4 relative">
-        <div className="grid grid-cols-1 lg:grid-cols-[17.5rem_1fr] gap-4">
-          {/* 左侧边栏 - 仅桌面端显示 */}
-          <aside className="hidden lg:block">
-            {/* 个人信息（始终显示） */}
-            <div className="flex flex-col w-full gap-4 mb-4">
-              <Profile />
-            </div>
-
-            {/* 文章详情页：骨架屏 / TOC / 分类标签 */}
-            {showSidebarLoading ? (
-              <div className="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
-                <SidebarSkeleton />
-              </div>
-            ) : showToc ? (
-              <div className="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
-                <TableOfContents headings={headings} />
-              </div>
-            ) : (
-              <div className="transition-all duration-700 flex flex-col w-full gap-4 top-4 sticky top-4">
-                <Categories className="onload-animation" style={{ animationDelay: '150ms' }} />
-                <Tags className="onload-animation" style={{ animationDelay: '200ms' }} />
-              </div>
-            )}
-          </aside>
+      {/* 主内容区域 - 三栏布局 */}
+      <div className="flex-1 max-w-[var(--page-width)] mx-auto w-full px-6 md:px-8 py-4">
+        <div className="flex gap-4 justify-center">
+          {/* 左侧边栏 - Profile + TOC */}
+          <LeftSidebar
+            isArticlePage={isArticlePage}
+            headings={headings}
+            isLoading={isArticleLoading}
+          />
 
           {/* 主内容区 */}
-          <main className="min-w-0 flex flex-col gap-4">
+          <main className="min-w-0 flex-1 max-w-[50rem] flex flex-col gap-4">
             <Outlet />
           </main>
-        </div>
 
-        {/* 右侧目录 - 仅超宽屏且非文章页显示 */}
-        {!isArticlePage && headings.length > 0 && (
-          <div className="hidden 2xl:block absolute top-0 -right-[var(--toc-width)] w-[var(--toc-width)] h-full">
-            <div className="sticky top-20">
-              <TableOfContents headings={headings} />
-            </div>
-          </div>
-        )}
+          {/* 右侧边栏 - 分类 + 标签（所有页面都显示） */}
+          <RightSidebar />
+        </div>
       </div>
 
       {/* 底部页脚 */}

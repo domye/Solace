@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useArticles } from '@/hooks';
 import { PostCardList, PostCardSkeletonList, Pagination, EmptyState, InlineLoader } from '@/components';
+import { CategoryBar } from '@/components/widget';
 import { toPostCardArticle } from '@/utils/article';
 
 export function HomePage() {
@@ -37,6 +38,8 @@ export function HomePage() {
   return (
     <>
       {isFetching && !isLoading && <InlineLoader />}
+      {/* 分类导航栏 */}
+      <CategoryBar />
       {/* 文章列表 */}
       <PostCardList articles={articles.map(toPostCardArticle)} />
       {/* 分页 - 在容器外 */}

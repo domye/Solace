@@ -8,6 +8,8 @@ export { ThemeToggle } from "../common/ThemeToggle";
 export { HuePicker } from "./HuePicker";
 export { Profile } from "./Profile";
 export { Categories } from "./Categories";
+export { CategoryBar } from "./CategoryBar";
 export { Tags } from "./Tags";
 export { SearchModal } from "./SearchModal";
 export { TableOfContents, type TocHeading } from "./TableOfContents";
+export { ContributionCalendar } from "./ContributionCalendar";

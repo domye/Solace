@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useArchive } from '@/hooks';
 import { ErrorDisplay, InlineLoader, EmptyState } from '@/components';
+import { CategoryBar } from '@/components/widget';
 import { formatShortDate, formatTags } from '@/utils';
 
 export function ArchivePage() {
@@ -13,14 +14,12 @@ export function ArchivePage() {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        {/* Header Skeleton */}
-        <div className="card-base p-6 animate-pulse">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
-            <div className="flex-1">
-              <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-2"></div>
-              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
-            </div>
+        {/* CategoryBar Skeleton */}
+        <div className="card-base p-3 animate-pulse">
+          <div className="flex gap-2">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-7 w-16 bg-[var(--btn-regular-bg)] rounded-lg" />
+            ))}
           </div>
         </div>
         {/* Timeline Skeleton */}
@@ -41,27 +40,15 @@ export function ArchivePage() {
     );
   }
 
-  const totalArticles = groups?.reduce((sum, g) => sum + g.count, 0) ?? 0;
-
   return (
     <div className="space-y-4">
       {isFetching && !isLoading && <InlineLoader />}
 
-      {/* Header */}
-      <div className="card-base p-6 onload-animation">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--klein-blue)] to-[var(--sky-blue)] flex items-center justify-center">
-            <span className="text-xl text-white font-bold">归档</span>
-          </div>
-          <div>
-            <h1 className="text-90 text-xl font-bold">归档</h1>
-            <p className="text-50 text-sm">{totalArticles} 篇文章</p>
-          </div>
-        </div>
-      </div>
+      {/* 分类导航栏 */}
+      <CategoryBar />
 
       {/* Timeline */}
-      <div className="card-base px-8 py-6 onload-animation" style={{ animationDelay: '50ms' }}>
+      <div className="card-base px-8 py-6 onload-animation">
         {groups && groups.length > 0 ? (
           groups.map((group) => (
             <div key={group.year}>

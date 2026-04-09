@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
-import { useCategoryBySlug, useArticles } from '@/hooks';
+import { useArticles } from '@/hooks';
 import { PostCardList, PostCardSkeletonList, Pagination, EmptyState, InlineLoader, NotFoundDisplay } from '@/components';
+import { CategoryBar } from '@/components/widget';
 import { useState } from 'react';
 import { toPostCardArticle } from '@/utils/article';
 
@@ -9,7 +10,6 @@ export function CategoryPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const { data: category } = useCategoryBySlug(slug || '');
   const { data: articlesData, isLoading, isFetching } = useArticles({
     page,
     pageSize,
@@ -22,16 +22,8 @@ export function CategoryPage() {
 
   return (
     <div className="flex flex-col gap-3 md:gap-4">
-      {/* Category Header */}
-      {category && (
-        <div className="card-base p-6 onload-animation">
-          <h1 className="text-2xl font-bold text-90 mb-2">{category.name}</h1>
-          {category.description && <p className="text-50">{category.description}</p>}
-          {category.article_count !== undefined && (
-            <p className="text-30 text-sm mt-2">{category.article_count} articles</p>
-          )}
-        </div>
-      )}
+      {/* 分类导航栏 */}
+      <CategoryBar />
 
       {/* Articles List */}
       {isLoading ? (

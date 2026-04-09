@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
-import { useTagBySlug, useArticles } from '@/hooks';
+import { useArticles } from '@/hooks';
 import { PostCardList, PostCardSkeletonList, Pagination, EmptyState, InlineLoader, NotFoundDisplay } from '@/components';
+import { CategoryBar } from '@/components/widget';
 import { useState } from 'react';
 import { toPostCardArticle } from '@/utils/article';
 
@@ -9,7 +10,6 @@ export function TagPage() {
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
-  const { data: tag } = useTagBySlug(slug || '');
   const { data: articlesData, isLoading, isFetching } = useArticles({
     page,
     pageSize,
@@ -22,15 +22,8 @@ export function TagPage() {
 
   return (
     <div className="flex flex-col gap-3 md:gap-4">
-      {/* Tag Header */}
-      {tag && (
-        <div className="card-base p-6 onload-animation">
-          <h1 className="text-2xl font-bold text-90 mb-2">#{tag.name}</h1>
-          {tag.article_count !== undefined && (
-            <p className="text-30 text-sm">{tag.article_count} articles</p>
-          )}
-        </div>
-      )}
+      {/* 分类导航栏 */}
+      <CategoryBar />
 
       {/* Articles List */}
       {isLoading ? (

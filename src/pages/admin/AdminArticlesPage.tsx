@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { useArticles, useDeleteArticle } from '@/hooks';
 import {
   Pagination,
-  PageHeader,
   AdminListSkeleton,
   ErrorDisplay,
   EmptyState,
@@ -52,15 +51,8 @@ export function AdminArticlesPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader
-        title="文章管理"
-        count={total}
-        icon="material-symbols:article-outline-rounded"
-        action={{ label: '新建', href: '/admin/articles/new' }}
-      />
-
-      {/* 状态筛选 */}
-      <div className="card-base p-4 fade-in-up" style={{ animationDelay: '0.05s' }}>
+      {/* 状态筛选和新建按钮 */}
+      <div className="card-base p-4 fade-in-up flex items-center justify-between">
         <div className="flex gap-2">
           {(['all', 'published', 'draft'] as const).map((status) => (
             <button
@@ -76,6 +68,12 @@ export function AdminArticlesPage() {
             </button>
           ))}
         </div>
+        <Link
+          to="/admin/articles/new"
+          className="rounded-[var(--radius-medium)] py-2 px-4 text-sm font-medium transition-all scale-animation ripple bg-gradient-to-r from-[var(--klein-blue)] to-[var(--klein-blue-light)] text-white hover:opacity-90"
+        >
+          新建
+        </Link>
       </div>
 
       {/* 文章列表 */}

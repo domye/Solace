@@ -9,7 +9,8 @@
   --radius-large: 1.25rem; /* 增大圆角，更符合 Fuwari 风格 */
   --radius-medium: 0.75rem;
   --radius-small: 0.5rem;
-  --page-width: 1200px;
+  --page-width: 1400px; /* 三栏布局需要更宽的页面宽度 */
+  --sidebar-width: 17.5rem; /* 侧边栏宽度 */
   --content-delay: 50ms;
 
   /* === 主色 === */

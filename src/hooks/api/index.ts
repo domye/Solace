@@ -42,3 +42,7 @@ export { useOwner } from './owner';
 
 // 认证相关
 export { useLogin, useLogout } from './auth';
+
+// GitHub 贡献日历
+export { useGitHubContributions, extractGitHubUsername } from './github';
+export type { ContributionDay } from './github';

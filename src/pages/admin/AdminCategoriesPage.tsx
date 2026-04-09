@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from '@/hooks';
 import {
-  PageHeader,
   AdminListSkeleton,
   ErrorDisplay,
   EmptyState,
@@ -94,12 +93,15 @@ export function AdminCategoriesPage() {
 
   return (
     <div className="space-y-4">
-      <PageHeader
-        title="分类管理"
-        count={categories?.length ?? 0}
-        icon="material-symbols:category-outline-rounded"
-        action={{ label: '新建', onClick: () => setShowForm(true) }}
-      />
+      {/* 新建按钮 */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => setShowForm(true)}
+          className="rounded-[var(--radius-medium)] py-2 px-4 text-sm font-medium transition-all scale-animation ripple bg-gradient-to-r from-[var(--klein-blue)] to-[var(--klein-blue-light)] text-white hover:opacity-90"
+        >
+          新建分类
+        </button>
+      </div>
 
       {/* 表单 */}
       {showForm && (
