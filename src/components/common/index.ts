@@ -3,7 +3,8 @@
  */
 
 export { Navbar } from "./Navbar";
-export { PostCard, PostMeta } from "./PostCard";
+export { PostCard } from "./PostCard";
+export { PostMeta } from "./PostMeta";
 export { PostCardSkeleton, PostCardSkeletonList } from "./PostCardSkeleton";
 export { PostCardList } from "./PostCardList";
 export { ArticleDetailSkeleton } from "./ArticleDetailSkeleton";

@@ -12,3 +12,5 @@ export * from './useAuth';
 export * from './useDarkMode';
 export * from './useTocScroll';
 export * from './useActiveIndicator';
+export * from './useClickOutside';
+export * from './useEscapeKey';

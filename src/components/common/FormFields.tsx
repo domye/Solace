@@ -4,6 +4,27 @@
  * 包含带加载状态的按钮、输入框、文本域
  */
 
+/** 表单字段包装器 - 统一 label 和 error 展示 */
+interface FormFieldWrapperProps {
+  label: string;
+  required?: boolean;
+  error?: string;
+  children: React.ReactNode;
+}
+
+function FormFieldWrapper({ label, required, error, children }: FormFieldWrapperProps) {
+  return (
+    <div className="mb-4">
+      <label className="block text-75 text-sm font-medium mb-2">
+        {label}
+        {required && <span className="text-[var(--primary)] ml-1">*</span>}
+      </label>
+      {children}
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
+  );
+}
+
 /** 带加载状态的按钮 */
 interface LoadingButtonProps {
   loading: boolean;
@@ -61,11 +82,7 @@ export function InputField({
   required,
 }: InputFieldProps) {
   return (
-    <div className="mb-4">
-      <label className="block text-75 text-sm font-medium mb-2">
-        {label}
-        {required && <span className="text-[var(--primary)] ml-1">*</span>}
-      </label>
+    <FormFieldWrapper label={label} required={required} error={error}>
       <input
         type={type}
         value={value}
@@ -73,10 +90,7 @@ export function InputField({
         placeholder={placeholder}
         className={`input-base ${error ? 'border-red-500 focus:border-red-500' : ''}`}
       />
-      {error && (
-        <p className="text-red-500 text-sm mt-1">{error}</p>
-      )}
-    </div>
+    </FormFieldWrapper>
   );
 }
 
@@ -101,11 +115,7 @@ export function TextAreaField({
   required,
 }: TextAreaFieldProps) {
   return (
-    <div className="mb-4">
-      <label className="block text-75 text-sm font-medium mb-2">
-        {label}
-        {required && <span className="text-[var(--primary)] ml-1">*</span>}
-      </label>
+    <FormFieldWrapper label={label} required={required} error={error}>
       <textarea
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -113,7 +123,6 @@ export function TextAreaField({
         rows={rows}
         className={`input-base resize-none ${error ? 'border-red-500 focus:border-red-500' : ''}`}
       />
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-    </div>
+    </FormFieldWrapper>
   );
 }

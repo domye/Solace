@@ -10,6 +10,7 @@ import { Icon } from '@iconify/react';
 import { Link } from 'react-router-dom';
 import { formatDate } from '@/utils/date';
 import { LazyImage } from './LazyImage';
+import { PostMeta } from './PostMeta';
 import type { PostCardArticle } from '@/types';
 
 /** 桌面端封面图宽度百分比 */
@@ -233,68 +234,6 @@ function ViewCount({ count }: { count: number }) {
   return (
     <div className="text-sm text-30 flex gap-4 transition-smooth">
       <span>{count} 次浏览</span>
-    </div>
-  );
-}
-
-/** 文章元信息（日期、作者、状态） */
-interface PostMetaProps {
-  article: PostCardArticle;
-  hideUpdateDate?: boolean;
-}
-
-export function PostMeta({ article, hideUpdateDate }: PostMetaProps) {
-  const showUpdate = !hideUpdateDate && article.updated_at !== article.created_at;
-
-  return (
-    <div className="flex flex-wrap text-50 items-center gap-4 gap-x-4 gap-y-2 mb-4">
-      <MetaItem
-        icon="material-symbols:calendar-today-outline-rounded"
-        text={formatDate(article.published_at || article.created_at)}
-      />
-      {showUpdate && (
-        <MetaItem
-          icon="material-symbols:edit-calendar-outline-rounded"
-          text={formatDate(article.updated_at)}
-        />
-      )}
-      {article.author && (
-        <MetaItem
-          icon="material-symbols:person-outline-rounded"
-          text={article.author.nickname || article.author.username}
-        />
-      )}
-      {article.status === 'draft' && (
-        <MetaItem
-          icon="material-symbols:edit-note-rounded"
-          text="草稿"
-          variant="warning"
-        />
-      )}
-    </div>
-  );
-}
-
-/** 元信息项 */
-function MetaItem({
-  icon,
-  text,
-  variant = 'default',
-}: {
-  icon: string;
-  text: string;
-  variant?: 'default' | 'warning';
-}) {
-  const iconClass = variant === 'warning'
-    ? 'meta-icon bg-amber-500/20 text-amber-600'
-    : 'meta-icon transition-smooth';
-
-  return (
-    <div className="flex items-center transition-smooth hover:text-[var(--primary)]">
-      <div className={iconClass}>
-        <Icon icon={icon} className="text-xl" />
-      </div>
-      <span className="text-50 text-sm font-medium">{text}</span>
     </div>
   );
 }

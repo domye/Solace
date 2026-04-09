@@ -16,10 +16,11 @@
 import { Icon } from '@iconify/react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores';
+import { useClickOutside } from '@/hooks';
 import { ThemeToggle } from './ThemeToggle';
 import { SearchModal } from '../widget/SearchModal';
 import { HuePicker } from '../widget/HuePicker';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 
 /** 导航链接配置 */
 const navLinks = [
@@ -75,15 +76,7 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   // 点击外部关闭菜单
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  useClickOutside(menuRef, () => setIsOpen(false), isOpen);
 
   return (
     <div ref={menuRef} className="relative">

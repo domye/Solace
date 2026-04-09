@@ -7,7 +7,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Icon } from '@iconify/react';
 import { useNavigate } from 'react-router-dom';
-import { useSearch } from '@/hooks';
+import { useSearch, useEscapeKey } from '@/hooks';
 import { useDebouncedCallback } from 'use-debounce';
 
 interface SearchModalProps {
@@ -39,31 +39,18 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setDebouncedQuery('');
   }, [navigate, onClose]);
 
+  // Escape 键关闭
+  useEscapeKey(onClose, isOpen);
+
+  // 打开时禁止背景滚动
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
     if (isOpen) {
-      document.addEventListener('keydown', handleEsc);
       document.body.style.overflow = 'hidden';
     }
     return () => {
-      document.removeEventListener('keydown', handleEsc);
       document.body.style.overflow = '';
     };
-  }, [isOpen, onClose]);
-
-  // 键盘快捷键：Cmd/Ctrl + K
-  useEffect(() => {
-    const handleShortcut = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        // 切换搜索弹窗
-      }
-    };
-    document.addEventListener('keydown', handleShortcut);
-    return () => document.removeEventListener('keydown', handleShortcut);
-  }, []);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 

@@ -22,8 +22,12 @@ export function PostCardList({ articles, className = '' }: PostCardListProps) {
   const halfRowIndices = new Set<number>();
 
   for (let i = 0; i < articles.length; i++) {
+    const current = articles[i];
+    // TypeScript 在循环中不能自动推断边界，但循环条件保证 current 存在
+    if (!current) continue;
+
     // 跳过有封面的
-    if (articles[i].cover_image) continue;
+    if (current.cover_image) continue;
 
     // 检查下一个是否也无封面
     const next = articles[i + 1];
