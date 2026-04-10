@@ -285,7 +285,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
     );
   }
 
-  if (!githubUsername || !import.meta.env.VITE_GITHUB_TOKEN) {
+  if (!githubUsername) {
     return null;
   }
 

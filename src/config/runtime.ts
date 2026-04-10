@@ -11,7 +11,6 @@
 // 运行时配置类型
 interface RuntimeConfig {
 	API_BASE: string;
-	GITHUB_TOKEN: string;
 }
 
 // 扩展 Window 类型
@@ -33,18 +32,4 @@ export function getApiBase(): string {
 
 	// 构建时配置（Vite 注入）
 	return import.meta.env.VITE_API_BASE || "/api/v1";
-}
-
-/**
- * 获取 GitHub Token
- * 优先使用运行时配置，否则使用构建时配置
- */
-export function getGitHubToken(): string | undefined {
-	// 运行时配置（Docker 注入）
-	if (window.__RUNTIME_CONFIG__?.GITHUB_TOKEN) {
-		return window.__RUNTIME_CONFIG__.GITHUB_TOKEN;
-	}
-
-	// 构建时配置（Vite 注入）
-	return import.meta.env.VITE_GITHUB_TOKEN;
 }

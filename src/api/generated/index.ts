@@ -24,5 +24,6 @@ export type { request_UpdateTagRequest } from './models/request_UpdateTagRequest
 export { ArticleService } from './services/ArticleService';
 export { AuthService } from './services/AuthService';
 export { CategoryService } from './services/CategoryService';
+export { GithubService } from './services/GithubService';
 export { OwnerService } from './services/OwnerService';
 export { TagService } from './services/TagService';

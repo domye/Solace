@@ -4,10 +4,9 @@
 
 # 设置默认值
 VITE_API_BASE=${VITE_API_BASE:-/api/v1}
-VITE_GITHUB_TOKEN=${VITE_GITHUB_TOKEN:-}
 
 # 创建运行时配置脚本，插入到 index.html 的 head 中
-RUNTIME_CONFIG="<script>window.__RUNTIME_CONFIG__={API_BASE:\"${VITE_API_BASE}\",GITHUB_TOKEN:\"${VITE_GITHUB_TOKEN}\"};</script>"
+RUNTIME_CONFIG="<script>window.__RUNTIME_CONFIG__={API_BASE:\"${VITE_API_BASE}\"};</script>"
 
 # 在 </head> 前插入配置脚本
 sed -i "s|</head>|${RUNTIME_CONFIG}</head>|" /usr/share/nginx/html/index.html
