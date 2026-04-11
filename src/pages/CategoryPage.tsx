@@ -1,8 +1,7 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { useArticles } from '@/hooks';
 import { PostCardList, PostCardSkeletonList, Pagination, EmptyState, InlineLoader, NotFoundDisplay } from '@/components';
 import { CategoryBar } from '@/components/widget';
-import { useState } from 'react';
 import { toPostCardArticle } from '@/utils/article';
 
 export function CategoryPage() {
@@ -15,7 +14,8 @@ export function TagPage() {
 
 function ArticleListPage({ type }: { type: 'category' | 'tag' }) {
   const { slug } = useParams<{ slug: string }>();
-  const [page, setPage] = useState(1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get('page') || '1', 10);
   const pageSize = 10;
 
   const { data, isLoading, isFetching } = useArticles({
@@ -23,6 +23,10 @@ function ArticleListPage({ type }: { type: 'category' | 'tag' }) {
     pageSize,
     [type]: slug,
   });
+
+  const handlePageChange = (newPage: number) => {
+    setSearchParams({ page: String(newPage) });
+  };
 
   if (!slug) {
     return <NotFoundDisplay message={`${type === 'category' ? '分类' : '标签'}不存在` as '分类不存在' | '标签不存在'} />;
@@ -37,7 +41,7 @@ function ArticleListPage({ type }: { type: 'category' | 'tag' }) {
         <>
           {isFetching && !isLoading && <InlineLoader />}
           <PostCardList articles={data.data.map(toPostCardArticle)} />
-          {data.total > pageSize && <Pagination page={page} pageSize={pageSize} total={data.total} onPageChange={setPage} />}
+          {data.total > pageSize && <Pagination page={page} pageSize={pageSize} total={data.total} onPageChange={handlePageChange} />}
         </>
       ) : (
         <EmptyState message={`该${type === 'category' ? '分类' : '标签'}下暂无文章`} />

@@ -24,6 +24,7 @@ import { Navbar, Footer } from '@/components/common';
 import { TableOfContents } from '@/components/widget';
 import { Profile, Categories, Tags, ContributionCalendar } from '@/components/widget';
 import { useTocStore } from '@/stores';
+import { useMediaQuery } from '@/hooks';
 import { useMemo } from 'react';
 
 /** 左侧边栏组件 */
@@ -34,7 +35,7 @@ interface LeftSidebarProps {
 
 function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
   return (
-    <aside className="hidden lg:block w-64 flex-shrink-0">
+    <aside className="w-64 flex-shrink-0">
       {/* 顶部组件区域 - Profile 始终显示 */}
       <div className="flex flex-col w-full gap-4 mb-4">
         <Profile />
@@ -57,7 +58,7 @@ function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
 /** 右侧边栏组件 - 显示分类 */
 function RightSidebar() {
   return (
-    <aside className="hidden xl:block w-64 flex-shrink-0">
+    <aside className="w-64 flex-shrink-0">
       <div className="sticky top-4 flex flex-col w-full gap-4">
         <ContributionCalendar className="onload-animation" style={{ animationDelay: '100ms' }} />
         <Categories className="onload-animation" style={{ animationDelay: '150ms' }} />
@@ -69,6 +70,10 @@ function RightSidebar() {
 export function MainLayout() {
   const { headings } = useTocStore();
   const location = useLocation();
+
+  // 响应式断点检测
+  const isLgOrLarger = useMediaQuery('(min-width: 1024px)');
+  const isXlOrLarger = useMediaQuery('(min-width: 1280px)');
 
   // 判断是否为文章详情页
   const isArticlePage = useMemo(() => {
@@ -83,19 +88,21 @@ export function MainLayout() {
       {/* 主内容区域 - 三栏布局 */}
       <div className="flex-1 max-w-[var(--page-width)] mx-auto w-full px-4 py-4">
         <div className="flex gap-4">
-          {/* 左侧边栏 - Profile + TOC */}
-          <LeftSidebar
-            isArticlePage={isArticlePage}
-            headings={headings}
-          />
+          {/* 左侧边栏 - Profile + TOC（lg 以上显示） */}
+          {isLgOrLarger && (
+            <LeftSidebar
+              isArticlePage={isArticlePage}
+              headings={headings}
+            />
+          )}
 
           {/* 主内容区 */}
           <main className="min-w-0 flex-1 flex flex-col gap-4">
             <Outlet />
           </main>
 
-          {/* 右侧边栏 - 分类 + 标签（所有页面都显示） */}
-          <RightSidebar />
+          {/* 右侧边栏 - 分类 + 标签（xl 以上显示） */}
+          {isXlOrLarger && <RightSidebar />}
         </div>
       </div>
 
