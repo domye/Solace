@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"strings"
 	"time"
 
 	apperrors "gin-quickstart/internal/pkg/errors"
@@ -60,31 +61,37 @@ func (h *GitHubHandler) GetContributions(c *gin.Context) {
 }
 
 // extractGitHubUsername 从 GitHub URL 中提取用户名
+// 支持格式: https://github.com/username, github.com/username, http://github.com/username
 func extractGitHubUsername(url string) string {
 	if url == "" {
 		return ""
 	}
-	// 匹配 https://github.com/username 或 github.com/username
-	for i := 0; i < len(url); i++ {
-		if url[i] == '/' {
-			if i+1 < len(url) && url[i+1] == '/' {
-				// 找到 //
-				rest := url[i+2:]
-				// 跳过域名部分
-				for j := 0; j < len(rest); j++ {
-					if rest[j] == '/' {
-						username := rest[j+1:]
-						// 移除尾部斜杠或其他路径
-						for k := 0; k < len(username); k++ {
-							if username[k] == '/' || username[k] == '?' || username[k] == '#' {
-								return username[:k]
-							}
-						}
-						return username
-					}
-				}
+
+	// 移除协议前缀
+	url = strings.TrimPrefix(url, "https://")
+	url = strings.TrimPrefix(url, "http://")
+
+	// 检查是否为 github.com 域名
+	if !strings.HasPrefix(url, "github.com/") {
+		return ""
+	}
+
+	// 提取 github.com/ 后面的部分
+	path := url[len("github.com/"):]
+
+	// 找到第一个分隔符（/、?、#）的位置
+	for i, char := range path {
+		if char == '/' || char == '?' || char == '#' {
+			if i == 0 {
+				return "" // 用户名为空
 			}
+			return path[:i]
 		}
 	}
-	return ""
+
+	// 没有分隔符，返回整个路径作为用户名
+	if path == "" {
+		return ""
+	}
+	return path
 }

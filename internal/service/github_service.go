@@ -7,9 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"gin-quickstart/internal/config"
@@ -138,41 +136,47 @@ func (s *githubService) GetContributions(ctx context.Context, username string, f
 	// 转换数据格式（按年份分组）
 	yearGroups := make(map[int]*ContributionsGroup)
 	total := 0
+
 	for _, week := range result.Data.User.ContributionsCollection.ContributionCalendar.Weeks {
 		for _, day := range week.ContributionDays {
-			if day.ContributionCount > 0 {
-				// 解析日期 YYYY-MM-DD
-				dateParts := strings.Split(day.Date, "-")
-				if len(dateParts) != 3 {
-					continue
-				}
-				year, err := strconv.Atoi(dateParts[0])
-				if err != nil {
-					continue
-				}
-
-				if yearGroups[year] == nil {
-					yearGroups[year] = &ContributionsGroup{
-						Year:          year,
-						Contributions: make(map[string]int),
-					}
-				}
-				// key 只保留 MM-DD（年份已在 group.year）
-				key := dateParts[1] + "-" + dateParts[2]
-				yearGroups[year].Contributions[key] = day.ContributionCount
-				total += day.ContributionCount
+			if day.ContributionCount == 0 {
+				continue
 			}
+
+			// 优化：直接从固定位置提取年份，避免 Split
+			// 日期格式: YYYY-MM-DD，年份在前4个字符
+			if len(day.Date) < 10 {
+				continue
+			}
+
+			year, err := strconv.Atoi(day.Date[:4])
+			if err != nil {
+				continue
+			}
+
+			// 获取或创建年份组
+			group, exists := yearGroups[year]
+			if !exists {
+				group = &ContributionsGroup{
+					Year:          year,
+					Contributions: make(map[string]int, 64), // 预分配容量
+				}
+				yearGroups[year] = group
+			}
+
+			// 优化：直接使用字符串切片，避免多次 Concat
+			// 从 "YYYY-MM-DD" 提取 "MM-DD" (位置 5-9)
+			key := day.Date[5:10]
+			group.Contributions[key] = day.ContributionCount
+			total += day.ContributionCount
 		}
 	}
 
-	// 按年份降序排列
+	// 转换为切片
 	groups := make([]*ContributionsGroup, 0, len(yearGroups))
 	for _, g := range yearGroups {
 		groups = append(groups, g)
 	}
-	sort.Slice(groups, func(i, j int) bool {
-		return groups[i].Year > groups[j].Year
-	})
 
 	return &ContributionsResponse{Total: total, Groups: groups}, nil
 }
