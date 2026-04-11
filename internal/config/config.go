@@ -18,6 +18,7 @@ type Config struct {
 	Logging   LoggingConfig   `toml:"logging"`
 	Migration MigrationConfig `toml:"migration"`
 	Admin     AdminConfig     `toml:"admin"`
+	GitHub    GitHubConfig    `toml:"github"`
 
 	// 缓存的密码哈希
 	adminPasswordHash string
@@ -67,6 +68,11 @@ type AdminConfig struct {
 	AvatarURL string `toml:"avatar_url"`
 	Bio       string `toml:"bio"`
 	GitHub    string `toml:"github"`
+}
+
+// GitHubConfig GitHub API 配置
+type GitHubConfig struct {
+	Token string `toml:"token"`
 }
 
 // Load 从 TOML 文件加载配置
@@ -149,3 +155,6 @@ func (c *Config) AdminAvatarURL() string    { return c.Admin.AvatarURL }
 func (c *Config) AdminBio() string          { return c.Admin.Bio }
 func (c *Config) AdminGitHub() string       { return c.Admin.GitHub }
 func (c *Config) AdminPasswordHash() string { return c.GetAdminPasswordHash() }
+
+// GitHub 配置访问器
+func (c *Config) GitHubToken() string { return c.GitHub.Token }

@@ -75,6 +75,7 @@ func main() {
 		cfg.JWTAccessDuration(),
 	)
 	ownerService := service.NewOwnerService(cfg)
+	githubService := service.NewGitHubService(cfg)
 	articleService := service.NewArticleService(articleRepo, categoryRepo, tagRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
 	tagService := service.NewTagService(tagRepo)
@@ -82,6 +83,7 @@ func main() {
 	// 初始化处理器
 	authHandler := handler.NewAuthHandler(authService)
 	ownerHandler := handler.NewOwnerHandler(ownerService)
+	githubHandler := handler.NewGitHubHandler(githubService, ownerService)
 	articleHandler := handler.NewArticleHandler(articleService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	tagHandler := handler.NewTagHandler(tagService)
@@ -93,6 +95,7 @@ func main() {
 		categoryHandler,
 		tagHandler,
 		ownerHandler,
+		githubHandler,
 		authService,
 	)
 	r := appRouter.Setup(cfg.ServerMode())

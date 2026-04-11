@@ -17,6 +17,7 @@ type Router struct {
 	categoryHandler *handler.CategoryHandler
 	tagHandler      *handler.TagHandler
 	ownerHandler    *handler.OwnerHandler
+	githubHandler   *handler.GitHubHandler
 	authService     service.AuthService
 }
 
@@ -27,6 +28,7 @@ func NewRouter(
 	categoryHandler *handler.CategoryHandler,
 	tagHandler *handler.TagHandler,
 	ownerHandler *handler.OwnerHandler,
+	githubHandler *handler.GitHubHandler,
 	authService service.AuthService,
 ) *Router {
 	return &Router{
@@ -35,6 +37,7 @@ func NewRouter(
 		categoryHandler: categoryHandler,
 		tagHandler:      tagHandler,
 		ownerHandler:    ownerHandler,
+		githubHandler:   githubHandler,
 		authService:     authService,
 	}
 }
@@ -63,6 +66,9 @@ func (r *Router) Setup(mode string) *gin.Engine {
 
 		// 站长信息（公开）
 		v1.GET("/owner", r.ownerHandler.GetOwner)
+
+		// GitHub 贡献数据（公开）
+		v1.GET("/github/contributions", r.githubHandler.GetContributions)
 
 		// 认证路由（公开）
 		auth := v1.Group("/auth")

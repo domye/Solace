@@ -41,7 +41,7 @@ migrate-create:
 
 # Generate swagger documentation
 swagger:
-	swag init -g cmd/server/main.go -o api/docs
+	swag init -g cmd/server/main.go -o internal/docs
 
 # Install dependencies
 deps:
