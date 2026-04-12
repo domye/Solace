@@ -36,7 +36,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
   }, [archiveData]);
 
   // 计算当前路径状态
-  const { isHome, isArchive, isCategoryPage, activeCategory } = useMemo(() => {
+  const { isHome, isArchive, activeCategory, shouldShow } = useMemo(() => {
     const pathname = location.pathname;
     const isHome = pathname === '/' || /^\/\d+$/.test(pathname);
     const isArchive = pathname === '/archive';
@@ -46,13 +46,12 @@ export function CategoryBar({ className }: CategoryBarProps) {
     const isCategoryPage = !!categoryMatch;
     const activeCategory = categoryMatch ? categoryMatch[1] : '';
 
-    return { isHome, isArchive, isCategoryPage, activeCategory };
-  }, [location.pathname]);
+    // 在首页、归档页、分类页和标签页显示
+    const isTagPage = /^\/tags\//.test(pathname);
+    const shouldShow = isHome || isArchive || isCategoryPage || isTagPage;
 
-  // 在首页、归档页、分类页和标签页显示
-  const isTagPage = /^\/tags\//.test(location.pathname);
-  const shouldShow = isHome || isArchive || isCategoryPage || isTagPage;
-  if (!shouldShow) return null;
+    return { isHome, isArchive, activeCategory, shouldShow };
+  }, [location.pathname]);
 
   // 更新滚动渐变提示
   const updateScrollHint = () => {
@@ -69,6 +68,8 @@ export function CategoryBar({ className }: CategoryBarProps) {
 
   // 滚动到当前高亮的分类
   useEffect(() => {
+    if (!shouldShow) return;
+
     const scroll = scrollRef.current;
     if (!scroll) return;
 
@@ -85,10 +86,12 @@ export function CategoryBar({ className }: CategoryBarProps) {
     }
 
     updateScrollHint();
-  }, [activeCategory, isHome, isArchive, categories]);
+  }, [activeCategory, isHome, isArchive, categories, shouldShow]);
 
   // 监听滚动和窗口大小变化
   useEffect(() => {
+    if (!shouldShow) return;
+
     const scroll = scrollRef.current;
     if (!scroll) return;
 
@@ -99,7 +102,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
       scroll.removeEventListener('scroll', updateScrollHint);
       window.removeEventListener('resize', updateScrollHint);
     };
-  }, []);
+  }, [shouldShow]);
 
   // 鼠标滚轮横向滚动
   const handleWheel = (e: React.WheelEvent) => {
@@ -109,6 +112,9 @@ export function CategoryBar({ className }: CategoryBarProps) {
     e.preventDefault();
     scroll.scrollLeft += e.deltaY;
   };
+
+  // 不显示时返回 null
+  if (!shouldShow) return null;
 
   return (
     <div className={`card-base p-3 onload-animation mb-4${className || ''}`}>

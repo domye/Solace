@@ -9,12 +9,14 @@
  * │  Profile    │      (Outlet)       │    Categories       │
  * │  TOC        │                     │       Tags          │
  * │ (文章详情页) │                     │                     │
- * └─────────────┴─────────────────────┴─────────────────────┤
+ * ├─────────────┴─────────────────────┴─────────────────────┤
+ * │              移动端侧边栏内容（lg以下显示）               │
+ * ├─────────────────────────────────────────────────────────┤
  * │                       Footer                            │
  * └─────────────────────────────────────────────────────────┘
  *
  * 响应式：
- * - 移动端：单栏（主内容）
+ * - 移动端：单栏（主内容 + 底部侧边栏内容 + Footer）
  * - 平板：双栏（左侧边栏 + 主内容）
  * - 桌面：三栏（左侧边栏 + 主内容 + 右侧边栏）
  */
@@ -67,6 +69,25 @@ function RightSidebar() {
   );
 }
 
+/** 移动端底部侧边栏内容 - Mizuki 风格 */
+function MobileBottomSidebar() {
+  return (
+    <div className="lg:hidden flex flex-col gap-4 mt-4">
+      {/* Profile */}
+      <Profile />
+
+      {/* 贡献日历和分类并排显示 */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <ContributionCalendar className="onload-animation" />
+        <Categories className="onload-animation" />
+      </div>
+
+      {/* Tags */}
+      <Tags className="onload-animation" />
+    </div>
+  );
+}
+
 export function MainLayout() {
   const { headings } = useTocStore();
   const location = useLocation();
@@ -104,6 +125,9 @@ export function MainLayout() {
           {/* 右侧边栏 - 分类 + 标签（xl 以上显示） */}
           {isXlOrLarger && <RightSidebar />}
         </div>
+
+        {/* 移动端底部侧边栏 - 在主内容下方、Footer 上方显示 */}
+        <MobileBottomSidebar />
       </div>
 
       {/* 底部页脚 */}
