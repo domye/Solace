@@ -2,18 +2,19 @@
  * 分类导航栏组件（参考 Mizuki 主题）
  *
  * 在文章列表顶部显示分类快捷导航：
- * [首页] [归档] | [分类1] [分类2] ...
+ * [首页] [归档(n)] | [分类1(n)] [分类2(n)] ...
  *
  * 特性：
  * - 横向滚动支持
  * - 鼠标滚轮横向滚动
  * - 高亮当前分类
  * - 滚动渐变提示
+ * - 显示文章计数
  */
 
 import { Link, useLocation } from 'react-router-dom';
 import { useEffect, useRef, useState, useMemo } from 'react';
-import { useCategories } from '@/hooks';
+import { useCategories, useArchive } from '@/hooks';
 import { SafeIcon } from '@/components/common/ui';
 
 interface CategoryBarProps {
@@ -22,10 +23,17 @@ interface CategoryBarProps {
 
 export function CategoryBar({ className }: CategoryBarProps) {
   const { data: categories, isLoading } = useCategories();
+  const { data: archiveData } = useArchive();
   const location = useLocation();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showFadeLeft, setShowFadeLeft] = useState(false);
   const [showFadeRight, setShowFadeRight] = useState(false);
+
+  // 计算总文章数
+  const totalPosts = useMemo(() => {
+    if (!archiveData) return 0;
+    return archiveData.reduce((sum, group) => sum + group.count, 0);
+  }, [archiveData]);
 
   // 计算当前路径状态
   const { isHome, isArchive, isCategoryPage, activeCategory } = useMemo(() => {
@@ -103,7 +111,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
   };
 
   return (
-    <div className={`card-base p-3 onload-animation${className || ''}`}>
+    <div className={`card-base p-3 onload-animation mb-4${className || ''}`}>
       <div className="flex gap-2">
         {/* 首页按钮 */}
         <Link
@@ -119,7 +127,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
           <SafeIcon icon="material-symbols:home" size="1.125rem" />
         </Link>
 
-        {/* 归档按钮 */}
+        {/* 归档按钮 - Mizuki 风格带计数 */}
         <Link
           to="/archive"
           className={`category-pill text-sm px-3 py-1 rounded-lg whitespace-nowrap flex-shrink-0
@@ -131,6 +139,9 @@ export function CategoryBar({ className }: CategoryBarProps) {
           data-active={isArchive && !activeCategory || undefined}
         >
           归档
+          {totalPosts > 0 && (
+            <span className="text-xs opacity-60 ml-1">{totalPosts}</span>
+          )}
         </Link>
 
         {/* 分隔线 */}
@@ -144,7 +155,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
               bg-gradient-to-r from-[var(--card-bg)] to-transparent" />
           )}
 
-          {/* 分类列表 */}
+          {/* 分类列表 - Mizuki 风格带计数 */}
           <div
             ref={scrollRef}
             onWheel={handleWheel}
@@ -173,6 +184,9 @@ export function CategoryBar({ className }: CategoryBarProps) {
                   data-active={activeCategory === category.slug || activeCategory === category.name || undefined}
                 >
                   {category.name}
+                  {category.article_count !== undefined && category.article_count > 0 && (
+                    <span className="text-xs opacity-60 ml-1">{category.article_count}</span>
+                  )}
                 </Link>
               ))
             )}
