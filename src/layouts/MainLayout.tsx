@@ -23,8 +23,7 @@
 
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar, Footer } from '@/components/common';
-import { TableOfContents } from '@/components/widget';
-import { Profile, Categories, Tags, ContributionCalendar } from '@/components/widget';
+import { TableOfContents, Profile, Categories, Tags, ContributionCalendar } from '@/components/widget';
 import { useTocStore } from '@/stores';
 import { useMediaQuery } from '@/hooks';
 import { useMemo } from 'react';
@@ -76,11 +75,8 @@ function MobileBottomSidebar() {
       {/* Profile */}
       <Profile />
 
-      {/* 贡献日历和分类并排显示 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <ContributionCalendar className="onload-animation" />
-        <Categories className="onload-animation" />
-      </div>
+      {/* 分类 */}
+      <Categories className="onload-animation" />
 
       {/* Tags */}
       <Tags className="onload-animation" />

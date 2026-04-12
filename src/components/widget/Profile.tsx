@@ -17,34 +17,34 @@ export function Profile() {
   const githubUrl = owner?.github_url;
 
   return (
-    <div className="card-base p-3 onload-animation">
-      <Link to="/about" className="group block relative mx-auto mt-1 lg:mx-0 lg:mt-0 mb-3 max-w-[12rem] lg:max-w-none aspect-square overflow-hidden rounded-xl active:scale-95">
+    <div className="card-base p-2.5 onload-animation">
+      <Link to="/about" className="group block relative mx-auto mt-0.5 lg:mx-0 lg:mt-0 mb-2 max-w-[10rem] lg:max-w-none aspect-square overflow-hidden rounded-lg active:scale-95">
         <div className="absolute inset-0 pointer-events-none group-hover:bg-black/30 group-active:bg-black/50 z-50 flex items-center justify-center">
-          <SafeIcon icon="fa6-regular:address-card" size="3rem" className="opacity-0 scale-90 group-hover:scale-100 group-hover:opacity-100 text-white transition" />
+          <SafeIcon icon="fa6-regular:address-card" size="2.5rem" className="opacity-0 scale-90 group-hover:scale-100 group-hover:opacity-100 text-white transition" />
         </div>
         {displayAvatar ? (
-          <LazyImage src={displayAvatar} alt="头像" className="w-full h-full object-cover rounded-xl" wrapperClassName="w-full h-full" effect="blur" />
+          <LazyImage src={displayAvatar} alt="头像" className="w-full h-full object-cover rounded-lg" wrapperClassName="w-full h-full" effect="blur" />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] rounded-xl flex items-center justify-center">
-            <SafeIcon icon="material-symbols:person-outline-rounded" size="2.5rem" className="text-white" />
+          <div className="w-full h-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary-light)] rounded-lg flex items-center justify-center">
+            <SafeIcon icon="material-symbols:person-outline-rounded" size="2rem" className="text-white" />
           </div>
         )}
       </Link>
 
-      <div className="px-2">
-        <div className="font-bold text-xl text-center mb-1 text-90">{displayName}</div>
-        <div className="h-1 w-5 bg-[var(--primary)] mx-auto rounded-full mb-2" />
-        <div className="text-center text-50 mb-2.5">{displayBio}</div>
+      <div className="px-1.5">
+        <div className="font-bold text-lg text-center mb-0.5 text-90">{displayName}</div>
+        <div className="h-0.5 w-4 bg-[var(--primary)] mx-auto rounded-full mb-1.5" />
+        <div className="text-center text-50 text-sm mb-2">{displayBio}</div>
 
-        <div className="flex flex-wrap gap-2 justify-center mb-1">
+        <div className="flex flex-wrap gap-1.5 justify-center mb-0.5">
           {isAuthenticated ? (
-            <Link to="/admin" className="btn-regular rounded-lg h-10 gap-2 px-3 font-bold active:scale-95 flex items-center">
-              <SafeIcon icon="material-symbols:dashboard-outline-rounded" size="1.25rem" />
+            <Link to="/admin" className="btn-regular rounded-md h-8 gap-1.5 px-2.5 font-medium text-sm active:scale-95 flex items-center">
+              <SafeIcon icon="material-symbols:dashboard-outline-rounded" size="1rem" />
               管理后台
             </Link>
           ) : githubUrl && (
-            <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="btn-regular rounded-lg h-10 gap-2 px-3 font-bold active:scale-95 flex items-center" aria-label="GitHub">
-              <SafeIcon icon="fa6-brands:github" size="1.5rem" />
+            <a href={githubUrl} target="_blank" rel="noopener noreferrer" className="btn-regular rounded-md h-8 gap-1.5 px-2.5 font-medium text-sm active:scale-95 flex items-center" aria-label="GitHub">
+              <SafeIcon icon="fa6-brands:github" size="1.125rem" />
               GitHub
             </a>
           )}

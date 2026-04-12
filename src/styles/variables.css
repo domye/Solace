@@ -6,11 +6,11 @@
 :root {
 	/* === 布局 === */
 	--hue: 250;
-	--radius-large: 1.25rem; /* 增大圆角，更符合 Fuwari 风格 */
-	--radius-medium: 0.75rem;
-	--radius-small: 0.5rem;
+	--radius-large: 1rem; /* 减小圆角 */
+	--radius-medium: 0.625rem;
+	--radius-small: 0.375rem;
 	--page-width: 1400px; /* 三栏布局需要更宽的页面宽度 */
-	--sidebar-width: 17.5rem; /* 侧边栏宽度 */
+	--sidebar-width: 16rem; /* 侧边栏宽度减小 */
 	--content-delay: 50ms;
 
 	/* === 主色 === */

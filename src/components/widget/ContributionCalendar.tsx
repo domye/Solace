@@ -90,6 +90,9 @@ function buildCalendar(
   return { cells, monthTotal };
 }
 
+/** 侧边栏标题样式 */
+const sidebarTitleStyle = 'font-bold text-base text-90 relative ml-6 mt-3 mb-1.5 before:w-0.5 before:h-3.5 before:rounded-sm before:bg-[var(--primary)] before:absolute before:-left-3 before:top-[4.5px]';
+
 export function ContributionCalendar({ className, style }: ContributionCalendarProps) {
   const { data: owner, isLoading: ownerLoading } = useOwner();
   const githubUsername = useMemo(
@@ -214,47 +217,47 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
 
     return (
       <>
-        <div className="flex justify-between items-center mb-2 mt-2 px-4">
-          <div className="font-bold text-base text-90 relative ml-4 flex items-center before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)] before:absolute before:-left-4 before:top-[5.5px]">
-            <div className="h-5 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="flex justify-between items-center mb-1.5 px-3">
+          <div className={sidebarTitleStyle}>
+            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           </div>
-          <div className="flex items-center gap-1 shrink-0 ml-2">
-            <div className="p-1.5 rounded-md">
-              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="flex items-center gap-0.5 shrink-0 ml-2">
+            <div className="p-1 rounded">
+              <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             </div>
-            <div className="p-1.5 rounded-md">
-              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="p-1 rounded">
+              <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             </div>
-            <div className="p-1.5 rounded-md">
-              <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="p-1 rounded">
+              <div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
             </div>
           </div>
         </div>
 
-        <div className="px-4">
-          <div className="grid grid-cols-7 gap-1 mb-1">
+        <div className="px-3">
+          <div className="grid grid-cols-7 gap-0.5 mb-0.5">
             {WEEK_DAYS.map((day) => (
-              <div key={day} className="text-center text-[10px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5">
+              <div key={day} className="text-center text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5">
                 {day}
               </div>
             ))}
           </div>
 
-          <div className="grid grid-cols-7 gap-1">
+          <div className="grid grid-cols-7 gap-0.5">
             {Array.from({ length: totalCells }).map((_, idx) => (
               <div
                 key={idx}
-                className="aspect-square flex items-center justify-center rounded-md bg-gray-100 dark:bg-gray-800"
+                className="aspect-square flex items-center justify-center rounded bg-gray-100 dark:bg-gray-800"
               >
-                <div className="w-3 h-3 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="w-2.5 h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="px-4 mt-2 flex items-center justify-between">
-          <div className="h-3 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-          <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="px-3 mt-1.5 flex items-center justify-between">
+          <div className="h-2.5 w-14 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-2.5 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
         </div>
       </>
     );
@@ -262,7 +265,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
 
   if (ownerLoading) {
     return (
-      <div className={`card-base pb-4 ${className || ''}`} style={style}>
+      <div className={`card-base pb-3 ${className || ''}`} style={style}>
         {renderSkeletonCalendar()}
       </div>
     );
@@ -274,7 +277,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
 
   if (isLoading) {
     return (
-      <div className={`card-base pb-4 ${className || ''}`} style={style}>
+      <div className={`card-base pb-3 ${className || ''}`} style={style}>
         {renderSkeletonCalendar()}
       </div>
     );
@@ -285,24 +288,24 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
   }
 
   return (
-    <div className={`card-base pb-4 onload-animation ${className || ''}`} style={style}>
+    <div className={`card-base pb-3 onload-animation ${className || ''}`} style={style}>
       {/* 标题栏 */}
-      <div className="flex justify-between items-center mb-2 mt-2 px-4">
-        <div className="font-bold text-base text-90 relative ml-4 flex items-center before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)] before:absolute before:-left-4 before:top-[5.5px]">
-          <span className="text-base font-bold select-none">
+      <div className="flex justify-between items-center mb-1.5 px-3">
+        <div className={sidebarTitleStyle}>
+          <span className="text-sm font-bold select-none">
             {currentYear}年{MONTH_NAMES[currentMonth]}
           </span>
         </div>
 
-        <div className="flex items-center gap-1 shrink-0 ml-2">
+        <div className="flex items-center gap-0.5 shrink-0 ml-2">
           {/* 返回今天 */}
           <button
             type="button"
             onClick={handleBackToToday}
-            className={`p-1.5 rounded-md hover:bg-[var(--btn-plain-bg-hover)] text-[var(--primary)] transition-all ${isBackToTodayVisible ? '' : 'invisible'}`}
+            className={`p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-[var(--primary)] transition-all ${isBackToTodayVisible ? '' : 'invisible'}`}
             aria-label="返回今天"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
               <path d="M3 3v5h5" />
             </svg>
@@ -311,7 +314,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
           <button
             type="button"
             onClick={handlePrevMonth}
-            className="p-1.5 rounded-md hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-xl font-bold"
+            className="p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-lg font-bold"
             aria-label="上一月"
           >
             ＜
@@ -320,7 +323,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
           <button
             type="button"
             onClick={handleNextMonth}
-            className="p-1.5 rounded-md hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-xl font-bold"
+            className="p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-lg font-bold"
             aria-label="下一月"
           >
             ＞
@@ -329,18 +332,18 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
       </div>
 
       {/* 日历网格 */}
-      <div className="px-4">
+      <div className="px-3">
         {/* 星期标签 */}
-        <div className="grid grid-cols-7 gap-1 mb-1">
+        <div className="grid grid-cols-7 gap-0.5 mb-0.5">
           {WEEK_DAYS.map((day) => (
-            <div key={day} className="text-center text-[10px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5">
+            <div key={day} className="text-center text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5">
               {day}
             </div>
           ))}
         </div>
 
         {/* 日期格子 */}
-        <div className="grid grid-cols-7 gap-1">
+        <div className="grid grid-cols-7 gap-0.5">
           {/* 月初空白 */}
           {Array.from({ length: emptyCellsCount }).map((_, idx) => (
             <div key={`empty-${idx}`} className="aspect-square" />
@@ -351,9 +354,9 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
             <button
               key={cell.date}
               type="button"
-              className={`aspect-square flex items-center justify-center rounded-md cursor-pointer relative transition-all duration-200
+              className={`aspect-square flex items-center justify-center rounded cursor-pointer relative transition-all duration-200
                 ${cell.isToday
-                  ? 'font-bold ring-2 ring-[var(--primary)]/40'
+                  ? 'font-bold ring-1.5 ring-[var(--primary)]/40'
                   : 'hover:bg-[var(--btn-plain-bg-hover)]'
                 }`}
               style={{
@@ -365,7 +368,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
               }}
               title={`${cell.date}: ${cell.count} 次贡献`}
             >
-              <span className={`text-[11px] ${
+              <span className={`text-[10px] ${
                 cell.isToday
                   ? 'font-bold text-neutral-500 dark:text-neutral-200'
                   : cell.count > 0
@@ -384,7 +387,7 @@ export function ContributionCalendar({ className, style }: ContributionCalendarP
       </div>
 
       {/* 底部统计 */}
-      <div className="px-4 mt-2 flex items-center justify-between text-[10px] text-neutral-400 dark:text-neutral-500">
+      <div className="px-3 mt-1.5 flex items-center justify-between text-[9px] text-neutral-400 dark:text-neutral-500">
         <span>
           当月 <span className="font-medium text-[var(--primary)]">{monthTotal}</span> 次
         </span>

@@ -117,7 +117,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
   if (!shouldShow) return null;
 
   return (
-    <div className={`card-base p-3 onload-animation mb-4${className || ''}`}>
+    <div className={`card-base p-3 onload-animation${className || ''}`}>
       <div className="flex gap-2">
         {/* 首页按钮 */}
         <Link

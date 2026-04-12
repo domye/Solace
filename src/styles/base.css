@@ -8,6 +8,14 @@
 	/* 强制保留滚动条空间，防止页面切换时左右偏移 */
 	html {
 		overflow-y: scroll;
+		/* 整体缩放 - 移动端 14px，桌面端 15px */
+		font-size: 14px;
+	}
+
+	@media (min-width: 768px) {
+		html {
+			font-size: 15px;
+		}
 	}
 
 	/* 默认透明滚动条 - 浅色模式 */
@@ -71,6 +79,7 @@
 		background-color: var(--page-bg);
 		color: var(--text-90);
 		@apply antialiased transition;
+		line-height: 1.5;
 	}
 
 	::selection {
