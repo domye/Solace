@@ -10,6 +10,8 @@
 		overflow-y: scroll;
 		/* 整体缩放 - 移动端 14px，桌面端 15px */
 		font-size: 14px;
+		/* 平滑滚动 */
+		scroll-behavior: smooth;
 	}
 
 	@media (min-width: 768px) {
@@ -98,5 +100,10 @@
 	*::after {
 		animation-duration: 0.01ms !important;
 		transition-duration: 0.01ms !important;
+	}
+
+	/* 禁用平滑滚动，尊重用户的减少动画偏好 */
+	html {
+		scroll-behavior: auto;
 	}
 }
