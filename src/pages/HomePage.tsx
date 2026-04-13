@@ -9,7 +9,7 @@ import { toPostCardArticle } from '@/utils/article';
 export function HomePage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get('page') || '1', 10);
-  const pageSize = 7;
+  const pageSize = 10;
 
   const { data, isLoading, isFetching, error } = useArticles({ page, pageSize, status: 'published' });
 

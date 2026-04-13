@@ -4,7 +4,7 @@ import { PostMeta } from './PostMeta';
 import { TagList } from './TagList';
 import type { PostCardArticle } from '@/types';
 
-const COVER_WIDTH_CSS = '28%';
+const COVER_WIDTH_CSS = '25%';
 
 interface PostCardProps {
   article: PostCardArticle;
