@@ -8,3 +8,5 @@ export { LazyImage } from './LazyImage';
 export { MetaItem } from './MetaItem';
 export { SafeIcon } from './SafeIcon';
 export type { SafeIconProps } from './SafeIcon';
+export { ReadingProgress } from './ReadingProgress';
+export { BackToTop } from './BackToTop';

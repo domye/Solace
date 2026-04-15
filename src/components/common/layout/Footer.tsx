@@ -13,11 +13,7 @@ export function Footer() {
           {/* 版权信息 */}
           <span className="block">
             &copy; {currentYear} Blog. All Rights Reserved. /
-            <FooterLink href="/rss">RSS</FooterLink>
-            /
-            <FooterLink href="/atom">Atom</FooterLink>
-            /
-            <FooterLink href="/sitemap-index.xml">Sitemap</FooterLink>
+            <FooterLink href="/sitemap.xml">Sitemap</FooterLink>
           </span>
 
           {/* Powered by */}

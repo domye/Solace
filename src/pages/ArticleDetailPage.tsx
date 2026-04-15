@@ -1,15 +1,16 @@
 import { useParams, Link } from 'react-router-dom';
 import { useArticleBySlug } from '@/hooks';
-import { PostMeta, MarkdownRenderer, ErrorDisplay, NotFoundDisplay, ArticleDetailSkeleton, LazyImage, SafeIcon, LicenseBlock, RecommendedPosts } from '@/components';
+import { PostMeta, MarkdownRenderer, ErrorDisplay, NotFoundDisplay, ArticleDetailSkeleton, LazyImage, SafeIcon, LicenseBlock, RecommendedPosts, ReadingProgress } from '@/components';
 import type { TocHeading } from '@/components/widget/TableOfContents';
 import { formatDate } from '@/utils';
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { useTocStore } from '@/stores';
 
 export function ArticleDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const { data: article, isLoading, error } = useArticleBySlug(slug ?? '');
   const { setHeadings, clearHeadings, setArticleLoading } = useTocStore();
+  const articleRef = useRef<HTMLElement>(null);
 
   // 切换文章时平滑滚动到顶部
   useEffect(() => {
@@ -29,7 +30,9 @@ export function ArticleDetailPage() {
   const hasUpdate = article.updated_at && article.updated_at !== article.created_at;
 
   return (
-    <article className="flex-1 min-w-0 space-y-4">
+    <>
+      <ReadingProgress show={true} articleRef={articleRef} />
+      <article ref={articleRef} className="flex-1 min-w-0 space-y-4">
       <div className="card-base p-6 md:p-8 fade-in-up">
         <h1 className="text-90 text-2xl md:text-3xl font-bold mb-4">{article.title}</h1>
         <PostMeta article={article} />
@@ -82,5 +85,6 @@ export function ArticleDetailPage() {
         <RecommendedPosts mode="recent" excludeId={article.id} limit={5} />
       </div>
     </article>
+    </>
   );
 }

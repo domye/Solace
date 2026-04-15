@@ -24,6 +24,7 @@
 import { Outlet, useLocation } from 'react-router-dom';
 import { Navbar, Footer } from '@/components/common';
 import { TableOfContents, Profile, Categories, Tags, ContributionCalendar } from '@/components/widget';
+import { BackToTop } from '@/components/common/ui';
 import { useTocStore } from '@/stores';
 import { useMediaQuery } from '@/hooks';
 import { useMemo } from 'react';
@@ -139,6 +140,9 @@ export function MainLayout() {
 
       {/* 底部页脚 */}
       <Footer />
+
+      {/* 返回顶部按钮 */}
+      <BackToTop />
     </div>
   );
 }

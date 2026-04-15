@@ -53,8 +53,8 @@ export function PostCard({ article, isHalfRow = false, className, style }: PostC
           <Link
             to={articleUrl}
             className="transition-smooth group w-full block font-semibold mb-2.5 text-[1.375rem] text-70 hover:text-[var(--primary)]
-              before:w-1 before:h-4 before:rounded-md before:bg-[var(--primary)]
-              before:absolute before:top-[26px] before:left-[20px]"
+              before:w-1.5 before:h-5 before:rounded-md before:bg-[var(--primary)]
+              before:absolute before:top-[25px] before:left-[16px]"
           >
             {article.title}
             <SafeIcon icon="material-symbols:chevron-right-rounded" size="1.75rem" className="text-[var(--primary)] transition-bounce inline absolute translate-y-0.5 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0" />
