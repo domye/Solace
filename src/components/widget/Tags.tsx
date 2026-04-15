@@ -35,6 +35,7 @@ export function Tags({ className, style }: TagsProps) {
           <Link
             key={tag.id}
             to={`/tags/${tag.slug}`}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="btn-regular h-7 text-xs px-2.5 rounded-md hover:bg-[var(--primary)] hover:text-white transition"
           >
             {tag.name}

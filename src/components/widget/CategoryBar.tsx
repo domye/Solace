@@ -122,6 +122,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
         {/* 首页按钮 */}
         <Link
           to="/"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className={`category-pill text-sm px-2 py-1 rounded-lg flex-shrink-0
             transition-colors duration-200 flex items-center justify-center
             border-[1.5px] ${isHome
@@ -136,6 +137,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
         {/* 归档按钮 - Mizuki 风格带计数 */}
         <Link
           to="/archive"
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className={`category-pill text-sm px-3 py-1 rounded-lg whitespace-nowrap flex-shrink-0
             transition-colors duration-200 flex items-center justify-center
             border-[1.5px] ${isArchive && !activeCategory
@@ -181,6 +183,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
                 <Link
                   key={category.id}
                   to={`/categories/${category.slug || category.name}`}
+                  onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   className={`category-pill text-sm px-3 py-1 rounded-lg whitespace-nowrap flex-shrink-0
                     transition-colors duration-200 flex items-center justify-center
                     border-[1.5px] ${activeCategory === category.slug || activeCategory === category.name

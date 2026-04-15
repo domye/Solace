@@ -38,6 +38,7 @@ export function TagList({ tags, maxTags, interactive = true }: TagListProps) {
         <Link
           key={tag.id}
           to={`/tags/${tag.slug}`}
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="btn-regular h-6 text-xs px-2 rounded-lg hover:text-[var(--primary)] whitespace-nowrap"
         >
           # {tag.name}

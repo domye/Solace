@@ -52,7 +52,31 @@ export function extractHeadings(content: string): TocHeading[] {
   const headings: TocHeading[] = [];
   const lines = content.split('\n');
 
+  // 跟踪代码块状态，避免将代码块内的注释识别为标题
+  let inCodeBlock = false;
+  let inFencedCode = false;
+
   for (const line of lines) {
+    // 检测围栏代码块的开始/结束 (``` 或 ~~~)
+    const fencedMatch = line.match(/^(`{3,}|~{3,})/);
+    if (fencedMatch) {
+      if (!inCodeBlock) {
+        // 进入代码块
+        inCodeBlock = true;
+        inFencedCode = true;
+      } else if (inFencedCode) {
+        // 离开代码块
+        inCodeBlock = false;
+        inFencedCode = false;
+      }
+      continue;
+    }
+
+    // 跳过代码块内的内容
+    if (inCodeBlock) {
+      continue;
+    }
+
     const match = line.match(/^(#{1,6})\s+(.+)$/);
     if (match?.[1] && match[2]) {
       const depth = match[1].length;

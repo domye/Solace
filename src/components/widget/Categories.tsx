@@ -35,6 +35,7 @@ export function Categories({ className, style }: CategoriesProps) {
           <Link
             key={cat.id}
             to={`/categories/${cat.slug}`}
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             className="w-full h-8 rounded-md hover:bg-[var(--btn-plain-bg-hover)] active:bg-[var(--btn-plain-bg-active)]
               transition-all pl-2 hover:pl-2.5 text-75 hover:text-[var(--primary)] flex items-center justify-between group"
           >

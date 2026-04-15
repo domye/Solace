@@ -35,22 +35,33 @@ interface LeftSidebarProps {
 }
 
 function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
+  const hasToc = isArticlePage && headings.length > 0;
+
+  // 有 TOC 时：Profile 不固定，TOC 和 Tags 固定
+  // 没有 TOC 时：Profile 和 Tags 都固定
+  if (hasToc) {
+    return (
+      <aside className="w-64 flex-shrink-0">
+        {/* Profile 不固定 */}
+        <div className="flex flex-col w-full gap-4 mb-4">
+          <Profile />
+        </div>
+
+        {/* 吸顶组件区域 */}
+        <div className="sticky top-4 flex flex-col w-full gap-4">
+          <Tags className="onload-animation" style={{ animationDelay: '150ms' }} />
+          <TableOfContents headings={headings} />
+        </div>
+      </aside>
+    );
+  }
+
+  // 没有 TOC：Profile 和 Tags 都固定
   return (
     <aside className="w-64 flex-shrink-0">
-      {/* 顶部组件区域 - Profile 始终显示 */}
-      <div className="flex flex-col w-full gap-4 mb-4">
-        <Profile />
-      </div>
-
-      {/* 吸顶组件区域 */}
       <div className="sticky top-4 flex flex-col w-full gap-4">
-        {/* Tags 始终显示 */}
+        <Profile />
         <Tags className="onload-animation" style={{ animationDelay: '150ms' }} />
-
-        {/* 文章详情页显示 TOC（只在有标题时显示） */}
-        {isArticlePage && headings.length > 0 && (
-          <TableOfContents headings={headings} />
-        )}
       </div>
     </aside>
   );
