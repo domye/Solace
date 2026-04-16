@@ -1,8 +1,9 @@
 /**
- * 时间线组件 - 像素可爱风格
+ * 时间线组件
  */
 
 import type { TimelineEvent } from "@/types";
+import { formatTimelineDate } from "@/utils";
 
 interface TimelineProps {
 	events: TimelineEvent[];
@@ -29,7 +30,7 @@ export function Timeline({ events }: TimelineProps) {
 					>
 						{/* 像素节点 */}
 						<div
-							className="absolute -left-7 md:-left-8 top-5 w-4 h-4 timeline-node"
+							className="absolute -left-8 md:-left-9 top-5 w-4 h-4 timeline-node"
 							aria-hidden="true"
 						/>
 
@@ -37,7 +38,7 @@ export function Timeline({ events }: TimelineProps) {
 						<div className="timeline-card p-4 md:p-5">
 							{/* 日期 */}
 							<div className="timeline-date text-sm font-bold mb-2">
-								{event.date}
+								{formatTimelineDate(event.date)}
 							</div>
 
 							{/* 标题 */}

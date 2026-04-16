@@ -396,44 +396,43 @@
 		}
 	}
 
-	/* === 像素可爱时间轴 === */
+	/* === 时间轴 === */
 	.timeline-line {
-		background: oklch(0.82 0.08 var(--hue));
-		border: 2px solid oklch(0.65 0.12 var(--hue));
-		border-radius: 0;
+		background: oklch(0.85 0.06 var(--hue));
+		border-radius: 9999px;
 	}
 
 	.dark .timeline-line {
-		background: oklch(0.45 0.06 var(--hue));
-		border-color: oklch(0.55 0.08 var(--hue));
+		background: oklch(0.4 0.04 var(--hue));
 	}
 
 	.timeline-node {
 		background: var(--primary);
-		border: 3px solid var(--card-bg);
-		outline: 2px solid var(--primary);
-		border-radius: 0;
+		border: 2px solid var(--card-bg);
+		box-shadow: 0 0 0 3px var(--primary);
+		border-radius: 9999px;
 	}
 
 	.timeline-card {
 		background: var(--card-bg);
-		border: 4px solid var(--primary);
-		border-radius: 0;
-		box-shadow: 6px 6px 0 oklch(0.85 0.06 var(--hue) / 0.4);
+		border: 2px solid oklch(0.88 0.06 var(--hue) / 0.5);
+		border-radius: 1rem;
+		box-shadow: 0 4px 12px oklch(0.7 0.1 var(--hue) / 0.08);
 		transition: transform 0.2s ease, box-shadow 0.2s ease;
 	}
 
 	.dark .timeline-card {
-		box-shadow: 6px 6px 0 oklch(0.35 0.06 var(--hue) / 0.25);
+		border-color: oklch(0.35 0.04 var(--hue) / 0.3);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 	}
 
 	.timeline-card:hover {
-		transform: translate(-2px, -4px);
-		box-shadow: 8px 10px 0 oklch(0.85 0.08 var(--hue) / 0.5);
+		transform: translateY(-2px);
+		box-shadow: 0 6px 16px oklch(0.7 0.12 var(--hue) / 0.12);
 	}
 
 	.dark .timeline-card:hover {
-		box-shadow: 8px 10px 0 oklch(0.3 0.08 var(--hue) / 0.35);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 	}
 
 	.timeline-date {
@@ -464,5 +463,31 @@
 
 	.timeline-link:hover .timeline-link-icon {
 		transform: translateX(3px);
+	}
+
+	/* === 足迹地图标记 === */
+	.custom-marker {
+		background: transparent;
+		border: none;
+	}
+
+	.marker-pin {
+		width: 24px;
+		height: 24px;
+		background: var(--primary);
+		border-radius: 50% 50% 50% 0;
+		transform: rotate(-45deg);
+		border: 2px solid var(--card-bg);
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+	}
+
+	/* Leaflet popup 样式 */
+	.leaflet-popup-content-wrapper {
+		border-radius: 0.75rem;
+	}
+
+	.leaflet-popup-content {
+		margin: 0.5rem 0.75rem;
+		font-size: 0.875rem;
 	}
 }
