@@ -76,6 +76,8 @@ function pointInPolygon(x: number, y: number, polygon: number[][]): boolean {
 		const xj = pJ[0];
 		const yj = pJ[1];
 
+		if (xi === undefined || yi === undefined || xj === undefined || yj === undefined) continue;
+
 		if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
 			inside = !inside;
 		}
@@ -108,10 +110,12 @@ function computeBBox(coords: number[][][]): BBox {
 		for (const point of polygon) {
 			const lng = point[0];
 			const lat = point[1];
-			if (lng < minLng) minLng = lng;
-			if (lng > maxLng) maxLng = lng;
-			if (lat < minLat) minLat = lat;
-			if (lat > maxLat) maxLat = lat;
+			if (lng !== undefined && lat !== undefined) {
+				if (lng < minLng) minLng = lng;
+				if (lng > maxLng) maxLng = lng;
+				if (lat < minLat) minLat = lat;
+				if (lat > maxLat) maxLat = lat;
+			}
 		}
 	}
 	return { minLng, maxLng, minLat, maxLat };
@@ -242,12 +246,12 @@ function parseFeatures(geoJson: GeoJSON): Feature[] {
 			const first = c[0];
 			if (Array.isArray(first?.[0])) {
 				// MultiPolygon: c 是 number[][][]，每个元素是 Polygon
-				for (const poly of c) {
-					allPolygons.push(poly as number[][]);
+				for (const poly of c as number[][][]) {
+					allPolygons.push(poly);
 				}
 			} else {
 				// Polygon: c 直接是 number[][]
-				allPolygons.push(c as number[][]);
+				allPolygons.push(c as unknown as number[][]);
 			}
 		}
 

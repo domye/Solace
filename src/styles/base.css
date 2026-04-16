@@ -79,6 +79,10 @@
 			"Segoe UI",
 			sans-serif;
 		background-color: var(--page-bg);
+		background-image:
+			radial-gradient(var(--showa-dots-color) 1px, transparent 1px),
+			linear-gradient(var(--page-bg), var(--page-bg));
+		background-size: var(--showa-dots-size) var(--showa-dots-size);
 		color: var(--text-90);
 		@apply antialiased transition;
 		line-height: 1.5;

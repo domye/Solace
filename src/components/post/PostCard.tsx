@@ -20,10 +20,10 @@ export function PostCard({ article, isHalfRow = false, className, style }: PostC
   const summary = article.summary || '暂无摘要';
 
   return (
-    <article
-      className={`card-base w-full rounded-[var(--radius-large)] overflow-hidden relative ${className || ''}`}
-      style={{ ...style, '--coverWidth': COVER_WIDTH_CSS } as React.CSSProperties}
-    >
+<article
+		className={`card-base w-full overflow-hidden relative ${className || ''}`}
+		style={{ ...style, '--coverWidth': COVER_WIDTH_CSS } as React.CSSProperties}
+	>
       {/* 移动端布局 */}
       <Link
         to={articleUrl}
@@ -40,11 +40,11 @@ export function PostCard({ article, isHalfRow = false, className, style }: PostC
             <TagList tags={article.tags} maxTags={3} interactive={false} />
           </div>
         </div>
-        {hasCover && (
-          <div className="flex-shrink-0 self-end rounded-md overflow-hidden" style={{ width: '110px', height: '82px' }}>
-            <LazyImage src={article.cover_image!} alt={article.title} className="w-full h-full object-cover" wrapperClassName="w-full h-full" effect="blur" />
-          </div>
-        )}
+{hasCover && (
+		<div className="flex-shrink-0 self-end rounded-[var(--radius-small)] overflow-hidden" style={{ width: '110px', height: '82px' }}>
+			<LazyImage src={article.cover_image!} alt={article.title} className="w-full h-full object-cover" wrapperClassName="w-full h-full" effect="blur" />
+		</div>
+	)}
       </Link>
 
       {/* 桌面端布局 */}
@@ -67,20 +67,18 @@ export function PostCard({ article, isHalfRow = false, className, style }: PostC
         </div>
 
         {/* 右侧封面或箭头 */}
-        {hasCover ? (
-          <Link to={articleUrl} className="group w-[var(--coverWidth)] absolute top-2.5 bottom-2.5 right-2.5 rounded-lg overflow-hidden">
-            <div className="absolute inset-0 group-hover:bg-black/30 transition-smooth" />
-            <SafeIcon icon="material-symbols:chevron-right-rounded" size="2.5rem" className="absolute z-20 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 text-white transition-bounce inset-0 m-auto" />
-            <LazyImage src={article.cover_image!} alt={article.title} className="w-full h-full object-cover transition-smooth group-hover:scale-105" wrapperClassName="w-full h-full" effect="blur" />
-          </Link>
-        ) : !isHalfRow && (
-          <Link to={articleUrl} className="btn-regular w-12 absolute right-2.5 top-2.5 bottom-2.5 rounded-lg hover:bg-[var(--btn-regular-bg-hover)] active:scale-95 transition-smooth">
-            <SafeIcon icon="material-symbols:chevron-right-rounded" size="2rem" className="text-[var(--primary)] mx-auto" />
-          </Link>
-        )}
-      </div>
-
-      <div className="hidden md:block absolute inset-0 pointer-events-none card-hover-overlay rounded-[var(--radius-large)]" />
-    </article>
+{hasCover ? (
+			<Link to={articleUrl} className="group w-[var(--coverWidth)] absolute top-2.5 bottom-2.5 right-2.5 rounded-[var(--radius-small)] overflow-hidden">
+				<div className="absolute inset-0 group-hover:bg-black/30 transition-smooth" />
+				<SafeIcon icon="material-symbols:chevron-right-rounded" size="2.5rem" className="absolute z-20 opacity-0 group-hover:opacity-100 scale-50 group-hover:scale-100 text-white transition-bounce inset-0 m-auto" />
+				<LazyImage src={article.cover_image!} alt={article.title} className="w-full h-full object-cover transition-smooth group-hover:scale-105" wrapperClassName="w-full h-full" effect="blur" />
+			</Link>
+		) : !isHalfRow && (
+			<Link to={articleUrl} className="btn-regular w-12 absolute right-2.5 top-2.5 bottom-2.5 hover:bg-[var(--btn-regular-bg-hover)] transition-smooth">
+				<SafeIcon icon="material-symbols:chevron-right-rounded" size="2rem" className="text-[var(--primary)] mx-auto" />
+			</Link>
+		)}
+</div>
+	</article>
   );
 }
