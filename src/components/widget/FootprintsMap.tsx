@@ -1,14 +1,19 @@
 /**
  * 足迹地图组件 - Echarts 中国地图
+ * 支持省份高亮 + 市级边界显示
  */
 
 import { useEffect, useRef } from "react";
 import * as echarts from "echarts";
 import type { FootprintCity } from "@/types";
 
-// 中国地图 GeoJSON
+// 中国省份 GeoJSON
 const chinaGeoJsonUrl =
 	"https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json";
+
+// 市级 GeoJSON URL 模板
+const cityGeoJsonUrlTemplate =
+	"https://geo.datav.aliyun.com/areas_v3/bound/{adcode}_full.json";
 
 interface FootprintsMapProps {
 	cities: FootprintCity[];
@@ -58,12 +63,12 @@ function pointInPolygon(point: [number, number], polygon: number[][]): boolean {
 	return inside;
 }
 
-// 根据坐标查找省份名称
+// 根据坐标查找省份信息和adcode
 function findProvinceByCoords(
-	geoJson: GeoJSON.FeatureCollection,
+	geoJson: GeoJSON,
 	lat: number,
 	lng: number
-): string | null {
+): { name: string; adcode: string } | null {
 	for (const feature of geoJson.features) {
 		const geometry = feature.geometry;
 		if (!geometry) continue;
@@ -74,10 +79,12 @@ function findProvinceByCoords(
 				? geometry.coordinates.flat(1) as number[][]
 				: [];
 
-		// 检查点是否在任一多边形内
 		for (const polygon of coords) {
 			if (pointInPolygon([lng, lat], polygon)) {
-				return feature.properties?.name || null;
+				return {
+					name: feature.properties?.name || "",
+					adcode: feature.properties?.adcode || "",
+				};
 			}
 		}
 	}
@@ -95,6 +102,7 @@ interface GeoJSON {
 		} | null;
 		properties?: {
 			name?: string;
+			adcode?: string;
 		};
 	}>;
 }
@@ -108,13 +116,13 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 
 		const initChart = async () => {
 			// 加载中国地图数据
-			let geoJson: GeoJSON;
+			let chinaGeoJson: GeoJSON;
 			try {
 				const response = await fetch(chinaGeoJsonUrl);
-				geoJson = await response.json();
-				echarts.registerMap("china", geoJson as object);
-			} catch {
-				console.error("加载中国地图数据失败");
+				chinaGeoJson = await response.json();
+				echarts.registerMap("china", chinaGeoJson as object);
+			} catch (e) {
+				console.error("加载中国地图数据失败", e);
 				return;
 			}
 
@@ -127,18 +135,70 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 			// 获取主题色
 			const primaryColor = parseThemeColor();
 
-			// 查找所有访问过的省份
-			const visitedProvinces = new Set<string>();
+			// 查找所有访问过的省份和 adcode
+			const provinceMap = new Map<string, { name: string; adcode: string }>();
+			// 存储城市对应的市级区域名称
+			const cityRegionNames = new Map<string, string>();
+
 			for (const city of citiesWithCoords) {
 				const province = findProvinceByCoords(
-					geoJson,
+					chinaGeoJson,
 					city.coords!.lat,
 					city.coords!.lng
 				);
-				if (province) {
-					visitedProvinces.add(province);
+				if (province && province.adcode) {
+					provinceMap.set(province.adcode, province);
 				}
 			}
+
+			// 动态加载访问过的省份的市级 GeoJSON，合并到主地图
+			const mergedFeatures = [...chinaGeoJson.features];
+			for (const [adcode] of provinceMap) {
+				try {
+					const response = await fetch(cityGeoJsonUrlTemplate.replace("{adcode}", adcode));
+					const cityGeoJson: GeoJSON = await response.json();
+					// 将市级数据添加到 features
+					mergedFeatures.push(...cityGeoJson.features);
+
+					// 根据坐标找到市级区域名称
+					for (const city of citiesWithCoords) {
+						const province = findProvinceByCoords(
+							chinaGeoJson,
+							city.coords!.lat,
+							city.coords!.lng
+						);
+						if (province && province.adcode === adcode) {
+							// 在市级 GeoJSON 中查找该坐标对应的区域
+							for (const feature of cityGeoJson.features) {
+								const geometry = feature.geometry;
+								if (!geometry) continue;
+
+								const coords: number[][][] = geometry.type === "Polygon"
+									? geometry.coordinates
+									: geometry.type === "MultiPolygon"
+										? geometry.coordinates.flat(1) as number[][]
+										: [];
+
+								for (const polygon of coords) {
+									if (pointInPolygon([city.coords!.lng, city.coords!.lat], polygon)) {
+										cityRegionNames.set(city.name, feature.properties?.name || "");
+										break;
+									}
+								}
+							}
+						}
+					}
+				} catch (e) {
+					console.warn(`加载省份 ${adcode} 市级数据失败`, e);
+				}
+			}
+
+			// 重新注册合并后的地图
+			const mergedGeoJson: GeoJSON = {
+				type: "FeatureCollection",
+				features: mergedFeatures,
+			};
+			echarts.registerMap("china_merged", mergedGeoJson as object);
 
 			// 构建散点数据
 			const scatterData = citiesWithCoords.map((city) => ({
@@ -149,18 +209,38 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 			// 判断是否为深色模式
 			const isDark = document.documentElement.classList.contains("dark");
 
-			// 构建省份高亮配置
-			const regions = Array.from(visitedProvinces).map((name) => ({
-				name,
-				itemStyle: {
-					areaColor: primaryColor + "40", // 主题色 25% 透明度
-				},
-				emphasis: {
+			// 构建高亮配置（省份 + 市级区域）
+			const regions: echarts.RegionsOption[] = [];
+
+			// 省份高亮
+			for (const province of provinceMap.values()) {
+				regions.push({
+					name: province.name,
+					itemStyle: {
+						areaColor: primaryColor + "30",
+					},
+					emphasis: {
+						itemStyle: {
+							areaColor: primaryColor + "50",
+						},
+					},
+				});
+			}
+
+			// 市级区域高亮（根据坐标匹配到的市级区域名称）
+			for (const [, regionName] of cityRegionNames) {
+				regions.push({
+					name: regionName,
 					itemStyle: {
 						areaColor: primaryColor + "60",
 					},
-				},
-			}));
+					emphasis: {
+						itemStyle: {
+							areaColor: primaryColor + "80",
+						},
+					},
+				});
+			}
 
 			// 图表配置
 			const option: echarts.EChartsOption = {
@@ -168,8 +248,9 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 				tooltip: {
 					trigger: "item",
 					formatter: (params: unknown) => {
-						const p = params as { name?: string; value?: number[] };
-						if (p.value) {
+						const p = params as { name?: string; value?: number[] | string };
+						// 散点数据
+						if (Array.isArray(p.value)) {
 							const city = citiesWithCoords.find(
 								(c) => c.coords!.lng === p.value![0] && c.coords!.lat === p.value![1]
 							);
@@ -181,11 +262,30 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 								</div>`;
 							}
 						}
-						return p.name || "";
+						// 地图区域（市级）
+						if (p.name) {
+							// 查找该市级区域对应的城市
+							const cityEntry = Array.from(cityRegionNames.entries()).find(
+								([, regionName]) => regionName === p.name
+							);
+							if (cityEntry) {
+								const cityName = cityEntry[0];
+								const city = citiesWithCoords.find((c) => c.name === cityName);
+								if (city) {
+									return `<div style="padding:4px;">
+										<strong>${cityName}</strong><br/>
+										${city.visited_at || ""}
+										${city.highlights ? `<br/><span style="color:#999">${city.highlights.join(", ")}</span>` : ""}
+									</div>`;
+								}
+							}
+							return p.name;
+						}
+						return "";
 					},
 				},
 				geo: {
-					map: "china",
+					map: "china_merged",
 					roam: true,
 					zoom: 2,
 					center: [105, 36],
@@ -209,16 +309,16 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 						type: "scatter",
 						coordinateSystem: "geo",
 						data: scatterData,
-						symbolSize: 14,
+						symbolSize: 12,
 						itemStyle: {
 							color: primaryColor,
-							shadowBlur: 6,
+							shadowBlur: 4,
 							shadowColor: primaryColor + "80",
 						},
 						emphasis: {
 							itemStyle: {
 								color: primaryColor,
-								shadowBlur: 12,
+								shadowBlur: 8,
 								shadowColor: primaryColor,
 							},
 						},
@@ -227,7 +327,7 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 						type: "effectScatter",
 						coordinateSystem: "geo",
 						data: scatterData.slice(0, 3),
-						symbolSize: 6,
+						symbolSize: 5,
 						showEffectOn: "render",
 						rippleEffect: {
 							brushType: "stroke",
@@ -236,7 +336,7 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 						},
 						itemStyle: {
 							color: primaryColor,
-							shadowBlur: 6,
+							shadowBlur: 4,
 							shadowColor: primaryColor,
 						},
 					},
