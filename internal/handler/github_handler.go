@@ -30,7 +30,7 @@ func NewGitHubHandler(githubService service.GitHubService, cfg *config.Config) *
 // @Success 200 {object} service.ContributionsResponse
 // @Failure 400 {object} Response
 // @Failure 500 {object} Response
-// @Router /github/contributions [get]
+// @Router /api/v1/github/contributions [get]
 func (h *GitHubHandler) GetContributions(c *gin.Context) {
 	// 直接从配置获取 GitHub 用户名
 	username := h.cfg.GitHubUsername()

@@ -60,6 +60,7 @@ func main() {
 	articleRepo := repository.NewArticleRepository(db)
 	categoryRepo := repository.NewCategoryRepository(db)
 	tagRepo := repository.NewTagRepository(db)
+	pageRepo := repository.NewPageRepository(db)
 
 	// 初始化 JWT 管理器
 	jwtManager := jwt.NewJWTManager(
@@ -79,6 +80,7 @@ func main() {
 	articleService := service.NewArticleService(articleRepo, categoryRepo, tagRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
 	tagService := service.NewTagService(tagRepo)
+	pageService := service.NewPageService(pageRepo)
 
 	// 初始化处理器
 	authHandler := handler.NewAuthHandler(authService)
@@ -87,6 +89,8 @@ func main() {
 	articleHandler := handler.NewArticleHandler(articleService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	tagHandler := handler.NewTagHandler(tagService)
+	sitemapHandler := handler.NewSitemapHandler(articleService, categoryService, tagService, cfg)
+	pageHandler := handler.NewPageHandler(pageService)
 
 	// 设置路由
 	appRouter := router.NewRouter(
@@ -97,6 +101,8 @@ func main() {
 		ownerHandler,
 		githubHandler,
 		authService,
+		sitemapHandler,
+		pageHandler,
 	)
 	r := appRouter.Setup(cfg.ServerMode())
 

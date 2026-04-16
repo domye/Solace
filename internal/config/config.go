@@ -19,6 +19,7 @@ type Config struct {
 	Migration MigrationConfig `toml:"migration"`
 	Admin     AdminConfig     `toml:"admin"`
 	GitHub    GitHubConfig    `toml:"github"`
+	Site      SiteConfig      `toml:"site"`
 
 	// 缓存的密码哈希
 	adminPasswordHash string
@@ -74,6 +75,11 @@ type AdminConfig struct {
 type GitHubConfig struct {
 	Token    string `toml:"token"`
 	Username string `toml:"username"`
+}
+
+// SiteConfig 站点配置
+type SiteConfig struct {
+	BaseURL string `toml:"base_url"` // 站点基础 URL，如 https://example.com
 }
 
 // Load 从 TOML 文件加载配置
@@ -160,3 +166,6 @@ func (c *Config) AdminPasswordHash() string { return c.GetAdminPasswordHash() }
 // GitHub 配置访问器
 func (c *Config) GitHubToken() string    { return c.GitHub.Token }
 func (c *Config) GitHubUsername() string { return c.GitHub.Username }
+
+// Site 配置访问器
+func (c *Config) SiteBaseURL() string { return c.Site.BaseURL }

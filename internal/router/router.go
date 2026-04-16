@@ -18,6 +18,8 @@ type Router struct {
 	tagHandler      *handler.TagHandler
 	ownerHandler    *handler.OwnerHandler
 	githubHandler   *handler.GitHubHandler
+	sitemapHandler  *handler.SitemapHandler
+	pageHandler     *handler.PageHandler
 	authService     service.AuthService
 }
 
@@ -30,6 +32,8 @@ func NewRouter(
 	ownerHandler *handler.OwnerHandler,
 	githubHandler *handler.GitHubHandler,
 	authService service.AuthService,
+	sitemapHandler *handler.SitemapHandler,
+	pageHandler *handler.PageHandler,
 ) *Router {
 	return &Router{
 		authHandler:     authHandler,
@@ -39,6 +43,8 @@ func NewRouter(
 		ownerHandler:    ownerHandler,
 		githubHandler:   githubHandler,
 		authService:     authService,
+		sitemapHandler:  sitemapHandler,
+		pageHandler:     pageHandler,
 	}
 }
 
@@ -57,6 +63,9 @@ func (r *Router) Setup(mode string) *gin.Engine {
 
 	// Swagger 文档路由
 	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+
+	// 站点地图
+	engine.GET("/sitemap.xml", r.sitemapHandler.GetSitemap)
 
 	// API v1 路由
 	v1 := engine.Group("/api/v1")
@@ -106,6 +115,12 @@ func (r *Router) Setup(mode string) *gin.Engine {
 			articles.GET("/slug/:slug", r.articleHandler.GetBySlug)
 		}
 
+		// 公开页面路由（导航列表）
+		v1.GET("/pages/nav", r.pageHandler.GetNavPages)
+
+		// 公开页面路由（按 slug 访问）
+		v1.GET("/pages/slug/:slug", r.pageHandler.GetBySlug)
+
 		// 受保护路由
 		protected := v1.Group("")
 		protected.Use(middleware.Auth(r.authService))
@@ -132,6 +147,16 @@ func (r *Router) Setup(mode string) *gin.Engine {
 				protectedTags.POST("", r.tagHandler.Create)
 				protectedTags.PUT("/:id", r.tagHandler.Update)
 				protectedTags.DELETE("/:id", r.tagHandler.Delete)
+			}
+
+			// 受保护的页面路由
+			protectedPages := protected.Group("/pages")
+			{
+				protectedPages.GET("", r.pageHandler.GetList)
+				protectedPages.GET("/:id", r.pageHandler.GetByID)
+				protectedPages.POST("", r.pageHandler.Create)
+				protectedPages.PUT("/:id", r.pageHandler.Update)
+				protectedPages.DELETE("/:id", r.pageHandler.Delete)
 			}
 		}
 	}

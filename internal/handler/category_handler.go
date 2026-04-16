@@ -29,7 +29,7 @@ func NewCategoryHandler(categoryService service.CategoryService) *CategoryHandle
 // @Success 201 {object} Response
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
-// @Router /categories [post]
+// @Router /api/v1/categories [post]
 func (h *CategoryHandler) Create(c *gin.Context) {
 	var req request.CreateCategoryRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -60,7 +60,7 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 // @Param id path int true "分类ID"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /categories/{id} [get]
+// @Router /api/v1/categories/{id} [get]
 func (h *CategoryHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -85,7 +85,7 @@ func (h *CategoryHandler) GetByID(c *gin.Context) {
 // @Param slug path string true "分类Slug"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /categories/slug/{slug} [get]
+// @Router /api/v1/categories/slug/{slug} [get]
 func (h *CategoryHandler) GetBySlug(c *gin.Context) {
 	slug := c.Param("slug")
 	if slug == "" {
@@ -107,7 +107,7 @@ func (h *CategoryHandler) GetBySlug(c *gin.Context) {
 // @Tags category
 // @Produce json
 // @Success 200 {object} Response
-// @Router /categories [get]
+// @Router /api/v1/categories [get]
 func (h *CategoryHandler) GetList(c *gin.Context) {
 	list, err := h.categoryService.GetList(c.Request.Context())
 	if err != nil {
@@ -129,7 +129,7 @@ func (h *CategoryHandler) GetList(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /categories/{id} [put]
+// @Router /api/v1/categories/{id} [put]
 func (h *CategoryHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -169,7 +169,7 @@ func (h *CategoryHandler) Update(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /categories/{id} [delete]
+// @Router /api/v1/categories/{id} [delete]
 func (h *CategoryHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)

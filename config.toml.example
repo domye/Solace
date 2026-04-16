@@ -33,3 +33,10 @@ nickname = "博主"
 avatar_url = ""
 bio = "欢迎来到我的博客"
 github = ""
+
+[github]
+token = ""         # GitHub Personal Access Token
+username = ""      # GitHub 用户名
+
+[site]
+base_url = "https://yourdomain.com"  # 站点完整 URL，用于生成 sitemap

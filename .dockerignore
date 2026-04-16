@@ -1,0 +1,41 @@
+# Binaries
+server
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test files
+*.test
+*.test.go
+coverage.out
+*.lcov
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Config (will use example or mounted)
+config.toml
+
+# Misc
+*.log
+*.md
+!README.md
+.DS_Store
+Thumbs.db
+
+# Development files
+Makefile
+.golangci.yml
+
+# Local development
+.env
+.env.*

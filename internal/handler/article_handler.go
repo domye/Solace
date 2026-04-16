@@ -30,7 +30,7 @@ func NewArticleHandler(articleService service.ArticleService) *ArticleHandler {
 // @Success 201 {object} Response
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
-// @Router /articles [post]
+// @Router /api/v1/articles [post]
 func (h *ArticleHandler) Create(c *gin.Context) {
 	var req request.CreateArticleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -78,7 +78,7 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 // @Param id path int true "文章ID"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /articles/{id} [get]
+// @Router /api/v1/articles/{id} [get]
 func (h *ArticleHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -103,7 +103,7 @@ func (h *ArticleHandler) GetByID(c *gin.Context) {
 // @Param slug path string true "文章 Slug"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /articles/slug/{slug} [get]
+// @Router /api/v1/articles/slug/{slug} [get]
 func (h *ArticleHandler) GetBySlug(c *gin.Context) {
 	slug := c.Param("slug")
 	if slug == "" {
@@ -131,7 +131,7 @@ func (h *ArticleHandler) GetBySlug(c *gin.Context) {
 // @Param category query string false "按分类slug筛选"
 // @Param tag query string false "按标签slug筛选"
 // @Success 200 {object} Response
-// @Router /articles [get]
+// @Router /api/v1/articles [get]
 func (h *ArticleHandler) GetList(c *gin.Context) {
 	var query request.ArticleListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -173,7 +173,7 @@ func (h *ArticleHandler) GetList(c *gin.Context) {
 // @Tags article
 // @Produce json
 // @Success 200 {object} Response
-// @Router /articles/archive [get]
+// @Router /api/v1/articles/archive [get]
 func (h *ArticleHandler) GetArchive(c *gin.Context) {
 	resp, err := h.articleService.GetArchive(c.Request.Context())
 	if err != nil {
@@ -192,7 +192,7 @@ func (h *ArticleHandler) GetArchive(c *gin.Context) {
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(10)
 // @Success 200 {object} Response
-// @Router /articles/search [get]
+// @Router /api/v1/articles/search [get]
 func (h *ArticleHandler) Search(c *gin.Context) {
 	query := c.Query("q")
 	if query == "" {
@@ -230,7 +230,7 @@ func (h *ArticleHandler) Search(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /articles/{id} [put]
+// @Router /api/v1/articles/{id} [put]
 func (h *ArticleHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 
@@ -281,7 +281,7 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /articles/{id} [delete]
+// @Router /api/v1/articles/{id} [delete]
 func (h *ArticleHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 
@@ -305,7 +305,7 @@ func (h *ArticleHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Param limit query int false "数量" default(5)
 // @Success 200 {object} Response
-// @Router /articles/random [get]
+// @Router /api/v1/articles/random [get]
 func (h *ArticleHandler) GetRandom(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
 	if limit < 1 || limit > 20 {
@@ -327,7 +327,7 @@ func (h *ArticleHandler) GetRandom(c *gin.Context) {
 // @Produce json
 // @Param limit query int false "数量" default(5)
 // @Success 200 {object} Response
-// @Router /articles/recent [get]
+// @Router /api/v1/articles/recent [get]
 func (h *ArticleHandler) GetRecent(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
 	if limit < 1 || limit > 20 {
