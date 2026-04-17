@@ -180,7 +180,7 @@ export function Navbar() {
 			</div>
 		</div>
 
-        <div ref={mobileMenuRef} className={`float-panel absolute top-full left-0 right-0 mt-1 p-2 md:hidden transition-all ${showMobileMenu ? '' : 'float-panel-closed'}`}>
+        <div ref={mobileMenuRef} className={`float-panel absolute top-full left-4 right-4 p-2 md:hidden transition-all ${showMobileMenu ? '' : 'float-panel-closed'}`}>
           {mobileMenuItems.map((item) => (
             <MenuItem key={item.path} link={item} onClose={closeMobileMenu} onLogout={handleLogout} />
           ))}
