@@ -55,12 +55,6 @@ const docTemplate = `{
                         "in": "query"
                     },
                     {
-                        "type": "integer",
-                        "description": "按作者ID筛选",
-                        "name": "author_id",
-                        "in": "query"
-                    },
-                    {
                         "type": "string",
                         "description": "按分类slug筛选",
                         "name": "category",
@@ -808,6 +802,277 @@ const docTemplate = `{
                 }
             }
         },
+        "/pages": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "page"
+                ],
+                "summary": "获取页面列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "default": 1,
+                        "description": "页码",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 10,
+                        "description": "每页数量",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "按状态筛选",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "按模板筛选",
+                        "name": "template",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "page"
+                ],
+                "summary": "创建页面",
+                "parameters": [
+                    {
+                        "description": "页面数据",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreatePageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/pages/nav": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "page"
+                ],
+                "summary": "获取导航页面列表",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/pages/slug/{slug}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "page"
+                ],
+                "summary": "根据 Slug 获取页面",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "页面 Slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/pages/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "page"
+                ],
+                "summary": "根据 ID 获取页面",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页面ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "page"
+                ],
+                "summary": "更新页面",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页面ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "页面数据",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdatePageRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "page"
+                ],
+                "summary": "删除页面",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "页面ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "无内容"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/tags": {
             "get": {
                 "produces": [
@@ -1135,6 +1400,58 @@ const docTemplate = `{
                 }
             }
         },
+        "request.CreatePageRequest": {
+            "type": "object",
+            "required": [
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "cover_image": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "order": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "show_in_nav": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "draft",
+                        "published"
+                    ]
+                },
+                "summary": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "template": {
+                    "type": "string",
+                    "enum": [
+                        "default",
+                        "about",
+                        "projects",
+                        "footprints"
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                }
+            }
+        },
         "request.CreateTagRequest": {
             "type": "object",
             "required": [
@@ -1254,6 +1571,62 @@ const docTemplate = `{
                 "sort_order": {
                     "type": "integer",
                     "minimum": 0
+                }
+            }
+        },
+        "request.UpdatePageRequest": {
+            "type": "object",
+            "required": [
+                "version"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "cover_image": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "order": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "show_in_nav": {
+                    "type": "boolean"
+                },
+                "slug": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
+                "status": {
+                    "type": "string",
+                    "enum": [
+                        "draft",
+                        "published"
+                    ]
+                },
+                "summary": {
+                    "type": "string",
+                    "maxLength": 500
+                },
+                "template": {
+                    "type": "string",
+                    "enum": [
+                        "default",
+                        "about",
+                        "projects",
+                        "footprints"
+                    ]
+                },
+                "title": {
+                    "type": "string",
+                    "maxLength": 200,
+                    "minLength": 1
+                },
+                "version": {
+                    "type": "integer",
+                    "minimum": 1
                 }
             }
         },

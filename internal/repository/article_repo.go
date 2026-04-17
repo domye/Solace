@@ -52,9 +52,6 @@ func (r *articleRepo) FindAll(ctx context.Context, limit, offset int, filters ma
 	if status, ok := filters["status"]; ok {
 		query = query.Where("status = ?", status)
 	}
-	if authorID, ok := filters["author_id"]; ok {
-		query = query.Where("author_id = ?", authorID)
-	}
 
 	// 统计总数
 	if err := query.Count(&total).Error; err != nil {
@@ -81,11 +78,6 @@ func (r *articleRepo) FindPublished(ctx context.Context, limit, offset int, filt
 		Preload("Category").
 		Preload("Tags").
 		Where("status = ?", model.StatusPublished)
-
-	// 应用筛选条件
-	if authorID, ok := filters["author_id"]; ok {
-		query = query.Where("author_id = ?", authorID)
-	}
 
 	// 统计总数
 	if err := query.Count(&total).Error; err != nil {

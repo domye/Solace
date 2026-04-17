@@ -29,7 +29,7 @@ func NewTagHandler(tagService service.TagService) *TagHandler {
 // @Success 201 {object} Response
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
-// @Router /api/v1/tags [post]
+// @Router /tags [post]
 func (h *TagHandler) Create(c *gin.Context) {
 	var req request.CreateTagRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,7 +53,7 @@ func (h *TagHandler) Create(c *gin.Context) {
 // @Param id path int true "标签ID"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/tags/{id} [get]
+// @Router /tags/{id} [get]
 func (h *TagHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -78,7 +78,7 @@ func (h *TagHandler) GetByID(c *gin.Context) {
 // @Param slug path string true "标签Slug"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/tags/slug/{slug} [get]
+// @Router /tags/slug/{slug} [get]
 func (h *TagHandler) GetBySlug(c *gin.Context) {
 	slug := c.Param("slug")
 	if slug == "" {
@@ -100,7 +100,7 @@ func (h *TagHandler) GetBySlug(c *gin.Context) {
 // @Tags tag
 // @Produce json
 // @Success 200 {object} Response
-// @Router /api/v1/tags [get]
+// @Router /tags [get]
 func (h *TagHandler) GetList(c *gin.Context) {
 	list, err := h.tagService.GetList(c.Request.Context())
 	if err != nil {
@@ -122,7 +122,7 @@ func (h *TagHandler) GetList(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/tags/{id} [put]
+// @Router /tags/{id} [put]
 func (h *TagHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -154,7 +154,7 @@ func (h *TagHandler) Update(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/tags/{id} [delete]
+// @Router /tags/{id} [delete]
 func (h *TagHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)

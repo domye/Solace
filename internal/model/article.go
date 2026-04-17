@@ -14,7 +14,6 @@ type Article struct {
 	Content     string         `gorm:"type:text;not null" json:"content"`
 	Summary     string         `gorm:"type:varchar(500)" json:"summary,omitempty"`
 	CoverImage  string         `gorm:"type:varchar(500)" json:"cover_image,omitempty"`
-	AuthorID    uint           `gorm:"not null;index" json:"author_id"`
 	CategoryID  *uint          `gorm:"index" json:"category_id,omitempty"`
 	Status      string         `gorm:"type:varchar(20);default:draft;index" json:"status"`
 	IsTop       bool           `gorm:"default:false" json:"is_top"`

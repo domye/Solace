@@ -29,7 +29,7 @@ func NewPageHandler(pageService service.PageService) *PageHandler {
 // @Success 201 {object} Response
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
-// @Router /api/v1/pages [post]
+// @Router /pages [post]
 func (h *PageHandler) Create(c *gin.Context) {
 	var req request.CreatePageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -64,7 +64,7 @@ func (h *PageHandler) Create(c *gin.Context) {
 // @Param id path int true "页面ID"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/pages/{id} [get]
+// @Router /pages/{id} [get]
 func (h *PageHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -89,7 +89,7 @@ func (h *PageHandler) GetByID(c *gin.Context) {
 // @Param slug path string true "页面 Slug"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/pages/slug/{slug} [get]
+// @Router /pages/slug/{slug} [get]
 func (h *PageHandler) GetBySlug(c *gin.Context) {
 	slug := c.Param("slug")
 	if slug == "" {
@@ -115,7 +115,7 @@ func (h *PageHandler) GetBySlug(c *gin.Context) {
 // @Param status query string false "按状态筛选"
 // @Param template query string false "按模板筛选"
 // @Success 200 {object} Response
-// @Router /api/v1/pages [get]
+// @Router /pages [get]
 func (h *PageHandler) GetList(c *gin.Context) {
 	var query request.PageListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -150,7 +150,7 @@ func (h *PageHandler) GetList(c *gin.Context) {
 // @Tags page
 // @Produce json
 // @Success 200 {object} Response
-// @Router /api/v1/pages/nav [get]
+// @Router /pages/nav [get]
 func (h *PageHandler) GetNavPages(c *gin.Context) {
 	pages, err := h.pageService.GetNavPages(c.Request.Context())
 	if err != nil {
@@ -172,7 +172,7 @@ func (h *PageHandler) GetNavPages(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/pages/{id} [put]
+// @Router /pages/{id} [put]
 func (h *PageHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -217,7 +217,7 @@ func (h *PageHandler) Update(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/pages/{id} [delete]
+// @Router /pages/{id} [delete]
 func (h *PageHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)

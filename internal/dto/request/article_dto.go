@@ -30,7 +30,6 @@ type ArticleListQuery struct {
 	Page     int    `form:"page" validate:"omitempty,min=1"`
 	PageSize int    `form:"pageSize" validate:"omitempty,min=1,max=100"`
 	Status   string `form:"status" validate:"omitempty,oneof=draft published"`
-	AuthorID uint   `form:"author_id" validate:"omitempty"`
 	Category string `form:"category" validate:"omitempty"` // 分类 slug
 	Tag      string `form:"tag" validate:"omitempty"`      // 标签 slug
 }

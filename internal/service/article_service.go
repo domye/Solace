@@ -25,10 +25,10 @@ var (
 
 // ArticleService 文章业务逻辑接口
 type ArticleService interface {
-	Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string, authorID uint) (*response.ArticleResponse, error)
+	Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error)
 	GetByID(ctx context.Context, id uint) (*response.ArticleResponse, error)
 	GetBySlug(ctx context.Context, slug string) (*response.ArticleResponse, error)
-	GetList(ctx context.Context, page, pageSize int, status string, authorID *uint, categorySlug, tagSlug string) (*response.ArticleListResponse, error)
+	GetList(ctx context.Context, page, pageSize int, status string, categorySlug, tagSlug string) (*response.ArticleListResponse, error)
 	GetArchive(ctx context.Context) (*response.ArchiveResponse, error)
 	Search(ctx context.Context, query string, page, pageSize int) (*response.ArticleListResponse, error)
 	GetRandom(ctx context.Context, limit int) ([]*response.ArticleSummary, error)
@@ -99,7 +99,7 @@ func NewArticleService(articleRepo articleRepository, categoryRepo categoryRepos
 	}
 }
 
-func (s *articleService) Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string, authorID uint) (*response.ArticleResponse, error) {
+func (s *articleService) Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
 	// 验证分类是否存在
 	if categoryID != nil {
 		if _, err := s.categoryRepo.FindByID(ctx, *categoryID); err != nil {
@@ -133,7 +133,6 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 		Content:    content,
 		Summary:    summary,
 		CoverImage: coverImage,
-		AuthorID:   authorID,
 		CategoryID: categoryID,
 		Status:     status,
 		Version:    1,
@@ -185,7 +184,7 @@ func (s *articleService) GetBySlug(ctx context.Context, articleSlug string) (*re
 	return toArticleResponse(article, prev, next), nil
 }
 
-func (s *articleService) GetList(ctx context.Context, page, pageSize int, status string, authorID *uint, categorySlug, tagSlug string) (*response.ArticleListResponse, error) {
+func (s *articleService) GetList(ctx context.Context, page, pageSize int, status string, categorySlug, tagSlug string) (*response.ArticleListResponse, error) {
 	offset := (page - 1) * pageSize
 	var articles []*model.Article
 	var total int64
@@ -196,17 +195,10 @@ func (s *articleService) GetList(ctx context.Context, page, pageSize int, status
 	} else if tagSlug != "" {
 		articles, total, err = s.articleRepo.FindByTag(ctx, tagSlug, pageSize, offset)
 	} else if status == "" || status == model.StatusPublished {
-		filters := make(map[string]interface{})
-		if authorID != nil {
-			filters["author_id"] = *authorID
-		}
-		articles, total, err = s.articleRepo.FindPublished(ctx, pageSize, offset, filters)
+		articles, total, err = s.articleRepo.FindPublished(ctx, pageSize, offset, nil)
 	} else {
 		filters := make(map[string]interface{})
 		filters["status"] = status
-		if authorID != nil {
-			filters["author_id"] = *authorID
-		}
 		articles, total, err = s.articleRepo.FindAll(ctx, pageSize, offset, filters)
 	}
 
@@ -429,7 +421,6 @@ func toArticleResponse(article *model.Article, prev, next *model.Article) *respo
 		Content:     article.Content,
 		Summary:     article.Summary,
 		CoverImage:  article.CoverImage,
-		AuthorID:    article.AuthorID,
 		Status:      article.Status,
 		IsTop:       article.IsTop,
 		Version:     article.Version,

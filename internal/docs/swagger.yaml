@@ -72,6 +72,44 @@ definitions:
     required:
     - name
     type: object
+  request.CreatePageRequest:
+    properties:
+      content:
+        type: string
+      cover_image:
+        maxLength: 500
+        type: string
+      order:
+        minimum: 0
+        type: integer
+      show_in_nav:
+        type: boolean
+      slug:
+        maxLength: 200
+        minLength: 1
+        type: string
+      status:
+        enum:
+        - draft
+        - published
+        type: string
+      summary:
+        maxLength: 500
+        type: string
+      template:
+        enum:
+        - default
+        - about
+        - projects
+        - footprints
+        type: string
+      title:
+        maxLength: 200
+        minLength: 1
+        type: string
+    required:
+    - title
+    type: object
   request.CreateTagRequest:
     properties:
       name:
@@ -159,6 +197,47 @@ definitions:
         minimum: 0
         type: integer
     type: object
+  request.UpdatePageRequest:
+    properties:
+      content:
+        type: string
+      cover_image:
+        maxLength: 500
+        type: string
+      order:
+        minimum: 0
+        type: integer
+      show_in_nav:
+        type: boolean
+      slug:
+        maxLength: 200
+        minLength: 1
+        type: string
+      status:
+        enum:
+        - draft
+        - published
+        type: string
+      summary:
+        maxLength: 500
+        type: string
+      template:
+        enum:
+        - default
+        - about
+        - projects
+        - footprints
+        type: string
+      title:
+        maxLength: 200
+        minLength: 1
+        type: string
+      version:
+        minimum: 1
+        type: integer
+    required:
+    - version
+    type: object
   request.UpdateTagRequest:
     properties:
       name:
@@ -223,10 +302,6 @@ paths:
         in: query
         name: status
         type: string
-      - description: 按作者ID筛选
-        in: query
-        name: author_id
-        type: integer
       - description: 按分类slug筛选
         in: query
         name: category
@@ -716,6 +791,183 @@ paths:
       summary: 获取站长公开信息
       tags:
       - owner
+  /pages:
+    get:
+      parameters:
+      - default: 1
+        description: 页码
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 每页数量
+        in: query
+        name: pageSize
+        type: integer
+      - description: 按状态筛选
+        in: query
+        name: status
+        type: string
+      - description: 按模板筛选
+        in: query
+        name: template
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 获取页面列表
+      tags:
+      - page
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页面数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreatePageRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 创建页面
+      tags:
+      - page
+  /pages/{id}:
+    delete:
+      parameters:
+      - description: 页面ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: 无内容
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 删除页面
+      tags:
+      - page
+    get:
+      parameters:
+      - description: 页面ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 根据 ID 获取页面
+      tags:
+      - page
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 页面ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 页面数据
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdatePageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 更新页面
+      tags:
+      - page
+  /pages/nav:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 获取导航页面列表
+      tags:
+      - page
+  /pages/slug/{slug}:
+    get:
+      parameters:
+      - description: 页面 Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 根据 Slug 获取页面
+      tags:
+      - page
   /tags:
     get:
       produces:

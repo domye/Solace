@@ -30,7 +30,7 @@ func NewArticleHandler(articleService service.ArticleService) *ArticleHandler {
 // @Success 201 {object} Response
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
-// @Router /api/v1/articles [post]
+// @Router /articles [post]
 func (h *ArticleHandler) Create(c *gin.Context) {
 	var req request.CreateArticleRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -50,7 +50,6 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 		status = "draft"
 	}
 
-	// 单用户模式，authorID 固定为 1
 	article, err := h.articleService.Create(
 		c.Request.Context(),
 		req.Title,
@@ -61,7 +60,6 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 		req.CategoryID,
 		req.TagIDs,
 		status,
-		1, // 固定 authorID
 	)
 	if err != nil {
 		RespondWithError(c, err)
@@ -78,7 +76,7 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 // @Param id path int true "文章ID"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/articles/{id} [get]
+// @Router /articles/{id} [get]
 func (h *ArticleHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 32)
@@ -103,7 +101,7 @@ func (h *ArticleHandler) GetByID(c *gin.Context) {
 // @Param slug path string true "文章 Slug"
 // @Success 200 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/articles/slug/{slug} [get]
+// @Router /articles/slug/{slug} [get]
 func (h *ArticleHandler) GetBySlug(c *gin.Context) {
 	slug := c.Param("slug")
 	if slug == "" {
@@ -127,11 +125,10 @@ func (h *ArticleHandler) GetBySlug(c *gin.Context) {
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(10)
 // @Param status query string false "按状态筛选"
-// @Param author_id query int false "按作者ID筛选"
 // @Param category query string false "按分类slug筛选"
 // @Param tag query string false "按标签slug筛选"
 // @Success 200 {object} Response
-// @Router /api/v1/articles [get]
+// @Router /articles [get]
 func (h *ArticleHandler) GetList(c *gin.Context) {
 	var query request.ArticleListQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -146,17 +143,11 @@ func (h *ArticleHandler) GetList(c *gin.Context) {
 		query.PageSize = 10
 	}
 
-	var authorID *uint
-	if query.AuthorID > 0 {
-		authorID = &query.AuthorID
-	}
-
 	resp, err := h.articleService.GetList(
 		c.Request.Context(),
 		query.Page,
 		query.PageSize,
 		query.Status,
-		authorID,
 		query.Category,
 		query.Tag,
 	)
@@ -173,7 +164,7 @@ func (h *ArticleHandler) GetList(c *gin.Context) {
 // @Tags article
 // @Produce json
 // @Success 200 {object} Response
-// @Router /api/v1/articles/archive [get]
+// @Router /articles/archive [get]
 func (h *ArticleHandler) GetArchive(c *gin.Context) {
 	resp, err := h.articleService.GetArchive(c.Request.Context())
 	if err != nil {
@@ -192,7 +183,7 @@ func (h *ArticleHandler) GetArchive(c *gin.Context) {
 // @Param page query int false "页码" default(1)
 // @Param pageSize query int false "每页数量" default(10)
 // @Success 200 {object} Response
-// @Router /api/v1/articles/search [get]
+// @Router /articles/search [get]
 func (h *ArticleHandler) Search(c *gin.Context) {
 	query := c.Query("q")
 	if query == "" {
@@ -230,7 +221,7 @@ func (h *ArticleHandler) Search(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/articles/{id} [put]
+// @Router /articles/{id} [put]
 func (h *ArticleHandler) Update(c *gin.Context) {
 	idStr := c.Param("id")
 
@@ -281,7 +272,7 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 // @Failure 400 {object} Response
 // @Failure 401 {object} Response
 // @Failure 404 {object} Response
-// @Router /api/v1/articles/{id} [delete]
+// @Router /articles/{id} [delete]
 func (h *ArticleHandler) Delete(c *gin.Context) {
 	idStr := c.Param("id")
 
@@ -305,7 +296,7 @@ func (h *ArticleHandler) Delete(c *gin.Context) {
 // @Produce json
 // @Param limit query int false "数量" default(5)
 // @Success 200 {object} Response
-// @Router /api/v1/articles/random [get]
+// @Router /articles/random [get]
 func (h *ArticleHandler) GetRandom(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
 	if limit < 1 || limit > 20 {
@@ -327,7 +318,7 @@ func (h *ArticleHandler) GetRandom(c *gin.Context) {
 // @Produce json
 // @Param limit query int false "数量" default(5)
 // @Success 200 {object} Response
-// @Router /api/v1/articles/recent [get]
+// @Router /articles/recent [get]
 func (h *ArticleHandler) GetRecent(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
 	if limit < 1 || limit > 20 {

@@ -20,7 +20,7 @@ func NewOwnerHandler(ownerService service.OwnerService) *OwnerHandler {
 // @Tags owner
 // @Produce json
 // @Success 200 {object} Response
-// @Router /api/v1/owner [get]
+// @Router /owner [get]
 func (h *OwnerHandler) GetOwner(c *gin.Context) {
 	owner, err := h.ownerService.GetOwner(c.Request.Context())
 	if err != nil {

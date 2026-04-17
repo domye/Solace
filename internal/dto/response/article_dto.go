@@ -10,7 +10,6 @@ type ArticleResponse struct {
 	Content     string            `json:"content"`
 	Summary     string            `json:"summary,omitempty"`
 	CoverImage  string            `json:"cover_image,omitempty"`
-	AuthorID    uint              `json:"author_id"`
 	Category    *CategoryResponse `json:"category,omitempty"`
 	Tags        []*TagResponse    `json:"tags,omitempty"`
 	Status      string            `json:"status"`
