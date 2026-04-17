@@ -80,7 +80,7 @@ const timelineConfig: ListEditorConfig<TimelineEvent> = {
 	renderItem: (item) => (
 		<div className="flex gap-1 mt-1">
 			{item.type && (
-				<span className="bg-[var(--bg-secondary)] text-50 rounded-[var(--radius-small)] px-1.5 py-0.5 text-xs">
+				<span className="bg-[var(--bg-secondary)] text-[var(--text-50)] rounded-[var(--radius-small)] px-1.5 py-0.5 text-xs">
 					{item.type === "milestone"
 						? "里程碑"
 						: item.type === "work"

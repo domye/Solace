@@ -3,17 +3,24 @@
  *
  * 用于 Projects 模板的项目列表可视化编辑
  */
-
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { SafeIcon } from "@/components/common/ui";
+import {
+	InputField,
+	TagsField,
+	SelectField,
+	ActionButtons,
+	SortButtons,
+	EditFormHeader,
+	EditFormActions,
+	EditorHeader,
+	EmptyState,
+} from "./EditorComponents";
 import type { Project } from "@/types";
 
-interface ProjectsEditorProps {
-	projects: Project[];
-	onChange: (projects: Project[]) => void;
-}
+// ============ 常量 ============
 
-const emptyProject: Project = {
+const EMPTY_PROJECT: Project = {
 	name: "",
 	description: "",
 	tech: [],
@@ -25,7 +32,7 @@ const emptyProject: Project = {
 	status: "active",
 };
 
-const statusOptions = [
+const STATUS_OPTIONS = [
 	{
 		value: "active",
 		label: "进行中",
@@ -38,383 +45,302 @@ const statusOptions = [
 	},
 ];
 
+// ============ 子组件 ============
+
+/** 项目列表项 */
+function ProjectItem({
+	project,
+	index,
+	total,
+	onEdit,
+	onDelete,
+	onMoveUp,
+	onMoveDown,
+}: {
+	project: Project;
+	index: number;
+	total: number;
+	onEdit: () => void;
+	onDelete: () => void;
+	onMoveUp: () => void;
+	onMoveDown: () => void;
+}) {
+	return (
+		<div className="card-base p-3 flex items-center gap-3 group">
+			<SortButtons
+				onMoveUp={onMoveUp}
+				onMoveDown={onMoveDown}
+				canMoveUp={index > 0}
+				canMoveDown={index < total - 1}
+			/>
+
+			{project.avatar && (
+				<img
+					src={project.avatar}
+					alt={project.name}
+					className="w-10 h-10 rounded-[var(--radius-small)] object-cover"
+				/>
+			)}
+
+			<div className="flex-1 min-w-0">
+				<div className="flex items-center gap-2">
+					<span className="text-[var(--text-75)] font-medium truncate">
+						{project.name}
+					</span>
+					{project.githubRepo && (
+						<SafeIcon icon="fa6-brands:github" size={14} className="text-[var(--text-50)]" />
+					)}
+					{project.status === "archived" && (
+						<span className="text-[var(--text-40)] text-xs">已归档</span>
+					)}
+				</div>
+				{project.tech.length > 0 && (
+					<div className="flex flex-wrap gap-1 mt-0.5">
+						{project.tech.slice(0, 4).map((tech) => (
+							<span
+								key={tech}
+								className="bg-[var(--bg-secondary)] text-[var(--text-50)] rounded-[var(--radius-small)] px-1.5 py-0.5 text-xs"
+							>
+								{tech}
+							</span>
+						))}
+					</div>
+				)}
+			</div>
+
+			<ActionButtons onEdit={onEdit} onDelete={onDelete} />
+		</div>
+	);
+}
+
+// ============ 主组件 ============
+
+interface ProjectsEditorProps {
+	projects: Project[];
+	onChange: (projects: Project[]) => void;
+}
+
 export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 	const [editingIndex, setEditingIndex] = useState<number | null>(null);
-	const [editForm, setEditForm] = useState<Project>(emptyProject);
+	const [editForm, setEditForm] = useState<Project>(EMPTY_PROJECT);
 	const [techInput, setTechInput] = useState("");
 
-	const handleAddProject = () => {
+	// 添加项目
+	const handleAddProject = useCallback(() => {
 		setEditingIndex(projects.length);
-		setEditForm(emptyProject);
+		setEditForm(EMPTY_PROJECT);
 		setTechInput("");
-	};
+	}, [projects.length]);
 
-	const handleEditProject = (index: number) => {
-		setEditingIndex(index);
-		setEditForm(projects[index] || emptyProject);
-		setTechInput("");
-	};
+	// 编辑项目
+	const handleEditProject = useCallback(
+		(index: number) => {
+			setEditingIndex(index);
+			setEditForm(projects[index] || EMPTY_PROJECT);
+			setTechInput("");
+		},
+		[projects],
+	);
 
-	const handleDeleteProject = (index: number) => {
-		onChange(projects.filter((_, i) => i !== index));
-		if (editingIndex === index) {
-			setEditingIndex(null);
-		}
-	};
+	// 删除项目
+	const handleDeleteProject = useCallback(
+		(index: number) => {
+			onChange(projects.filter((_, i) => i !== index));
+			if (editingIndex === index) {
+				setEditingIndex(null);
+			}
+		},
+		[projects, editingIndex, onChange],
+	);
 
-	const handleSaveEdit = () => {
+	// 保存
+	const handleSaveEdit = useCallback(() => {
 		if (!editForm.name.trim()) return;
 
-		const techArray = editForm.tech;
-
-		const updatedProject: Project = {
-			...editForm,
-			tech: techArray,
-		};
-
 		if (editingIndex === projects.length) {
-			onChange([...projects, updatedProject]);
+			onChange([...projects, editForm]);
 		} else if (editingIndex !== null && projects[editingIndex]) {
-			onChange(
-				projects.map((p, i) => (i === editingIndex ? updatedProject : p)),
-			);
+			onChange(projects.map((p, i) => (i === editingIndex ? editForm : p)));
 		}
 
 		setEditingIndex(null);
-		setEditForm(emptyProject);
+		setEditForm(EMPTY_PROJECT);
 		setTechInput("");
-	};
+	}, [editForm, editingIndex, projects, onChange]);
 
-	const handleCancelEdit = () => {
+	// 取消
+	const handleCancelEdit = useCallback(() => {
 		setEditingIndex(null);
-		setEditForm(emptyProject);
+		setEditForm(EMPTY_PROJECT);
 		setTechInput("");
-	};
+	}, []);
 
-	const handleAddTech = () => {
-		if (techInput.trim() && !editForm.tech.includes(techInput.trim())) {
-			setEditForm({ ...editForm, tech: [...editForm.tech, techInput.trim()] });
-			setTechInput("");
-		}
-	};
+	// 添加技术标签
+	const handleAddTech = useCallback(
+		(tag: string) => {
+			const trimmed = tag.trim();
+			if (trimmed && !editForm.tech.includes(trimmed)) {
+				setEditForm({ ...editForm, tech: [...editForm.tech, trimmed] });
+				setTechInput("");
+			}
+		},
+		[editForm],
+	);
 
-	const handleRemoveTech = (tech: string) => {
-		setEditForm({ ...editForm, tech: editForm.tech.filter((t) => t !== tech) });
-	};
+	// 移除技术标签
+	const handleRemoveTech = useCallback(
+		(tech: string) => {
+			setEditForm({ ...editForm, tech: editForm.tech.filter((t) => t !== tech) });
+		},
+		[editForm],
+	);
 
-	const handleMoveUp = (index: number) => {
-		if (index === 0) return;
-		const newProjects = [...projects];
-		const prev = newProjects[index - 1];
-		const curr = newProjects[index];
-		if (prev && curr) {
-			newProjects[index - 1] = curr;
-			newProjects[index] = prev;
-			onChange(newProjects);
-		}
-	};
+	// 上移
+	const handleMoveUp = useCallback(
+		(index: number) => {
+			if (index === 0) return;
+			const newProjects = [...projects];
+			const prev = newProjects[index - 1];
+			const curr = newProjects[index];
+			if (prev && curr) {
+				newProjects[index - 1] = curr;
+				newProjects[index] = prev;
+				onChange(newProjects);
+			}
+		},
+		[projects, onChange],
+	);
 
-	const handleMoveDown = (index: number) => {
-		if (index === projects.length - 1) return;
-		const newProjects = [...projects];
-		const curr = newProjects[index];
-		const next = newProjects[index + 1];
-		if (curr && next) {
-			newProjects[index] = next;
-			newProjects[index + 1] = curr;
-			onChange(newProjects);
-		}
-	};
+	// 下移
+	const handleMoveDown = useCallback(
+		(index: number) => {
+			if (index === projects.length - 1) return;
+			const newProjects = [...projects];
+			const curr = newProjects[index];
+			const next = newProjects[index + 1];
+			if (curr && next) {
+				newProjects[index] = next;
+				newProjects[index + 1] = curr;
+				onChange(newProjects);
+			}
+		},
+		[projects, onChange],
+	);
+
+	// 更新字段
+	const updateField = useCallback(
+		(field: keyof Project, value: Project[keyof Project]) => {
+			setEditForm((prev) => ({ ...prev, [field]: value }));
+		},
+		[],
+	);
+
+	const isEditing = editingIndex !== null;
+	const editMode = editingIndex === projects.length ? "add" : "edit";
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between">
-				<h3 className="text-75 font-medium">项目列表</h3>
-				<button
-					type="button"
-					onClick={handleAddProject}
-					className="btn-regular btn-sm py-1.5 px-3 flex items-center gap-1"
-				>
-					<SafeIcon icon="material-symbols:add-rounded" size={16} />
-					添加项目
-				</button>
-			</div>
+			<EditorHeader
+				title="项目列表"
+				count={projects.length}
+				onAdd={handleAddProject}
+			/>
 
-			{editingIndex !== null && (
+			{/* 编辑表单 */}
+			{isEditing && (
 				<div className="card-base p-4 space-y-3 border-2 border-[var(--primary)]">
-					<h4 className="text-75 font-medium text-sm">
-						{editingIndex === projects.length ? "添加新项目" : "编辑项目"}
-					</h4>
+					<EditFormHeader mode={editMode} itemLabel="项目" />
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-						<div>
-							<label className="block text-50 text-xs mb-1">项目名称 *</label>
-							<input
-								type="text"
-								value={editForm.name}
-								onChange={(e) =>
-									setEditForm({ ...editForm, name: e.target.value })
-								}
-								placeholder="我的项目"
-								className="input-base"
-							/>
-						</div>
+						<InputField
+							label="项目名称"
+							value={editForm.name}
+							onChange={(v) => updateField("name", v)}
+							placeholder="我的项目"
+							required
+						/>
 
-						<div>
-							<label className="block text-50 text-xs mb-1">GitHub 仓库</label>
-							<input
-								type="text"
-								value={editForm.githubRepo}
-								onChange={(e) =>
-									setEditForm({ ...editForm, githubRepo: e.target.value })
-								}
-								placeholder="owner/repo (自动解析 GitHub)"
-								className="input-base"
-							/>
-							<p className="text-40 text-xs mt-0.5">
-								格式: 用户名/仓库名，如 domye/blog
-							</p>
-						</div>
+						<InputField
+							label="GitHub 仓库"
+							value={editForm.githubRepo ?? ""}
+							onChange={(v) => updateField("githubRepo", v)}
+							placeholder="owner/repo (自动解析 GitHub)"
+							help="格式: 用户名/仓库名，如 domye/blog"
+						/>
 
-						<div>
-							<label className="block text-50 text-xs mb-1">封面/头像</label>
-							<input
-								type="url"
-								value={editForm.avatar}
-								onChange={(e) =>
-									setEditForm({ ...editForm, avatar: e.target.value })
-								}
-								placeholder="https://example.com/avatar.png"
-								className="input-base"
-							/>
-						</div>
+						<InputField
+							label="封面/头像"
+							value={editForm.avatar ?? ""}
+							onChange={(v) => updateField("avatar", v)}
+							placeholder="https://example.com/avatar.png"
+							type="url"
+						/>
 
-						<div>
-							<label className="block text-50 text-xs mb-1">演示链接</label>
-							<input
-								type="url"
-								value={editForm.demo}
-								onChange={(e) =>
-									setEditForm({ ...editForm, demo: e.target.value })
-								}
-								placeholder="https://demo.example.com"
-								className="input-base"
-							/>
-						</div>
+						<InputField
+							label="演示链接"
+							value={editForm.demo ?? ""}
+							onChange={(v) => updateField("demo", v)}
+							placeholder="https://demo.example.com"
+							type="url"
+						/>
 
-						<div className="md:col-span-2">
-							<label className="block text-50 text-xs mb-1">描述</label>
-							<input
-								type="text"
-								value={editForm.description}
-								onChange={(e) =>
-									setEditForm({ ...editForm, description: e.target.value })
-								}
-								placeholder="项目简介..."
-								className="input-base"
-							/>
-						</div>
+						<InputField
+							label="描述"
+							value={editForm.description}
+							onChange={(v) => updateField("description", v)}
+							placeholder="项目简介..."
+							className="md:col-span-2"
+						/>
 
-						<div className="md:col-span-2">
-							<label className="block text-50 text-xs mb-1">技术栈</label>
-							<div className="flex gap-2">
-								<input
-									type="text"
-									value={techInput}
-									onChange={(e) => setTechInput(e.target.value)}
-									onKeyDown={(e) => {
-										if (e.key === "Enter") {
-											e.preventDefault();
-											handleAddTech();
-										}
-									}}
-									placeholder="输入技术名称后按 Enter"
-									className="input-base flex-1"
-								/>
-								<button
-									type="button"
-									onClick={handleAddTech}
-									className="btn-regular btn-sm px-2.5"
-								>
-									添加
-								</button>
-							</div>
-							{editForm.tech.length > 0 && (
-								<div className="flex flex-wrap gap-1 mt-2">
-									{editForm.tech.map((tech) => (
-										<span
-											key={tech}
-											className="bg-[var(--primary)]/20 text-[var(--primary)] rounded-[var(--radius-small)] px-2 py-0.5 text-xs flex items-center gap-1"
-										>
-											{tech}
-											<button
-												type="button"
-												onClick={() => handleRemoveTech(tech)}
-												className="hover:bg-white/20 rounded"
-											>
-												<SafeIcon
-													icon="material-symbols:close-rounded"
-													size={12}
-												/>
-											</button>
-										</span>
-									))}
-								</div>
-							)}
-						</div>
+						<TagsField
+							label="技术栈"
+							tags={editForm.tech}
+							onAdd={handleAddTech}
+							onRemove={handleRemoveTech}
+							inputValue={techInput}
+							onInputChange={setTechInput}
+							placeholder="输入技术名称后按 Enter"
+							className="md:col-span-2"
+						/>
 
-						<div className="md:col-span-2">
-							<label className="block text-50 text-xs mb-1">状态</label>
-							<div className="flex gap-2">
-								{statusOptions.map((opt) => (
-									<button
-										key={opt.value}
-										type="button"
-										onClick={() =>
-											setEditForm({
-												...editForm,
-												status: opt.value as "active" | "archived",
-											})
-										}
-										className={`rounded-[var(--radius-medium)] py-1.5 px-3 text-sm flex items-center gap-1 transition-all ${
-											editForm.status === opt.value
-												? "btn-primary btn-sm py-1 px-2.5"
-												: "btn-regular"
-										}`}
-									>
-										<SafeIcon icon={opt.icon} size={14} />
-										{opt.label}
-									</button>
-								))}
-							</div>
-						</div>
+						<SelectField
+							label="状态"
+							value={editForm.status}
+							onChange={(v) => updateField("status", v as Project["status"])}
+							options={STATUS_OPTIONS}
+							className="md:col-span-2"
+						/>
 					</div>
 
-					<div className="flex gap-2 pt-2">
-						<button
-							type="button"
-							onClick={handleSaveEdit}
-							disabled={!editForm.name.trim()}
-							className="btn-primary btn-sm py-1.5 px-3 disabled:opacity-50 disabled:cursor-not-allowed"
-						>
-							保存
-						</button>
-						<button
-							type="button"
-							onClick={handleCancelEdit}
-							className="btn-plain btn-sm py-1.5 px-3"
-						>
-							取消
-						</button>
-					</div>
+					<EditFormActions
+						onSave={handleSaveEdit}
+						onCancel={handleCancelEdit}
+						saveDisabled={!editForm.name.trim()}
+					/>
 				</div>
 			)}
 
-			{projects.length > 0 && (
+			{/* 项目列表 */}
+			{projects.length > 0 && !isEditing && (
 				<div className="space-y-2">
 					{projects.map((project, index) => (
-						<div
+						<ProjectItem
 							key={index}
-							className="card-base p-3 flex items-center gap-3 group"
-						>
-							<div className="flex items-center gap-1 text-40">
-								<button
-									type="button"
-									onClick={() => handleMoveUp(index)}
-									disabled={index === 0}
-									className="p-1 hover:text-75 disabled:opacity-30 disabled:cursor-not-allowed"
-									title="上移"
-								>
-									<SafeIcon
-										icon="material-symbols:arrow-upward-rounded"
-										size={16}
-									/>
-								</button>
-								<button
-									type="button"
-									onClick={() => handleMoveDown(index)}
-									disabled={index === projects.length - 1}
-									className="p-1 hover:text-75 disabled:opacity-30 disabled:cursor-not-allowed"
-									title="下移"
-								>
-									<SafeIcon
-										icon="material-symbols:arrow-downward-rounded"
-										size={16}
-									/>
-								</button>
-							</div>
-
-							{project.avatar && (
-								<img
-									src={project.avatar}
-									alt={project.name}
-									className="w-10 h-10 rounded-[var(--radius-small)] object-cover"
-								/>
-							)}
-
-							<div className="flex-1 min-w-0">
-								<div className="flex items-center gap-2">
-									<span className="text-75 font-medium truncate">
-										{project.name}
-									</span>
-									{project.githubRepo && (
-										<SafeIcon
-											icon="fa6-brands:github"
-											size={14}
-											className="text-50"
-										/>
-									)}
-									{project.status === "archived" && (
-										<span className="text-40 text-xs">已归档</span>
-									)}
-								</div>
-								{project.tech.length > 0 && (
-									<div className="flex flex-wrap gap-1 mt-0.5">
-										{project.tech.slice(0, 4).map((tech) => (
-											<span
-												key={tech}
-												className="bg-[var(--bg-secondary)] text-50 rounded-[var(--radius-small)] px-1.5 py-0.5 text-xs"
-											>
-												{tech}
-											</span>
-										))}
-									</div>
-								)}
-							</div>
-
-							<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-								<button
-									type="button"
-									onClick={() => handleEditProject(index)}
-									className="p-1.5 hover:bg-[var(--btn-regular-bg-hover)] rounded-[var(--radius-small)] text-50 hover:text-75"
-									title="编辑"
-								>
-									<SafeIcon
-										icon="material-symbols:edit-outline-rounded"
-										size={16}
-									/>
-								</button>
-								<button
-									type="button"
-									onClick={() => handleDeleteProject(index)}
-									className="p-1.5 hover:bg-red-500/10 rounded-[var(--radius-small)] text-50 hover:text-red-500"
-									title="删除"
-								>
-									<SafeIcon
-										icon="material-symbols:delete-outline-rounded"
-										size={16}
-									/>
-								</button>
-							</div>
-						</div>
+							project={project}
+							index={index}
+							total={projects.length}
+							onEdit={() => handleEditProject(index)}
+							onDelete={() => handleDeleteProject(index)}
+							onMoveUp={() => handleMoveUp(index)}
+							onMoveDown={() => handleMoveDown(index)}
+						/>
 					))}
 				</div>
 			)}
 
-			{projects.length === 0 && editingIndex === null && (
-				<div className="card-base p-4 text-center text-50">
-					<p>暂无项目，点击上方按钮添加</p>
-				</div>
+			{/* 空状态 */}
+			{projects.length === 0 && !isEditing && (
+				<EmptyState message="暂无项目，点击上方按钮添加" />
 			)}
 		</div>
 	);
