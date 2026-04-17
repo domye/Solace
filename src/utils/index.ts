@@ -4,5 +4,6 @@ export {
 	formatShortDate,
 	formatTimelineDate,
 	formatTags,
+	getArticleDate,
 } from "./date";
 export { toPostCardArticle } from "./article";

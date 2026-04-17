@@ -33,3 +33,8 @@ export function formatTimelineDate(dateStr?: string): string {
 export function formatTags(tags?: { id: number; name: string }[]): string {
 	return tags?.length ? tags.map((t) => `#${t.name}`).join(" ") : "";
 }
+
+/** 获取文章显示日期（优先发布日期） */
+export function getArticleDate(article: { published_at?: string; created_at: string }): string {
+	return article.published_at ? formatDate(article.published_at) : formatDate(article.created_at);
+}
