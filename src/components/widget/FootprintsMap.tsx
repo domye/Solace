@@ -1,5 +1,6 @@
 /**
- * 足迹地图组件 - Echarts 中国地图（性能优化版）
+ * 足迹地图组件 - ECharts 中国地图（性能优化版）
+ *
  * 优化策略：
  * 1. R-Tree 空间索引 - 点查询 O(log n)
  * 2. 并行加载省级 GeoJSON - Promise.all
@@ -8,39 +9,33 @@
  */
 
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
-// ECharts 按需导入 - 减少 bundle 体积
 import * as echarts from "echarts/core";
-import { MapChart } from "echarts/charts";
-import { ScatterChart, EffectScatterChart } from "echarts/charts";
-import {
-	GeoComponent,
-	TooltipComponent,
-	VisualMapComponent,
-} from "echarts/components";
+import { MapChart, ScatterChart, EffectScatterChart } from "echarts/charts";
+import { GeoComponent, TooltipComponent } from "echarts/components";
 import { SVGRenderer } from "echarts/renderers";
 import type { FootprintCity } from "@/types";
 import { useThemeStore } from "@/stores/theme";
 
-// 注册需要的 ECharts 模块
+// 注册 ECharts 模块
 echarts.use([
 	MapChart,
 	ScatterChart,
 	EffectScatterChart,
 	GeoComponent,
 	TooltipComponent,
-	VisualMapComponent,
 	SVGRenderer,
 ]);
 
-// 缓存版本号（GeoJSON 数据结构变化时递增）
+// ============================================================
+// 常量配置
+// ============================================================
+
 const CACHE_VERSION = 2;
 const CACHE_KEY = `footprints_geojson_v${CACHE_VERSION}`;
+const CACHE_EXPIRE_MS = 7 * 24 * 60 * 60 * 1000;
+const CDN_BASE = "https://cdn.jsdelivr.net/npm/china-geojson@1.0.0/src/geojson";
+const FONT_FAMILY = "MaokenZhuyuanTi, sans-serif";
 
-// 中国省份 GeoJSON（jsdelivr CDN）
-const chinaGeoJsonUrl =
-	"https://cdn.jsdelivr.net/npm/china-geojson@1.0.0/src/geojson/china.json";
-
-// 省份名称到拼音文件名映射
 const PROVINCE_FILE_MAP: Record<string, string> = {
 	北京: "bei_jing",
 	天津: "tian_jin",
@@ -78,18 +73,68 @@ const PROVINCE_FILE_MAP: Record<string, string> = {
 	澳门: "ao_men",
 };
 
-// 直辖市名称
 const MUNICIPALITY_NAMES = new Set(["北京", "天津", "上海", "重庆"]);
+const CHINA_GEOJSON_URL = `${CDN_BASE}/china.json`;
 
-// 获取省级 GeoJSON URL
-function getProvinceGeoJsonUrl(name: string): string | null {
-	const fileName = PROVINCE_FILE_MAP[name];
-	if (!fileName) return null;
-	return `https://cdn.jsdelivr.net/npm/china-geojson@1.0.0/src/geojson/${fileName}_geo.json`;
+// ============================================================
+// 类型定义
+// ============================================================
+
+interface BBox {
+	minLng: number;
+	maxLng: number;
+	minLat: number;
+	maxLat: number;
 }
 
-// 预计算的色调映射表（已排序，用于二分查找）
-const HUE_TABLE: ReadonlyArray<readonly [number, string, string]> = [
+interface Feature {
+	name: string;
+	adcode: string;
+	bbox: BBox;
+	coords: number[][][];
+}
+
+interface RTreeNode {
+	bbox: BBox;
+	children?: RTreeNode[];
+	feature?: Feature;
+}
+
+interface GeoJSON {
+	type: string;
+	features: Array<{
+		type: string;
+		geometry: {
+			type: string;
+			coordinates: number[][][] | number[][][][];
+		} | null;
+		properties?: { name?: string; adcode?: string | number };
+	}>;
+}
+
+interface CacheData {
+	china: GeoJSON;
+	provinceFeatures: Record<string, Feature[]>;
+	mergedFeatures: GeoJSON["features"];
+	timestamp: number;
+}
+
+interface CityWithData extends FootprintCity {
+	coords: NonNullable<FootprintCity["coords"]>;
+}
+
+// ============================================================
+// 工具函数
+// ============================================================
+
+/** 获取省级 GeoJSON URL */
+const getProvinceGeoJsonUrl = (name: string): string | null => {
+	const fileName = PROVINCE_FILE_MAP[name];
+	return fileName ? `${CDN_BASE}/${fileName}_geo.json` : null;
+};
+
+/** 色调映射表（预计算，二分查找） */
+const HUE_TABLE: [number, string, string][] = [
 	[0, "#f87171", "#ef4444"],
 	[30, "#fb923c", "#f97316"],
 	[60, "#facc15", "#eab308"],
@@ -101,10 +146,10 @@ const HUE_TABLE: ReadonlyArray<readonly [number, string, string]> = [
 	[270, "#a78bfa", "#8b5cf6"],
 	[300, "#f472b6", "#ec4899"],
 	[330, "#fb7185", "#f43f5e"],
-] as const;
+];
 
+/** 根据 hue 值获取颜色（二分查找） */
 function hueToHex(hue: number, isDark: boolean): string {
-	// 二分查找最近色调
 	let left = 0,
 		right = HUE_TABLE.length - 1;
 	while (left < right) {
@@ -112,313 +157,181 @@ function hueToHex(hue: number, isDark: boolean): string {
 		if (HUE_TABLE[mid]![0] < hue) left = mid + 1;
 		else right = mid;
 	}
-
 	const curr = HUE_TABLE[left]!;
-	if (left > 0) {
-		const prev = HUE_TABLE[left - 1]!;
-		if (Math.abs(prev[0] - hue) < Math.abs(curr[0] - hue)) {
-			return isDark ? prev[1] : prev[2];
-		}
+	const prev = left > 0 ? HUE_TABLE[left - 1] : null;
+	if (prev && Math.abs(prev[0] - hue) < Math.abs(curr[0] - hue)) {
+		return isDark ? prev[1] : prev[2];
 	}
 	return isDark ? curr[1] : curr[2];
 }
 
-// 点是否在多边形内（射线法优化版）
+/** 射线法判断点是否在多边形内 */
 function pointInPolygon(x: number, y: number, polygon: number[][]): boolean {
 	let inside = false;
-	const len = polygon.length;
-
-	for (let i = 0, j = len - 1; i < len; j = i++) {
-		const pI = polygon[i];
-		const pJ = polygon[j];
-		if (!pI || !pJ) continue;
-
-		const xi = pI[0];
-		const yi = pI[1];
-		const xj = pJ[0];
-		const yj = pJ[1];
-
-		if (
-			xi === undefined ||
-			yi === undefined ||
-			xj === undefined ||
-			yj === undefined
-		)
-			continue;
-
+	for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+		const pi = polygon[i];
+		const pj = polygon[j];
+		if (!pi || !pj) continue;
+		const xi = pi[0]!;
+		const yi = pi[1]!;
+		const xj = pj[0]!;
+		const yj = pj[1]!;
 		if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) {
 			inside = !inside;
 		}
 	}
-
 	return inside;
 }
 
-// 边界框
-interface BBox {
-	minLng: number;
-	maxLng: number;
-	minLat: number;
-	maxLat: number;
-}
-
-// R-Tree 节点
-interface RTreeNode {
-	bbox: BBox;
-	children?: RTreeNode[];
-	feature?: Feature;
-}
-
-// 计算边界框
+/** 计算坐标集合的边界框 */
 function computeBBox(coords: number[][][]): BBox {
 	let minLng = Infinity,
-		maxLng = -Infinity;
-	let minLat = Infinity,
+		maxLng = -Infinity,
+		minLat = Infinity,
 		maxLat = -Infinity;
-
-	for (const polygon of coords) {
-		for (const point of polygon) {
-			const lng = point[0];
-			const lat = point[1];
-			if (lng !== undefined && lat !== undefined) {
-				if (lng < minLng) minLng = lng;
-				if (lng > maxLng) maxLng = lng;
-				if (lat < minLat) minLat = lat;
-				if (lat > maxLat) maxLat = lat;
-			}
+	for (const poly of coords) {
+		for (const point of poly) {
+			const lng = point[0]!;
+			const lat = point[1]!;
+			if (lng < minLng) minLng = lng;
+			if (lng > maxLng) maxLng = lng;
+			if (lat < minLat) minLat = lat;
+			if (lat > maxLat) maxLat = lat;
 		}
 	}
 	return { minLng, maxLng, minLat, maxLat };
 }
 
-// 简化的 R-Tree 构建（批量加载）
+/** 合并多个边界框 */
+const mergeBBox = (boxes: BBox[]): BBox => ({
+	minLng: Math.min(...boxes.map((b) => b.minLng)),
+	maxLng: Math.max(...boxes.map((b) => b.maxLng)),
+	minLat: Math.min(...boxes.map((b) => b.minLat)),
+	maxLat: Math.max(...boxes.map((b) => b.maxLat)),
+});
+
+/** 构建简化的 R-Tree（批量加载） */
 function buildRTree(features: Feature[]): RTreeNode {
-	if (features.length === 0) {
+	if (features.length === 0)
 		return { bbox: { minLng: 0, maxLng: 0, minLat: 0, maxLat: 0 } };
-	}
 
-	// 叶子节点容量
 	const MAX_LEAF = 16;
-
 	if (features.length <= MAX_LEAF) {
-		let minLng = Infinity,
-			maxLng = -Infinity;
-		let minLat = Infinity,
-			maxLat = -Infinity;
-
-		for (const f of features) {
-			if (f.bbox.minLng < minLng) minLng = f.bbox.minLng;
-			if (f.bbox.maxLng > maxLng) maxLng = f.bbox.maxLng;
-			if (f.bbox.minLat < minLat) minLat = f.bbox.minLat;
-			if (f.bbox.maxLat > maxLat) maxLat = f.bbox.maxLat;
-		}
-
 		return {
-			bbox: { minLng, maxLng, minLat, maxLat },
+			bbox: mergeBBox(features.map((f) => f.bbox)),
 			children: features.map((f) => ({ bbox: f.bbox, feature: f })),
 		};
 	}
 
-	// 按 X 坐标排序分组
 	const sorted = [...features].sort((a, b) => a.bbox.minLng - b.bbox.minLng);
 	const groupSize = Math.ceil(
 		sorted.length / Math.ceil(Math.sqrt(sorted.length / MAX_LEAF)),
 	);
-	const groups: Feature[][] = [];
-
-	for (let i = 0; i < sorted.length; i += groupSize) {
-		groups.push(sorted.slice(i, i + groupSize));
-	}
-
+	const groups = Array.from(
+		{ length: Math.ceil(sorted.length / groupSize) },
+		(_, i) => sorted.slice(i * groupSize, (i + 1) * groupSize),
+	);
 	const children = groups.map((g) => buildRTree(g));
-
-	// 合并边界框
-	let minLng = Infinity,
-		maxLng = -Infinity;
-	let minLat = Infinity,
-		maxLat = -Infinity;
-	for (const child of children) {
-		if (child.bbox.minLng < minLng) minLng = child.bbox.minLng;
-		if (child.bbox.maxLng > maxLng) maxLng = child.bbox.maxLng;
-		if (child.bbox.minLat < minLat) minLat = child.bbox.minLat;
-		if (child.bbox.maxLat > maxLat) maxLat = child.bbox.maxLat;
-	}
-
-	return { bbox: { minLng, maxLng, minLat, maxLat }, children };
+	return { bbox: mergeBBox(children.map((c) => c.bbox)), children };
 }
 
-// R-Tree 查询
+/** R-Tree 空间查询 */
 function queryRTree(node: RTreeNode, lng: number, lat: number): Feature[] {
 	const { bbox, children, feature } = node;
-
-	// 边界框检查
 	if (
 		lng < bbox.minLng ||
 		lng > bbox.maxLng ||
 		lat < bbox.minLat ||
 		lat > bbox.maxLat
-	) {
+	)
 		return [];
-	}
-
-	if (feature) {
-		return [feature];
-	}
-
+	if (feature) return [feature];
 	if (!children) return [];
-
-	const results: Feature[] = [];
-	for (const child of children) {
-		results.push(...queryRTree(child, lng, lat));
-	}
-	return results;
+	return children.flatMap((c) => queryRTree(c, lng, lat));
 }
 
-interface GeoJSON {
-	type: string;
-	features: Array<{
-		type: string;
-		geometry: {
-			type: string;
-			coordinates: number[][][] | number[][][][];
-		} | null;
-		properties?: {
-			name?: string;
-			adcode?: string | number;
-		};
-	}>;
-}
-
-interface Feature {
-	name: string;
-	adcode: string;
-	bbox: BBox;
-	coords: number[][][]; // 统一为 Polygon 数组
-}
-
-// 缓存数据结构
-interface CacheData {
-	china: GeoJSON;
-	provinceFeatures: Record<string, Feature[]>;
-	mergedFeatures: GeoJSON["features"];
-	timestamp: number;
-}
-
-// 解析 GeoJSON 为 Feature 数组
+/** 解析 GeoJSON 为 Feature 数组 */
 function parseFeatures(geoJson: GeoJSON): Feature[] {
-	const features: Feature[] = [];
+	return geoJson.features
+		.filter((f) => f.geometry)
+		.map((f) => {
+			const g = f.geometry!;
+			const coords =
+				g.type === "Polygon"
+					? [g.coordinates as number[][][]]
+					: g.type === "MultiPolygon"
+						? (g.coordinates as number[][][][])
+						: [];
 
-	for (const f of geoJson.features) {
-		const geometry = f.geometry;
-		if (!geometry) continue;
-
-		const coords =
-			geometry.type === "Polygon"
-				? [geometry.coordinates as number[][][]]
-				: geometry.type === "MultiPolygon"
-					? (geometry.coordinates as number[][][][])
-					: [];
-
-		if (coords.length === 0) continue;
-
-		// 展开所有 polygon
-		const allPolygons: number[][][] = [];
-		for (const c of coords) {
-			// 检查第一个元素是否是数组（判断 Polygon 还是 MultiPolygon）
-			const first = c[0];
-			if (Array.isArray(first?.[0])) {
-				// MultiPolygon: c 是 number[][][]，每个元素是 Polygon
-				for (const poly of c as number[][][]) {
-					allPolygons.push(poly);
+			const allPolygons: number[][][] = [];
+			for (const c of coords) {
+				const first = c[0]?.[0];
+				if (Array.isArray(first)) {
+					for (const poly of c as number[][][]) allPolygons.push(poly);
+				} else {
+					allPolygons.push(c as unknown as number[][]);
 				}
-			} else {
-				// Polygon: c 直接是 number[][]
-				allPolygons.push(c as unknown as number[][]);
 			}
-		}
 
-		features.push({
-			name: f.properties?.name || "",
-			adcode: String(f.properties?.adcode || ""),
-			bbox: computeBBox(allPolygons),
-			coords: allPolygons,
+			return {
+				name: f.properties?.name || "",
+				adcode: String(f.properties?.adcode || ""),
+				bbox: computeBBox(allPolygons),
+				coords: allPolygons,
+			};
 		});
-	}
-
-	return features;
 }
 
-// 使用 R-Tree 查找省份
-function findProvinceByCoords(
+/** 根据坐标查找省份 */
+function findProvince(
 	tree: RTreeNode,
 	lat: number,
 	lng: number,
-): { name: string } | null {
+): string | null {
 	const candidates = queryRTree(tree, lng, lat);
-
 	for (const f of candidates) {
-		for (const polygon of f.coords) {
-			if (pointInPolygon(lng, lat, polygon)) {
-				return { name: f.name };
-			}
-		}
+		if (f.coords.some((poly) => pointInPolygon(lng, lat, poly))) return f.name;
 	}
-
 	return null;
 }
 
-interface FootprintsMapProps {
-	cities: FootprintCity[];
-}
-
-// 查找城市对应的区域名
-function findCityRegion(
+/** 查找城市对应的区域名 */
+function findCityRegions(
 	cacheData: CacheData | null,
-	citiesWithCoords: Array<
-		FootprintCity & { coords: NonNullable<FootprintCity["coords"]> }
-	>,
+	cities: CityWithData[],
 ): Map<string, string> {
 	if (!cacheData) return new Map();
 
 	const result = new Map<string, string>();
+	const chinaTree = buildRTree(parseFeatures(cacheData.china));
 
-	// 构建中国省级 R-Tree（用于直辖市）
-	const chinaFeatures = parseFeatures(cacheData.china);
-	const chinaTree = buildRTree(chinaFeatures);
-
-	// 处理直辖市：直辖市本身就是一个区域
-	for (const city of citiesWithCoords) {
-		const found = findProvinceByCoords(
-			chinaTree,
-			city.coords.lat,
-			city.coords.lng,
-		);
-		if (found && MUNICIPALITY_NAMES.has(found.name)) {
-			result.set(city.name, found.name);
-		}
+	// 直辖市直接匹配
+	for (const city of cities) {
+		const province = findProvince(chinaTree, city.coords.lat, city.coords.lng);
+		if (province && MUNICIPALITY_NAMES.has(province))
+			result.set(city.name, province);
 	}
 
-	// 处理普通省份：在省级市级数据中查找
-	for (const [, features] of Object.entries(cacheData.provinceFeatures)) {
+	// 省级市级数据匹配
+	for (const features of Object.values(cacheData.provinceFeatures)) {
 		if (features.length === 0) continue;
 		const tree = buildRTree(features);
-
-		for (const city of citiesWithCoords) {
+		for (const city of cities) {
 			if (result.has(city.name)) continue;
-			const candidates = queryRTree(tree, city.coords.lng, city.coords.lat);
-			for (const f of candidates) {
-				for (const polygon of f.coords) {
-					if (pointInPolygon(city.coords.lng, city.coords.lat, polygon)) {
-						result.set(city.name, f.name);
-						break;
-					}
-				}
-				if (result.has(city.name)) break;
-			}
+			const region = findProvince(tree, city.coords.lat, city.coords.lng);
+			if (region) result.set(city.name, region);
 		}
 	}
 
 	return result;
+}
+
+// ============================================================
+// 主组件
+// ============================================================
+
+interface FootprintsMapProps {
+	cities: FootprintCity[];
 }
 
 export function FootprintsMap({ cities }: FootprintsMapProps) {
@@ -428,31 +341,23 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 	const [isReady, setIsReady] = useState(false);
 	const { theme, hue } = useThemeStore();
 
-	// 缓存城市数据（避免重复 filter）
+	// 带坐标的城市
 	const citiesWithCoords = useMemo(
-		() =>
-			cities.filter(
-				(
-					c,
-				): c is FootprintCity & {
-					coords: NonNullable<FootprintCity["coords"]>;
-				} => !!c.coords,
-			),
+		() => cities.filter((c): c is CityWithData => !!c.coords),
 		[cities],
 	);
 
-	// 首次加载 GeoJSON 数据
+	// 加载 GeoJSON
 	useEffect(() => {
 		if (!chartRef.current) return;
 
 		const loadGeoJson = async () => {
-			// 尝试从 localStorage 读取缓存
+			// 读取缓存
 			try {
 				const cached = localStorage.getItem(CACHE_KEY);
 				if (cached) {
 					const data = JSON.parse(cached) as CacheData;
-					// 缓存有效期 7 天
-					if (Date.now() - data.timestamp < 7 * 24 * 60 * 60 * 1000) {
+					if (Date.now() - data.timestamp < CACHE_EXPIRE_MS) {
 						cacheRef.current = data;
 						// eslint-disable-next-line @typescript-eslint/no-explicit-any
 						echarts.registerMap("china_merged", {
@@ -465,88 +370,64 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 					}
 				}
 			} catch {
-				// 缓存损坏，忽略
+				/* 缓存损坏 */
 			}
 
 			// 加载中国地图
 			let chinaGeoJson: GeoJSON;
 			try {
-				const response = await fetch(chinaGeoJsonUrl);
-				if (!response.ok) {
-					throw new Error("加载中国地图数据失败");
-				}
-				chinaGeoJson = await response.json();
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				echarts.registerMap("china", chinaGeoJson as any);
+				const res = await fetch(CHINA_GEOJSON_URL);
+				if (!res.ok) throw new Error("加载中国地图失败");
+				chinaGeoJson = await res.json();
 			} catch (e) {
-				console.error("加载中国地图数据失败", e);
+				console.error("加载中国地图失败", e);
 				return;
 			}
 
-			// 解析省份 features 并构建 R-Tree
-			const chinaFeatures = parseFeatures(chinaGeoJson);
-			const chinaTree = buildRTree(chinaFeatures);
-
-			// 查找所有城市对应的省份
-			const provinceMap = new Map<string, string>();
-			const citiesByProvince = new Map<string, typeof citiesWithCoords>();
+			const chinaTree = buildRTree(parseFeatures(chinaGeoJson));
+			const provinceMap = new Map<string, CityWithData[]>();
 
 			for (const city of citiesWithCoords) {
-				const province = findProvinceByCoords(
+				const province = findProvince(
 					chinaTree,
 					city.coords.lat,
 					city.coords.lng,
 				);
-				if (province && province.name) {
-					provinceMap.set(province.name, province.name);
-					const list = citiesByProvince.get(province.name);
-					if (list) list.push(city);
-					else citiesByProvince.set(province.name, [city]);
+				if (province) {
+					const list = provinceMap.get(province) ?? [];
+					list.push(city);
+					provinceMap.set(province, list);
 				}
 			}
 
-			// 并行加载所有省级 GeoJSON（排除直辖市）
+			// 并行加载省级 GeoJSON
 			const provinceNames = [...provinceMap.keys()].filter(
 				(n) => !MUNICIPALITY_NAMES.has(n),
 			);
-			const fetchPromises = provinceNames.map(async (name) => {
-				try {
+			const provinceResults = await Promise.all(
+				provinceNames.map(async (name) => {
 					const url = getProvinceGeoJsonUrl(name);
-					if (!url)
+					if (!url) return { name, features: [], rawFeatures: [] };
+					try {
+						const geoJson = await fetch(url).then((r) => r.json());
 						return {
 							name,
-							features: [] as Feature[],
-							rawFeatures: [] as GeoJSON["features"],
+							features: parseFeatures(geoJson),
+							rawFeatures: geoJson.features,
 						};
-					const response = await fetch(url);
-					const geoJson: GeoJSON = await response.json();
-					return {
-						name,
-						features: parseFeatures(geoJson),
-						rawFeatures: geoJson.features,
-					};
-				} catch {
-					return {
-						name,
-						features: [] as Feature[],
-						rawFeatures: [] as GeoJSON["features"],
-					};
-				}
-			});
+					} catch {
+						return { name, features: [], rawFeatures: [] };
+					}
+				}),
+			);
 
-			const provinceResults = await Promise.all(fetchPromises);
-
-			// 构建省级 feature 映射
-			const provinceFeatures: Record<string, Feature[]> = {};
-			for (const { name, features } of provinceResults) {
-				provinceFeatures[name] = features;
-			}
-
-			// 合并所有 features（直辖市用中国地图的省级边界）
-			const mergedFeatures = [...chinaGeoJson.features];
-			for (const { rawFeatures } of provinceResults) {
-				mergedFeatures.push(...rawFeatures);
-			}
+			const provinceFeatures = Object.fromEntries(
+				provinceResults.map((r) => [r.name, r.features]),
+			);
+			const mergedFeatures = [
+				...chinaGeoJson.features,
+				...provinceResults.flatMap((r) => r.rawFeatures),
+			];
 
 			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			echarts.registerMap("china_merged", {
@@ -554,20 +435,17 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 				features: mergedFeatures,
 			} as any);
 
-			// 缓存数据
 			cacheRef.current = {
 				china: chinaGeoJson,
 				provinceFeatures,
 				mergedFeatures,
 				timestamp: Date.now(),
 			};
-
-			// 写入 localStorage（异步，不阻塞）
 			setTimeout(() => {
 				try {
 					localStorage.setItem(CACHE_KEY, JSON.stringify(cacheRef.current));
 				} catch {
-					// localStorage 满了，忽略
+					/* 满了 */
 				}
 			}, 0);
 
@@ -588,199 +466,168 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 		};
 	}, [citiesWithCoords]);
 
-	// 查找城市对应的区域名
-	const cityRegionMap = useMemo(() => {
-		return findCityRegion(cacheRef.current, citiesWithCoords);
-	}, [citiesWithCoords, isReady]);
+	// 城市区域映射
+	const cityRegionMap = useMemo(
+		() => findCityRegions(cacheRef.current, citiesWithCoords),
+		[citiesWithCoords, isReady],
+	);
 
-	// 预计算散点数据
+	// 散点数据
 	const scatterData = useMemo(
 		() =>
-			citiesWithCoords.map((city) => ({
-				name: city.name,
-				value: [city.coords.lng, city.coords.lat] as [number, number],
-				visited_at: city.visited_at,
-				highlights: city.highlights,
+			citiesWithCoords.map((c) => ({
+				name: c.name,
+				value: [c.coords.lng, c.coords.lat] as [number, number],
+				visited_at: c.visited_at,
+				highlights: c.highlights,
 			})),
 		[citiesWithCoords],
 	);
 
-	// 计算中心点
+	// 中心点
 	const center = useMemo(() => {
 		if (scatterData.length === 0) return [105, 36] as [number, number];
-		let sumLng = 0,
-			sumLat = 0;
-		for (const d of scatterData) {
-			sumLng += d.value[0];
-			sumLat += d.value[1];
-		}
-		return [sumLng / scatterData.length, sumLat / scatterData.length] as [
-			number,
-			number,
-		];
+		const sumLng = scatterData.reduce((s, d) => s + d.value[0], 0);
+		const sumLat = scatterData.reduce((s, d) => s + d.value[1], 0);
+		return [sumLng / scatterData.length, sumLat / scatterData.length];
 	}, [scatterData]);
 
-	// 预构建 O(1) 查找表
-	const coordToCity = useMemo(() => {
-		const m = new Map<string, (typeof scatterData)[0]>();
-		for (const d of scatterData) {
-			m.set(`${d.value[0]},${d.value[1]}`, d);
-		}
-		return m;
-	}, [scatterData]);
+	// 查找表
+	const coordToCity = useMemo(
+		() => new Map(scatterData.map((d) => [`${d.value[0]},${d.value[1]}`, d])),
+		[scatterData],
+	);
 
-	const regionToCity = useMemo(() => {
-		const m = new Map<string, (typeof scatterData)[0]>();
-		for (const d of scatterData) {
-			const region = cityRegionMap.get(d.name);
-			if (region) m.set(region, d);
-		}
-		return m;
-	}, [scatterData, cityRegionMap]);
+	const regionToCity = useMemo(
+		() =>
+			new Map(
+				scatterData
+					.filter((d) => cityRegionMap.has(d.name))
+					.map((d) => [cityRegionMap.get(d.name), d]),
+			),
+		[scatterData, cityRegionMap],
+	);
 
-	// 主题相关
+	// 主题
 	const isDark = theme === "dark";
 	const primaryColor = hueToHex(hue, isDark);
 
-	// 构建区域高亮
-	const regions = useMemo(() => {
-		const r: Array<{
-			name: string;
-			itemStyle: { areaColor: string };
-			label?: { show: boolean };
-			emphasis: {
-				itemStyle: { areaColor: string };
-				label?: { show: boolean; fontFamily: string; fontSize: number };
-			};
-		}> = [];
-
-		// 市级区域高亮
-		for (const [, regionName] of cityRegionMap) {
-			r.push({
-				name: regionName,
+	// 区域高亮
+	const regions = useMemo(
+		() =>
+			[...cityRegionMap.values()].map((name) => ({
+				name,
 				itemStyle: { areaColor: primaryColor + "60" },
 				label: { show: false },
 				emphasis: {
 					itemStyle: { areaColor: primaryColor + "80" },
-					label: { show: true, fontFamily: "MaokenZhuyuanTi", fontSize: 12 },
+					label: { show: true, fontFamily: FONT_FAMILY, fontSize: 12 },
 				},
-			});
-		}
+			})),
+		[cityRegionMap, primaryColor],
+	);
 
-		return r;
-	}, [cityRegionMap, primaryColor]);
-
-	// tooltip formatter
+	// tooltip
 	const tooltipFormatter = useCallback(
 		(params: unknown) => {
 			const p = params as { name?: string; value?: number[] | string };
+			const formatCity = (city: (typeof scatterData)[0]) =>
+				`<div style="padding:4px;font-family:${FONT_FAMILY}">
+					<strong>${city.name}</strong><br/>${city.visited_at || ""}
+					${city.highlights?.length ? `<br/><span style="color:#999">${city.highlights.join(", ")}</span>` : ""}
+				</div>`;
 
 			if (Array.isArray(p.value)) {
 				const city = coordToCity.get(`${p.value[0]},${p.value[1]}`);
-				if (city) {
-					return `<div style="padding:4px;font-family:MaokenZhuyuanTi,sans-serif;">
-					<strong>${city.name}</strong><br/>
-					${city.visited_at || ""}
-					${city.highlights?.length ? `<br/><span style="color:#999">${city.highlights.join(", ")}</span>` : ""}
-				</div>`;
-				}
+				if (city) return formatCity(city);
 			}
-
 			if (p.name) {
 				const city = regionToCity.get(p.name);
-				if (city) {
-					return `<div style="padding:4px;font-family:MaokenZhuyuanTi,sans-serif;">
-					<strong>${city.name}</strong><br/>
-					${city.visited_at || ""}
-					${city.highlights?.length ? `<br/><span style="color:#999">${city.highlights.join(", ")}</span>` : ""}
-				</div>`;
-				}
-				return `<span style="font-family:MaokenZhuyuanTi,sans-serif;">${p.name}</span>`;
+				if (city) return formatCity(city);
+				return `<span style="font-family:${FONT_FAMILY}">${p.name}</span>`;
 			}
-
 			return "";
 		},
 		[coordToCity, regionToCity],
 	);
 
-	// 主题变化时更新图表
+	// 图表配置
 	useEffect(() => {
 		if (!isReady || !chartInstance.current) return;
 
-		const option: echarts.EChartsCoreOption = {
-			backgroundColor: "transparent",
-			tooltip: {
-				trigger: "item",
-				formatter: tooltipFormatter,
-				extraCssText: "font-family: MaokenZhuyuanTi, sans-serif !important;",
-			},
-			geo: {
+		const baseLabel = { fontFamily: FONT_FAMILY, fontSize: 12, show: true };
+
+		chartInstance.current.setOption(
+			{
+				backgroundColor: "transparent",
 				tooltip: {
-					show: true,
+					trigger: "item",
 					formatter: tooltipFormatter,
-					extraCssText: "font-family: MaokenZhuyuanTi, sans-serif !important;",
+					extraCssText: `font-family: ${FONT_FAMILY} !important`,
 				},
-				map: "china_merged",
-				roam: true,
-				zoom: 6,
-				center,
-				regions,
-				itemStyle: {
-					areaColor: isDark ? "#1e293b" : "#f1f5f9",
-					borderColor: isDark ? "#334155" : "#cbd5e1",
-					borderWidth: 1,
-				},
-				emphasis: {
-					itemStyle: { areaColor: isDark ? "#334155" : "#e2e8f0" },
-					label: { show: true, fontFamily: "MaokenZhuyuanTi", fontSize: 12 },
-				},
-				label: {
-					show: false,
-					fontFamily: "MaokenZhuyuanTi",
-					fontSize: 10,
-					color: isDark ? "#94a3b8" : "#64748b",
-				},
-			},
-			series: [
-				{
-					type: "scatter",
-					coordinateSystem: "geo",
-					data: scatterData,
-					symbolSize: 6,
+				geo: {
+					tooltip: {
+						show: true,
+						formatter: tooltipFormatter,
+						extraCssText: `font-family: ${FONT_FAMILY} !important`,
+					},
+					map: "china_merged",
+					roam: true,
+					zoom: 6,
+					center,
+					regions,
 					itemStyle: {
-						color: primaryColor,
-						shadowBlur: 4,
-						shadowColor: primaryColor + "80",
+						areaColor: isDark ? "#1e293b" : "#f1f5f9",
+						borderColor: isDark ? "#334155" : "#cbd5e1",
+						borderWidth: 1,
 					},
 					emphasis: {
+						itemStyle: { areaColor: isDark ? "#334155" : "#e2e8f0" },
+						label: baseLabel,
+					},
+					label: {
+						...baseLabel,
+						show: false,
+						fontSize: 10,
+						color: isDark ? "#94a3b8" : "#64748b",
+					},
+				},
+				series: [
+					{
+						type: "scatter",
+						coordinateSystem: "geo",
+						data: scatterData,
+						symbolSize: 6,
 						itemStyle: {
 							color: primaryColor,
-							shadowBlur: 8,
+							shadowBlur: 4,
+							shadowColor: primaryColor + "80",
+						},
+						emphasis: {
+							itemStyle: {
+								color: primaryColor,
+								shadowBlur: 8,
+								shadowColor: primaryColor,
+							},
+						},
+					},
+					{
+						type: "effectScatter",
+						coordinateSystem: "geo",
+						data: scatterData.slice(0, 3),
+						symbolSize: 5,
+						showEffectOn: "render",
+						rippleEffect: { brushType: "stroke", scale: 4, period: 4 },
+						itemStyle: {
+							color: primaryColor,
+							shadowBlur: 4,
 							shadowColor: primaryColor,
 						},
 					},
-				},
-				{
-					type: "effectScatter",
-					coordinateSystem: "geo",
-					data: scatterData.slice(0, 3),
-					symbolSize: 5,
-					showEffectOn: "render",
-					rippleEffect: {
-						brushType: "stroke",
-						scale: 4,
-						period: 4,
-					},
-					itemStyle: {
-						color: primaryColor,
-						shadowBlur: 4,
-						shadowColor: primaryColor,
-					},
-				},
-			],
-		};
-
-		chartInstance.current.setOption(option, { notMerge: true });
+				],
+			},
+			{ notMerge: true },
+		);
 	}, [
 		isReady,
 		theme,

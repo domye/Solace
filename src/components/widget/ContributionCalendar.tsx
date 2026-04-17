@@ -12,12 +12,15 @@ import {
 import type { ContributionsGroup } from "@/hooks/api/github";
 import { useOwner } from "@/hooks";
 
+// ============================================================
+// 类型定义
+// ============================================================
+
 interface ContributionCalendarProps {
 	className?: string;
 	style?: React.CSSProperties;
 }
 
-// 日历格子数据
 interface CalendarCell {
 	day: number;
 	date: string;
@@ -26,36 +29,25 @@ interface CalendarCell {
 	isToday: boolean;
 }
 
-// 中文月份
-const MONTH_NAMES = [
-	"一月",
-	"二月",
-	"三月",
-	"四月",
-	"五月",
-	"六月",
-	"七月",
-	"八月",
-	"九月",
-	"十月",
-	"十一月",
-	"十二月",
-];
+interface CalendarBuildResult {
+	cells: CalendarCell[];
+	monthTotal: number;
+	emptyCellsCount: number;
+}
 
-// 星期标签
+// ============================================================
+// 常量
+// ============================================================
+
+const MONTH_NAMES = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
 const WEEK_DAYS = ["日", "一", "二", "三", "四", "五", "六"];
+const SKELETON_CELLS = 35; // 5周 * 7天
 
-// 获取月份的天数
-function getDaysInMonth(year: number, month: number): number {
-	return new Date(year, month + 1, 0).getDate();
-}
+// ============================================================
+// 工具函数
+// ============================================================
 
-// 获取月份第一天是星期几
-function getFirstDayOfMonth(year: number, month: number): number {
-	return new Date(year, month, 1).getDay();
-}
-
-// 根据 count 计算 level (0-4)，四分位算法
+/** 根据 count 计算 level (0-4)，四分位算法 */
 function calculateLevel(count: number, maxCount: number): number {
 	if (count === 0 || maxCount === 0) return 0;
 	const quartile = maxCount / 4;
@@ -65,13 +57,7 @@ function calculateLevel(count: number, maxCount: number): number {
 	return 4;
 }
 
-// 日历构建结果（合并返回避免重复循环）
-interface CalendarBuildResult {
-	cells: CalendarCell[];
-	monthTotal: number;
-}
-
-// 构建日历格子（一次循环同时计算格子数据和月贡献总数）
+/** 构建日历格子（单次遍历计算格子数据、月贡献总数、空白格数） */
 function buildCalendar(
 	year: number,
 	month: number,
@@ -81,34 +67,48 @@ function buildCalendar(
 	const today = new Date();
 	const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-	const daysInMonth = getDaysInMonth(year, month);
+	const daysInMonth = new Date(year, month + 1, 0).getDate();
+	const emptyCellsCount = new Date(year, month, 1).getDay();
+	const monthStr = String(month + 1).padStart(2, "0");
+
 	const cells: CalendarCell[] = [];
 	let monthTotal = 0;
 
-	const monthStr = String(month + 1).padStart(2, "0");
-
 	for (let day = 1; day <= daysInMonth; day++) {
 		const dayStr = String(day).padStart(2, "0");
-		const key = `${monthStr}-${dayStr}`; // MM-DD（年份从 yearGroup.year 获取）
-		const count = yearGroup?.contributions?.[key] ?? 0;
+		const dateStr = `${year}-${monthStr}-${dayStr}`;
+		const count = yearGroup?.contributions?.[`${monthStr}-${dayStr}`] ?? 0;
 
 		monthTotal += count;
-
 		cells.push({
 			day,
-			date: `${year}-${monthStr}-${dayStr}`,
+			date: dateStr,
 			count,
 			level: calculateLevel(count, maxCount),
-			isToday: `${year}-${monthStr}-${dayStr}` === todayStr,
+			isToday: dateStr === todayStr,
 		});
 	}
 
-	return { cells, monthTotal };
+	return { cells, monthTotal, emptyCellsCount };
 }
 
-/** 侧边栏标题样式 */
-const sidebarTitleStyle =
-	"font-bold text-base text-90 relative ml-6 mt-3 mb-1.5 before:w-0.5 before:h-3.5 before:rounded-sm before:bg-[var(--primary)] before:absolute before:-left-3 before:top-[4.5px]";
+/** 计算所有年份的最大贡献数 */
+function computeMaxCount(groups: ContributionsGroup[] | undefined): number {
+	if (!groups) return 1;
+	const allCounts = groups.flatMap((g) =>
+		g.contributions ? Object.values(g.contributions) : [],
+	);
+	return Math.max(...allCounts, 1);
+}
+
+// ============================================================
+// 样式常量
+// ============================================================
+
+const TITLE_STYLE = "font-bold text-base text-90 relative ml-6 mt-3 mb-1.5 before:w-0.5 before:h-3.5 before:rounded-sm before:bg-[var(--primary)] before:absolute before:-left-3 before:top-[4.5px]";
+const WEEK_DAY_STYLE = "text-center text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5";
+const CELL_BASE_STYLE = "aspect-square flex items-center justify-center rounded cursor-pointer relative transition-all duration-200";
+const NAV_BTN_STYLE = "p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-lg font-bold";
 
 export function ContributionCalendar({
 	className,
@@ -150,17 +150,11 @@ export function ContributionCalendar({
 		return () => observer.disconnect();
 	}, []);
 
-	// 预计算 maxCount（所有年份的贡献合并计算）
-	const maxCount = useMemo(() => {
-		if (!sparseData?.groups) return 1;
-		const allCounts: number[] = [];
-		for (const group of sparseData.groups) {
-			if (group.contributions) {
-				allCounts.push(...Object.values(group.contributions));
-			}
-		}
-		return Math.max(...allCounts, 1);
-	}, [sparseData]);
+	// 预计算 maxCount
+	const maxCount = useMemo(
+		() => computeMaxCount(sparseData?.groups),
+		[sparseData],
+	);
 
 	// 获取当前年份对应的分组
 	const currentYearGroup = useMemo(() => {
@@ -168,15 +162,11 @@ export function ContributionCalendar({
 		return sparseData.groups.find((g) => g.year === currentYear);
 	}, [sparseData, currentYear]);
 
-	// 日历构建（一次循环同时返回 cells 和 monthTotal）
-	const { cells, monthTotal } = useMemo(() => {
-		return buildCalendar(currentYear, currentMonth, maxCount, currentYearGroup);
-	}, [currentYear, currentMonth, maxCount, currentYearGroup]);
-
-	// 月初空白格数
-	const emptyCellsCount = useMemo(() => {
-		return getFirstDayOfMonth(currentYear, currentMonth);
-	}, [currentYear, currentMonth]);
+	// 日历构建（一次循环同时返回 cells、monthTotal 和 emptyCellsCount）
+	const { cells, monthTotal, emptyCellsCount } = useMemo(
+		() => buildCalendar(currentYear, currentMonth, maxCount, currentYearGroup),
+		[currentYear, currentMonth, maxCount, currentYearGroup],
+	);
 
 	// 当前年份总贡献数（从顶层 total 获取）
 	const yearTotal = sparseData?.total ?? 0;
@@ -237,60 +227,48 @@ export function ContributionCalendar({
 	};
 
 	// 骨架屏
-	const renderSkeletonCalendar = () => {
-		const weeksCount = 5;
-		const totalCells = weeksCount * 7;
-
-		return (
-			<>
-				<div className="flex justify-between items-center mb-1.5 px-3">
-					<div className={sidebarTitleStyle}>
-						<div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-					</div>
-					<div className="flex items-center gap-0.5 shrink-0 ml-2">
-						<div className="p-1 rounded">
+	const renderSkeletonCalendar = () => (
+		<>
+			<div className="flex justify-between items-center mb-1.5 px-3">
+				<div className={TITLE_STYLE}>
+					<div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+				</div>
+				<div className="flex items-center gap-0.5 shrink-0 ml-2">
+					{[1, 2, 3].map((i) => (
+						<div key={i} className="p-1 rounded">
 							<div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
 						</div>
-						<div className="p-1 rounded">
-							<div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+					))}
+				</div>
+			</div>
+
+			<div className="px-3">
+				<div className="grid grid-cols-7 gap-0.5 mb-0.5">
+					{WEEK_DAYS.map((day) => (
+						<div key={day} className={WEEK_DAY_STYLE}>
+							{day}
 						</div>
-						<div className="p-1 rounded">
-							<div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+					))}
+				</div>
+
+				<div className="grid grid-cols-7 gap-0.5">
+					{Array.from({ length: SKELETON_CELLS }).map((_, idx) => (
+						<div
+							key={idx}
+							className="aspect-square flex items-center justify-center rounded bg-gray-100 dark:bg-gray-800"
+						>
+							<div className="w-2.5 h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
 						</div>
-					</div>
+					))}
 				</div>
+			</div>
 
-				<div className="px-3">
-					<div className="grid grid-cols-7 gap-0.5 mb-0.5">
-						{WEEK_DAYS.map((day) => (
-							<div
-								key={day}
-								className="text-center text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5"
-							>
-								{day}
-							</div>
-						))}
-					</div>
-
-					<div className="grid grid-cols-7 gap-0.5">
-						{Array.from({ length: totalCells }).map((_, idx) => (
-							<div
-								key={idx}
-								className="aspect-square flex items-center justify-center rounded bg-gray-100 dark:bg-gray-800"
-							>
-								<div className="w-2.5 h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-							</div>
-						))}
-					</div>
-				</div>
-
-				<div className="px-3 mt-1.5 flex items-center justify-between">
-					<div className="h-2.5 w-14 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-					<div className="h-2.5 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-				</div>
-			</>
-		);
-	};
+			<div className="px-3 mt-1.5 flex items-center justify-between">
+				<div className="h-2.5 w-14 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+				<div className="h-2.5 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+			</div>
+		</>
+	);
 
 	if (ownerLoading) {
 		return (
@@ -323,7 +301,7 @@ export function ContributionCalendar({
 		>
 			{/* 标题栏 */}
 			<div className="flex justify-between items-center mb-1.5 px-3">
-				<div className={sidebarTitleStyle}>
+				<div className={TITLE_STYLE}>
 					<span className="text-sm font-bold select-none">
 						{currentYear}年{MONTH_NAMES[currentMonth]}
 					</span>
@@ -337,33 +315,17 @@ export function ContributionCalendar({
 						className={`p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-[var(--primary)] transition-all ${isBackToTodayVisible ? "" : "invisible"}`}
 						aria-label="返回今天"
 					>
-						<svg
-							className="w-4 h-4"
-							viewBox="0 0 24 24"
-							fill="none"
-							stroke="currentColor"
-							strokeWidth="2"
-						>
+						<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 							<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
 							<path d="M3 3v5h5" />
 						</svg>
 					</button>
 					{/* 上一月 */}
-					<button
-						type="button"
-						onClick={handlePrevMonth}
-						className="p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-lg font-bold"
-						aria-label="上一月"
-					>
+					<button type="button" onClick={handlePrevMonth} className={NAV_BTN_STYLE} aria-label="上一月">
 						＜
 					</button>
 					{/* 下一月 */}
-					<button
-						type="button"
-						onClick={handleNextMonth}
-						className="p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-lg font-bold"
-						aria-label="下一月"
-					>
+					<button type="button" onClick={handleNextMonth} className={NAV_BTN_STYLE} aria-label="下一月">
 						＞
 					</button>
 				</div>
@@ -374,10 +336,7 @@ export function ContributionCalendar({
 				{/* 星期标签 */}
 				<div className="grid grid-cols-7 gap-0.5 mb-0.5">
 					{WEEK_DAYS.map((day) => (
-						<div
-							key={day}
-							className="text-center text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5"
-						>
+						<div key={day} className={WEEK_DAY_STYLE}>
 							{day}
 						</div>
 					))}
@@ -395,17 +354,10 @@ export function ContributionCalendar({
 						<button
 							key={cell.date}
 							type="button"
-							className={`aspect-square flex items-center justify-center rounded cursor-pointer relative transition-all duration-200
-                ${
-									cell.isToday
-										? "font-bold ring-1.5 ring-[var(--primary)]/40"
-										: "hover:bg-[var(--btn-plain-bg-hover)]"
-								}`}
+							className={`${CELL_BASE_STYLE} ${cell.isToday ? "font-bold ring-1.5 ring-[var(--primary)]/40" : "hover:bg-[var(--btn-plain-bg-hover)]"}`}
 							style={{
 								backgroundColor: cell.isToday
-									? isDark
-										? "oklch(0.35 0.08 var(--hue))"
-										: "oklch(0.88 0.06 var(--hue))"
+									? isDark ? "oklch(0.35 0.08 var(--hue))" : "oklch(0.88 0.06 var(--hue))"
 									: getCellBg(cell),
 							}}
 							title={`${cell.date}: ${cell.count} 次贡献`}
@@ -433,16 +385,10 @@ export function ContributionCalendar({
 			{/* 底部统计 */}
 			<div className="px-3 mt-1.5 flex items-center justify-between text-[9px] text-neutral-400 dark:text-neutral-500">
 				<span>
-					当月{" "}
-					<span className="font-medium text-[var(--primary)]">
-						{monthTotal}
-					</span>{" "}
-					次
+					当月 <span className="font-medium text-[var(--primary)]">{monthTotal}</span> 次
 				</span>
 				<span>
-					过去一年{" "}
-					<span className="font-medium text-[var(--primary)]">{yearTotal}</span>{" "}
-					次
+					过去一年 <span className="font-medium text-[var(--primary)]">{yearTotal}</span> 次
 				</span>
 			</div>
 		</div>
