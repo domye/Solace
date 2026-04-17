@@ -86,7 +86,11 @@
 	/* 主按钮 - Klein Blue 渐变 */
 	.btn-primary {
 		@apply flex items-center justify-center transition-all duration-200 cursor-pointer select-none font-medium;
-		background: linear-gradient(135deg, var(--klein-blue), var(--klein-blue-light));
+		background: linear-gradient(
+			135deg,
+			var(--klein-blue),
+			var(--klein-blue-light)
+		);
 		color: white;
 		border-radius: var(--radius-medium);
 	}

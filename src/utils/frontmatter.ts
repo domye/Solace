@@ -9,7 +9,7 @@
  *   - item1
  *   - item2
  * ---
- * 
+ *
  * Markdown 正文内容
  */
 
@@ -24,7 +24,7 @@ export function parseFrontmatter<T extends object>(
 ): ParsedContent<T> {
 	// 统一换行符为 LF
 	const normalizedContent = content.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-	
+
 	// 正则匹配 --- 开头和结尾的 YAML 块（允许结尾无换行）
 	const frontmatterRegex = /^---\n([\s\S]*?)\n---(?:\n|$)/;
 	const match = normalizedContent.match(frontmatterRegex);
@@ -45,7 +45,9 @@ export function parseFrontmatter<T extends object>(
 /**
  * 将 frontmatter 对象转换为 YAML 字符串
  */
-export function stringifyFrontmatter(frontmatter: Record<string, unknown>): string {
+export function stringifyFrontmatter(
+	frontmatter: Record<string, unknown>,
+): string {
 	if (Object.keys(frontmatter).length === 0) {
 		return "";
 	}

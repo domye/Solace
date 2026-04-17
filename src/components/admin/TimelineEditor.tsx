@@ -47,10 +47,26 @@ const timelineConfig: ListEditorConfig<TimelineEvent> = {
 			type: "select",
 			defaultValue: "milestone",
 			options: [
-				{ value: "milestone", label: "里程碑", icon: "material-symbols:flag-outline-rounded" },
-				{ value: "work", label: "工作", icon: "material-symbols:work-outline-rounded" },
-				{ value: "education", label: "教育", icon: "material-symbols:school-outline-rounded" },
-				{ value: "award", label: "奖项", icon: "material-symbols:trophy-outline-rounded" },
+				{
+					value: "milestone",
+					label: "里程碑",
+					icon: "material-symbols:flag-outline-rounded",
+				},
+				{
+					value: "work",
+					label: "工作",
+					icon: "material-symbols:work-outline-rounded",
+				},
+				{
+					value: "education",
+					label: "教育",
+					icon: "material-symbols:school-outline-rounded",
+				},
+				{
+					value: "award",
+					label: "奖项",
+					icon: "material-symbols:trophy-outline-rounded",
+				},
 			],
 		},
 		{
@@ -65,7 +81,13 @@ const timelineConfig: ListEditorConfig<TimelineEvent> = {
 		<div className="flex gap-1 mt-1">
 			{item.type && (
 				<span className="bg-[var(--bg-secondary)] text-50 rounded-[var(--radius-small)] px-1.5 py-0.5 text-xs">
-					{item.type === "milestone" ? "里程碑" : item.type === "work" ? "工作" : item.type === "education" ? "教育" : "奖项"}
+					{item.type === "milestone"
+						? "里程碑"
+						: item.type === "work"
+							? "工作"
+							: item.type === "education"
+								? "教育"
+								: "奖项"}
 				</span>
 			)}
 		</div>
@@ -78,5 +100,7 @@ interface TimelineEditorProps {
 }
 
 export function TimelineEditor({ timeline, onChange }: TimelineEditorProps) {
-	return <ListEditor items={timeline} onChange={onChange} config={timelineConfig} />;
+	return (
+		<ListEditor items={timeline} onChange={onChange} config={timelineConfig} />
+	);
 }

@@ -3,16 +3,16 @@
  */
 
 // 通用基础组件
-export * from './common';
+export * from "./common";
 
 // 文章相关组件
-export * from './post';
+export * from "./post";
 
 // 管理页面组件
-export * from './admin';
+export * from "./admin";
 
 // 小部件组件
-export * from './widget';
+export * from "./widget";
 
 // 控制组件
-export * from './control';
+export * from "./control";

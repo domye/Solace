@@ -54,7 +54,11 @@ function GitHubRepoCard({ project }: ProjectCardProps) {
 			<div className="project-card-header">
 				<div className="project-card-avatar-box">
 					{avatar ? (
-						<img src={avatar} alt={project.name} className="project-card-avatar" />
+						<img
+							src={avatar}
+							alt={project.name}
+							className="project-card-avatar"
+						/>
 					) : (
 						<div className="project-card-avatar-default">
 							<SafeIcon icon="fa6-brands:github" size={24} />
@@ -79,7 +83,10 @@ function GitHubRepoCard({ project }: ProjectCardProps) {
 			</div>
 			{project.demo && (
 				<div className="project-card-demo-badge">
-					<SafeIcon icon="material-symbols:open-in-new-outline-rounded" size={14} />
+					<SafeIcon
+						icon="material-symbols:open-in-new-outline-rounded"
+						size={14}
+					/>
 					演示
 				</div>
 			)}
@@ -107,10 +114,17 @@ function ManualProjectCard({ project }: ProjectCardProps) {
 			<div className="project-card-header">
 				<div className="project-card-avatar-box">
 					{avatar ? (
-						<img src={avatar} alt={project.name} className="project-card-avatar" />
+						<img
+							src={avatar}
+							alt={project.name}
+							className="project-card-avatar"
+						/>
 					) : (
 						<div className="project-card-avatar-default">
-							<SafeIcon icon="material-symbols:folder-outline-rounded" size={24} />
+							<SafeIcon
+								icon="material-symbols:folder-outline-rounded"
+								size={24}
+							/>
 						</div>
 					)}
 				</div>
@@ -128,11 +142,16 @@ function ManualProjectCard({ project }: ProjectCardProps) {
 				</div>
 			</div>
 			<div className="project-card-body">
-				<p className="project-card-desc">{truncateText(project.description, 50)}</p>
+				<p className="project-card-desc">
+					{truncateText(project.description, 50)}
+				</p>
 			</div>
 			{project.demo && (
 				<div className="project-card-demo-badge">
-					<SafeIcon icon="material-symbols:open-in-new-outline-rounded" size={14} />
+					<SafeIcon
+						icon="material-symbols:open-in-new-outline-rounded"
+						size={14}
+					/>
 					演示
 				</div>
 			)}

@@ -64,9 +64,7 @@ export function ProjectsTemplate({
 
 			{/* 无项目时显示 */}
 			{!frontmatter.projects?.length && !markdown && (
-				<div className="card-base p-6 md:p-8 text-center text-50">
-					暂无项目
-				</div>
+				<div className="card-base p-6 md:p-8 text-center text-50">暂无项目</div>
 			)}
 		</div>
 	);

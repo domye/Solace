@@ -33,7 +33,7 @@ export function FootprintsEditor({ cities, onChange }: FootprintsEditorProps) {
 	// 按省份分组
 	const groupedCities = useMemo(() => {
 		const groups: Map<string, ProvinceGroup> = new Map();
-		
+
 		cities.forEach((city) => {
 			const province = city.province || city.country || "未分类";
 			if (!groups.has(province)) {
@@ -42,7 +42,9 @@ export function FootprintsEditor({ cities, onChange }: FootprintsEditorProps) {
 			groups.get(province)!.cities.push(city);
 		});
 
-		return Array.from(groups.values()).sort((a, b) => a.province.localeCompare(b.province));
+		return Array.from(groups.values()).sort((a, b) =>
+			a.province.localeCompare(b.province),
+		);
 	}, [cities]);
 
 	// 切换展开状态
@@ -59,11 +61,14 @@ export function FootprintsEditor({ cities, onChange }: FootprintsEditorProps) {
 	};
 
 	// 判断是否展开
-	const isExpanded = (province: string): boolean => expandedGroups.has(province);
+	const isExpanded = (province: string): boolean =>
+		expandedGroups.has(province);
 
 	// 获取城市在原数组中的索引
 	const getCityIndex = (city: FootprintCity): number => {
-		return cities.findIndex((c) => c.name === city.name && c.province === city.province);
+		return cities.findIndex(
+			(c) => c.name === city.name && c.province === city.province,
+		);
 	};
 
 	// 编辑城市
@@ -286,7 +291,9 @@ export function FootprintsEditor({ cities, onChange }: FootprintsEditorProps) {
 										className="text-50"
 									/>
 									<span className="text-75 font-medium">{group.province}</span>
-									<span className="text-50 text-xs">({getGroupCount(group)})</span>
+									<span className="text-50 text-xs">
+										({getGroupCount(group)})
+									</span>
 								</div>
 							</button>
 
@@ -301,7 +308,9 @@ export function FootprintsEditor({ cities, onChange }: FootprintsEditorProps) {
 											<div className="flex-1 min-w-0">
 												<div className="text-75 truncate">{city.name}</div>
 												{city.visited_at && (
-													<div className="text-50 text-xs">{city.visited_at}</div>
+													<div className="text-50 text-xs">
+														{city.visited_at}
+													</div>
 												)}
 											</div>
 
@@ -312,7 +321,10 @@ export function FootprintsEditor({ cities, onChange }: FootprintsEditorProps) {
 													className="p-1.5 hover:bg-[var(--btn-regular-bg-hover)] rounded-[var(--radius-small)] text-50 hover:text-75"
 													title="编辑"
 												>
-													<SafeIcon icon="material-symbols:edit-outline-rounded" size={16} />
+													<SafeIcon
+														icon="material-symbols:edit-outline-rounded"
+														size={16}
+													/>
 												</button>
 												<button
 													type="button"
@@ -320,7 +332,10 @@ export function FootprintsEditor({ cities, onChange }: FootprintsEditorProps) {
 													className="p-1.5 hover:bg-red-500/10 rounded-[var(--radius-small)] text-50 hover:text-red-500"
 													title="删除"
 												>
-													<SafeIcon icon="material-symbols:delete-outline-rounded" size={16} />
+													<SafeIcon
+														icon="material-symbols:delete-outline-rounded"
+														size={16}
+													/>
 												</button>
 											</div>
 										</div>

@@ -70,18 +70,24 @@ export function ListEditor<T extends object>({
 		setTagsInput({});
 	}, [items.length, config]);
 
-	const handleEditItem = useCallback((index: number) => {
-		setEditingIndex(index);
-		setEditForm(items[index] || config.createEmpty());
-		setTagsInput({});
-	}, [items, config]);
+	const handleEditItem = useCallback(
+		(index: number) => {
+			setEditingIndex(index);
+			setEditForm(items[index] || config.createEmpty());
+			setTagsInput({});
+		},
+		[items, config],
+	);
 
-	const handleDeleteItem = useCallback((index: number) => {
-		onChange(items.filter((_, i) => i !== index));
-		if (editingIndex === index) {
-			setEditingIndex(null);
-		}
-	}, [items, editingIndex, onChange]);
+	const handleDeleteItem = useCallback(
+		(index: number) => {
+			onChange(items.filter((_, i) => i !== index));
+			if (editingIndex === index) {
+				setEditingIndex(null);
+			}
+		},
+		[items, editingIndex, onChange],
+	);
 
 	const handleSaveEdit = useCallback(() => {
 		const requiredFields = config.fields.filter((f) => f.required);
@@ -126,52 +132,67 @@ export function ListEditor<T extends object>({
 		setTagsInput({});
 	}, [config]);
 
-	const handleMoveUp = useCallback((index: number) => {
-		if (index === 0) return;
-		const newItems = [...items];
-		const prev = newItems[index - 1];
-		const curr = newItems[index];
-		if (prev && curr) {
-			newItems[index - 1] = curr;
-			newItems[index] = prev;
-			onChange(newItems);
-		}
-	}, [items, onChange]);
+	const handleMoveUp = useCallback(
+		(index: number) => {
+			if (index === 0) return;
+			const newItems = [...items];
+			const prev = newItems[index - 1];
+			const curr = newItems[index];
+			if (prev && curr) {
+				newItems[index - 1] = curr;
+				newItems[index] = prev;
+				onChange(newItems);
+			}
+		},
+		[items, onChange],
+	);
 
-	const handleMoveDown = useCallback((index: number) => {
-		if (index === items.length - 1) return;
-		const newItems = [...items];
-		const curr = newItems[index];
-		const next = newItems[index + 1];
-		if (curr && next) {
-			newItems[index] = next;
-			newItems[index + 1] = curr;
-			onChange(newItems);
-		}
-	}, [items, onChange]);
+	const handleMoveDown = useCallback(
+		(index: number) => {
+			if (index === items.length - 1) return;
+			const newItems = [...items];
+			const curr = newItems[index];
+			const next = newItems[index + 1];
+			if (curr && next) {
+				newItems[index] = next;
+				newItems[index + 1] = curr;
+				onChange(newItems);
+			}
+		},
+		[items, onChange],
+	);
 
 	const handleFieldChange = useCallback(
 		(fieldName: keyof T, value: unknown) => {
 			setEditForm((prev) => ({ ...prev, [fieldName]: value }));
 		},
-		[]
+		[],
 	);
 
-	const handleAddTag = useCallback((fieldName: keyof T) => {
-		const inputValue = tagsInput[String(fieldName)] || "";
-		if (!inputValue.trim()) return;
+	const handleAddTag = useCallback(
+		(fieldName: keyof T) => {
+			const inputValue = tagsInput[String(fieldName)] || "";
+			if (!inputValue.trim()) return;
 
-		const currentTags = (editForm[fieldName] as string[] | undefined) || [];
-		if (!currentTags.includes(inputValue.trim())) {
-			handleFieldChange(fieldName, [...currentTags, inputValue.trim()]);
-		}
-		setTagsInput((prev) => ({ ...prev, [String(fieldName)]: "" }));
-	}, [tagsInput, editForm, handleFieldChange]);
+			const currentTags = (editForm[fieldName] as string[] | undefined) || [];
+			if (!currentTags.includes(inputValue.trim())) {
+				handleFieldChange(fieldName, [...currentTags, inputValue.trim()]);
+			}
+			setTagsInput((prev) => ({ ...prev, [String(fieldName)]: "" }));
+		},
+		[tagsInput, editForm, handleFieldChange],
+	);
 
-	const handleRemoveTag = useCallback((fieldName: keyof T, tag: string) => {
-		const currentTags = (editForm[fieldName] as string[] | undefined) || [];
-		handleFieldChange(fieldName, currentTags.filter((t) => t !== tag));
-	}, [editForm, handleFieldChange]);
+	const handleRemoveTag = useCallback(
+		(fieldName: keyof T, tag: string) => {
+			const currentTags = (editForm[fieldName] as string[] | undefined) || [];
+			handleFieldChange(
+				fieldName,
+				currentTags.filter((t) => t !== tag),
+			);
+		},
+		[editForm, handleFieldChange],
+	);
 
 	const getDisplayValue = (item: T): string => {
 		const value = item[config.displayField];
@@ -181,12 +202,14 @@ export function ListEditor<T extends object>({
 
 	const getSecondaryValues = (item: T): string[] => {
 		if (!config.secondaryFields) return [];
-		return config.secondaryFields.map((field) => {
-			const value = item[field];
-			if (typeof value === "string") return value;
-			if (Array.isArray(value)) return value.join(", ");
-			return "";
-		}).filter(Boolean);
+		return config.secondaryFields
+			.map((field) => {
+				const value = item[field];
+				if (typeof value === "string") return value;
+				if (Array.isArray(value)) return value.join(", ");
+				return "";
+			})
+			.filter(Boolean);
 	};
 
 	return (
@@ -206,33 +229,53 @@ export function ListEditor<T extends object>({
 			{editingIndex !== null && (
 				<div className="card-base p-4 space-y-3 border-2 border-[var(--primary)]">
 					<h4 className="text-75 font-medium text-sm">
-						{editingIndex === items.length ? `添加新${config.itemLabel}` : `编辑${config.itemLabel}`}
+						{editingIndex === items.length
+							? `添加新${config.itemLabel}`
+							: `编辑${config.itemLabel}`}
 					</h4>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 						{config.fields.map((field) => {
-							const isFullWidth = field.type === "textarea" || field.type === "tags";
+							const isFullWidth =
+								field.type === "textarea" || field.type === "tags";
 							const fieldKey = String(field.name);
 
 							return (
-								<div key={fieldKey} className={isFullWidth ? "md:col-span-2" : ""}>
+								<div
+									key={fieldKey}
+									className={isFullWidth ? "md:col-span-2" : ""}
+								>
 									<label className="block text-50 text-xs mb-1">
 										{field.label}
-										{field.required && <span className="text-red-400 ml-1">*</span>}
+										{field.required && (
+											<span className="text-red-400 ml-1">*</span>
+										)}
 									</label>
 
-									{field.type === "text" || field.type === "url" || field.type === "date" ? (
+									{field.type === "text" ||
+									field.type === "url" ||
+									field.type === "date" ? (
 										<input
-											type={field.type === "url" ? "url" : field.type === "date" ? "date" : "text"}
+											type={
+												field.type === "url"
+													? "url"
+													: field.type === "date"
+														? "date"
+														: "text"
+											}
 											value={(editForm[field.name] as string | undefined) || ""}
-											onChange={(e) => handleFieldChange(field.name, e.target.value)}
+											onChange={(e) =>
+												handleFieldChange(field.name, e.target.value)
+											}
 											placeholder={field.placeholder}
 											className="input-base"
 										/>
 									) : field.type === "textarea" ? (
 										<textarea
 											value={(editForm[field.name] as string | undefined) || ""}
-											onChange={(e) => handleFieldChange(field.name, e.target.value)}
+											onChange={(e) =>
+												handleFieldChange(field.name, e.target.value)
+											}
 											placeholder={field.placeholder}
 											rows={3}
 											className="input-base"
@@ -243,7 +286,9 @@ export function ListEditor<T extends object>({
 												<button
 													key={opt.value}
 													type="button"
-													onClick={() => handleFieldChange(field.name, opt.value)}
+													onClick={() =>
+														handleFieldChange(field.name, opt.value)
+													}
 													className={`rounded-[var(--radius-medium)] py-1.5 px-3 text-sm flex items-center gap-1 transition-all ${
 														editForm[field.name] === opt.value
 															? "btn-primary btn-sm py-1 px-2.5"
@@ -287,21 +332,28 @@ export function ListEditor<T extends object>({
 											{Array.isArray(editForm[field.name]) &&
 												(editForm[field.name] as string[]).length > 0 && (
 													<div className="flex flex-wrap gap-1">
-														{(editForm[field.name] as string[]).map((tag: string) => (
-															<span
-																key={tag}
-																className="bg-[var(--primary)]/20 text-[var(--primary)] rounded-[var(--radius-small)] px-2 py-0.5 text-xs flex items-center gap-1"
-															>
-																{tag}
-																<button
-																	type="button"
-																	onClick={() => handleRemoveTag(field.name, tag)}
-																	className="hover:bg-white/20 rounded"
+														{(editForm[field.name] as string[]).map(
+															(tag: string) => (
+																<span
+																	key={tag}
+																	className="bg-[var(--primary)]/20 text-[var(--primary)] rounded-[var(--radius-small)] px-2 py-0.5 text-xs flex items-center gap-1"
 																>
-																	<SafeIcon icon="material-symbols:close-rounded" size={12} />
-																</button>
-															</span>
-														))}
+																	{tag}
+																	<button
+																		type="button"
+																		onClick={() =>
+																			handleRemoveTag(field.name, tag)
+																		}
+																		className="hover:bg-white/20 rounded"
+																	>
+																		<SafeIcon
+																			icon="material-symbols:close-rounded"
+																			size={12}
+																		/>
+																	</button>
+																</span>
+															),
+														)}
 													</div>
 												)}
 										</div>
@@ -312,7 +364,11 @@ export function ListEditor<T extends object>({
 													type="number"
 													step="any"
 													value={
-														(editForm[field.name] as { lat: number; lng: number } | undefined)?.lat || ""
+														(
+															editForm[field.name] as
+																| { lat: number; lng: number }
+																| undefined
+														)?.lat || ""
 													}
 													onChange={(e) =>
 														handleFieldChange(field.name, {
@@ -329,7 +385,11 @@ export function ListEditor<T extends object>({
 													type="number"
 													step="any"
 													value={
-														(editForm[field.name] as { lat: number; lng: number } | undefined)?.lng || ""
+														(
+															editForm[field.name] as
+																| { lat: number; lng: number }
+																| undefined
+														)?.lng || ""
 													}
 													onChange={(e) =>
 														handleFieldChange(field.name, {
@@ -344,7 +404,9 @@ export function ListEditor<T extends object>({
 										</div>
 									) : null}
 
-									{field.help && <p className="text-40 text-xs mt-0.5">{field.help}</p>}
+									{field.help && (
+										<p className="text-40 text-xs mt-0.5">{field.help}</p>
+									)}
 								</div>
 							);
 						})}
@@ -385,7 +447,10 @@ export function ListEditor<T extends object>({
 										className="p-1 hover:text-75 disabled:opacity-30 disabled:cursor-not-allowed"
 										title="上移"
 									>
-										<SafeIcon icon="material-symbols:arrow-upward-rounded" size={16} />
+										<SafeIcon
+											icon="material-symbols:arrow-upward-rounded"
+											size={16}
+										/>
 									</button>
 									<button
 										type="button"
@@ -394,13 +459,18 @@ export function ListEditor<T extends object>({
 										className="p-1 hover:text-75 disabled:opacity-30 disabled:cursor-not-allowed"
 										title="下移"
 									>
-										<SafeIcon icon="material-symbols:arrow-downward-rounded" size={16} />
+										<SafeIcon
+											icon="material-symbols:arrow-downward-rounded"
+											size={16}
+										/>
 									</button>
 								</div>
 							)}
 
 							<div className="flex-1 min-w-0">
-								<div className="text-75 font-medium truncate">{getDisplayValue(item)}</div>
+								<div className="text-75 font-medium truncate">
+									{getDisplayValue(item)}
+								</div>
 								{getSecondaryValues(item).length > 0 && (
 									<div className="text-50 text-xs truncate mt-0.5">
 										{getSecondaryValues(item).join(" · ")}
@@ -416,7 +486,10 @@ export function ListEditor<T extends object>({
 									className="p-1.5 hover:bg-[var(--btn-regular-bg-hover)] rounded-[var(--radius-small)] text-50 hover:text-75"
 									title="编辑"
 								>
-									<SafeIcon icon="material-symbols:edit-outline-rounded" size={16} />
+									<SafeIcon
+										icon="material-symbols:edit-outline-rounded"
+										size={16}
+									/>
 								</button>
 								<button
 									type="button"
@@ -424,7 +497,10 @@ export function ListEditor<T extends object>({
 									className="p-1.5 hover:bg-red-500/10 rounded-[var(--radius-small)] text-50 hover:text-red-500"
 									title="删除"
 								>
-									<SafeIcon icon="material-symbols:delete-outline-rounded" size={16} />
+									<SafeIcon
+										icon="material-symbols:delete-outline-rounded"
+										size={16}
+									/>
 								</button>
 							</div>
 						</div>

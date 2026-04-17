@@ -25,8 +25,12 @@ const templateLabels: Record<string, string> = {
 
 export function AdminPagesPage() {
 	const [page, setPage] = useState(1);
-	const [statusFilter, setStatusFilter] = useState<"all" | "draft" | "published">("all");
-	const [templateFilter, setTemplateFilter] = useState<"all" | "default" | "about" | "projects" | "footprints">("all");
+	const [statusFilter, setStatusFilter] = useState<
+		"all" | "draft" | "published"
+	>("all");
+	const [templateFilter, setTemplateFilter] = useState<
+		"all" | "default" | "about" | "projects" | "footprints"
+	>("all");
 	const pageSize = 10;
 
 	const { accessToken, isAuthenticated } = useAuthStore();
@@ -75,7 +79,9 @@ export function AdminPagesPage() {
 								key={status}
 								onClick={() => setStatusFilter(status)}
 								className={`btn-regular btn-sm py-1 px-2.5 ${
-									statusFilter === status ? "border-[var(--primary)] bg-[var(--btn-regular-bg-active)]" : ""
+									statusFilter === status
+										? "border-[var(--primary)] bg-[var(--btn-regular-bg-active)]"
+										: ""
 								}`}
 							>
 								{statusLabels[status]}
@@ -85,12 +91,16 @@ export function AdminPagesPage() {
 
 					{/* 模板筛选 */}
 					<div className="flex gap-2">
-						{(["all", "default", "about", "projects", "footprints"] as const).map((template) => (
+						{(
+							["all", "default", "about", "projects", "footprints"] as const
+						).map((template) => (
 							<button
 								key={template}
 								onClick={() => setTemplateFilter(template)}
 								className={`btn-regular btn-sm py-1 px-2.5 ${
-									templateFilter === template ? "border-[var(--primary)] bg-[var(--btn-regular-bg-active)]" : ""
+									templateFilter === template
+										? "border-[var(--primary)] bg-[var(--btn-regular-bg-active)]"
+										: ""
 								}`}
 							>
 								{templateLabels[template] || template}
@@ -99,10 +109,7 @@ export function AdminPagesPage() {
 					</div>
 				</div>
 
-				<Link
-					to="/admin/pages/new"
-					className="btn-regular btn-sm py-1.5 px-3"
-				>
+				<Link to="/admin/pages/new" className="btn-regular btn-sm py-1.5 px-3">
 					新建页面
 				</Link>
 			</div>

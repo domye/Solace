@@ -13,10 +13,7 @@ interface AboutTemplateProps {
 	markdown: string;
 }
 
-export function AboutTemplate({
-	frontmatter,
-	markdown,
-}: AboutTemplateProps) {
+export function AboutTemplate({ frontmatter, markdown }: AboutTemplateProps) {
 	return (
 		<div className="space-y-6 fade-in-up">
 			{/* 时间线 */}

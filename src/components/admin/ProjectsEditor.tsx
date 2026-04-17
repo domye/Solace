@@ -26,8 +26,16 @@ const emptyProject: Project = {
 };
 
 const statusOptions = [
-	{ value: "active", label: "进行中", icon: "material-symbols:rocket-launch-outline-rounded" },
-	{ value: "archived", label: "已归档", icon: "material-symbols:archive-outline-rounded" },
+	{
+		value: "active",
+		label: "进行中",
+		icon: "material-symbols:rocket-launch-outline-rounded",
+	},
+	{
+		value: "archived",
+		label: "已归档",
+		icon: "material-symbols:archive-outline-rounded",
+	},
 ];
 
 export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
@@ -67,7 +75,9 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 		if (editingIndex === projects.length) {
 			onChange([...projects, updatedProject]);
 		} else if (editingIndex !== null && projects[editingIndex]) {
-			onChange(projects.map((p, i) => (i === editingIndex ? updatedProject : p)));
+			onChange(
+				projects.map((p, i) => (i === editingIndex ? updatedProject : p)),
+			);
 		}
 
 		setEditingIndex(null);
@@ -142,7 +152,9 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 							<input
 								type="text"
 								value={editForm.name}
-								onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+								onChange={(e) =>
+									setEditForm({ ...editForm, name: e.target.value })
+								}
 								placeholder="我的项目"
 								className="input-base"
 							/>
@@ -153,11 +165,15 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 							<input
 								type="text"
 								value={editForm.githubRepo}
-								onChange={(e) => setEditForm({ ...editForm, githubRepo: e.target.value })}
+								onChange={(e) =>
+									setEditForm({ ...editForm, githubRepo: e.target.value })
+								}
 								placeholder="owner/repo (自动解析 GitHub)"
 								className="input-base"
 							/>
-							<p className="text-40 text-xs mt-0.5">格式: 用户名/仓库名，如 domye/blog</p>
+							<p className="text-40 text-xs mt-0.5">
+								格式: 用户名/仓库名，如 domye/blog
+							</p>
 						</div>
 
 						<div>
@@ -165,7 +181,9 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 							<input
 								type="url"
 								value={editForm.avatar}
-								onChange={(e) => setEditForm({ ...editForm, avatar: e.target.value })}
+								onChange={(e) =>
+									setEditForm({ ...editForm, avatar: e.target.value })
+								}
 								placeholder="https://example.com/avatar.png"
 								className="input-base"
 							/>
@@ -176,7 +194,9 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 							<input
 								type="url"
 								value={editForm.demo}
-								onChange={(e) => setEditForm({ ...editForm, demo: e.target.value })}
+								onChange={(e) =>
+									setEditForm({ ...editForm, demo: e.target.value })
+								}
 								placeholder="https://demo.example.com"
 								className="input-base"
 							/>
@@ -187,7 +207,9 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 							<input
 								type="text"
 								value={editForm.description}
-								onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+								onChange={(e) =>
+									setEditForm({ ...editForm, description: e.target.value })
+								}
 								placeholder="项目简介..."
 								className="input-base"
 							/>
@@ -230,7 +252,10 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 												onClick={() => handleRemoveTech(tech)}
 												className="hover:bg-white/20 rounded"
 											>
-												<SafeIcon icon="material-symbols:close-rounded" size={12} />
+												<SafeIcon
+													icon="material-symbols:close-rounded"
+													size={12}
+												/>
 											</button>
 										</span>
 									))}
@@ -245,7 +270,12 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 									<button
 										key={opt.value}
 										type="button"
-										onClick={() => setEditForm({ ...editForm, status: opt.value as "active" | "archived" })}
+										onClick={() =>
+											setEditForm({
+												...editForm,
+												status: opt.value as "active" | "archived",
+											})
+										}
 										className={`rounded-[var(--radius-medium)] py-1.5 px-3 text-sm flex items-center gap-1 transition-all ${
 											editForm.status === opt.value
 												? "btn-primary btn-sm py-1 px-2.5"
@@ -295,7 +325,10 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 									className="p-1 hover:text-75 disabled:opacity-30 disabled:cursor-not-allowed"
 									title="上移"
 								>
-									<SafeIcon icon="material-symbols:arrow-upward-rounded" size={16} />
+									<SafeIcon
+										icon="material-symbols:arrow-upward-rounded"
+										size={16}
+									/>
 								</button>
 								<button
 									type="button"
@@ -304,7 +337,10 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 									className="p-1 hover:text-75 disabled:opacity-30 disabled:cursor-not-allowed"
 									title="下移"
 								>
-									<SafeIcon icon="material-symbols:arrow-downward-rounded" size={16} />
+									<SafeIcon
+										icon="material-symbols:arrow-downward-rounded"
+										size={16}
+									/>
 								</button>
 							</div>
 
@@ -318,9 +354,15 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 
 							<div className="flex-1 min-w-0">
 								<div className="flex items-center gap-2">
-									<span className="text-75 font-medium truncate">{project.name}</span>
+									<span className="text-75 font-medium truncate">
+										{project.name}
+									</span>
 									{project.githubRepo && (
-										<SafeIcon icon="fa6-brands:github" size={14} className="text-50" />
+										<SafeIcon
+											icon="fa6-brands:github"
+											size={14}
+											className="text-50"
+										/>
 									)}
 									{project.status === "archived" && (
 										<span className="text-40 text-xs">已归档</span>
@@ -347,7 +389,10 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 									className="p-1.5 hover:bg-[var(--btn-regular-bg-hover)] rounded-[var(--radius-small)] text-50 hover:text-75"
 									title="编辑"
 								>
-									<SafeIcon icon="material-symbols:edit-outline-rounded" size={16} />
+									<SafeIcon
+										icon="material-symbols:edit-outline-rounded"
+										size={16}
+									/>
 								</button>
 								<button
 									type="button"
@@ -355,7 +400,10 @@ export function ProjectsEditor({ projects, onChange }: ProjectsEditorProps) {
 									className="p-1.5 hover:bg-red-500/10 rounded-[var(--radius-small)] text-50 hover:text-red-500"
 									title="删除"
 								>
-									<SafeIcon icon="material-symbols:delete-outline-rounded" size={16} />
+									<SafeIcon
+										icon="material-symbols:delete-outline-rounded"
+										size={16}
+									/>
 								</button>
 							</div>
 						</div>

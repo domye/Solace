@@ -15,16 +15,18 @@ import type { FootprintsFrontmatter, FootprintCity } from "@/types";
 
 // 懒加载地图组件 - ECharts 较大，仅在实际需要时加载
 const FootprintsMap = lazy(() =>
-  import("@/components/widget/FootprintsMap").then((m) => ({ default: m.FootprintsMap }))
+	import("@/components/widget/FootprintsMap").then((m) => ({
+		default: m.FootprintsMap,
+	})),
 );
 
 // 地图加载占位符
 function MapLoadingFallback() {
-  return (
-    <div className="h-[400px] md:h-[500px] w-full rounded-xl bg-[var(--btn-regular-bg)] flex items-center justify-center">
-      <div className="text-50 animate-pulse">加载地图中...</div>
-    </div>
-  );
+	return (
+		<div className="h-[400px] md:h-[500px] w-full rounded-xl bg-[var(--btn-regular-bg)] flex items-center justify-center">
+			<div className="text-50 animate-pulse">加载地图中...</div>
+		</div>
+	);
 }
 
 interface FootprintsTemplateProps {
@@ -45,7 +47,9 @@ export function FootprintsTemplate({
 	const citiesWithCoords = validCities.filter((c) => c.coords);
 
 	// 统计省份数量
-	const provinces = [...new Set(validCities.map((c) => c.province || c.country))];
+	const provinces = [
+		...new Set(validCities.map((c) => c.province || c.country)),
+	];
 
 	// 按省份分组
 	const citiesByProvince: Record<string, FootprintCity[]> = {};
@@ -103,13 +107,14 @@ export function FootprintsTemplate({
 						<h2 className="text-90 text-xl font-bold mb-4 flex items-center gap-2">
 							<SafeIcon icon="material-symbols:location-city-outline-rounded" />
 							{province}
-							<span className="text-50 text-sm">
-								({provinceCities.length})
-							</span>
+							<span className="text-50 text-sm">({provinceCities.length})</span>
 						</h2>
 						<div className="space-y-3">
 							{provinceCities.map((city, idx) => (
-								<FootprintCard key={`${province}-${city.name}-${idx}`} city={city} />
+								<FootprintCard
+									key={`${province}-${city.name}-${idx}`}
+									city={city}
+								/>
 							))}
 						</div>
 					</div>

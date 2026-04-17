@@ -13,9 +13,7 @@ interface FootprintCardProps {
 
 export function FootprintCard({ city }: FootprintCardProps) {
 	return (
-		<div
-			className="flex items-start gap-3 p-3 rounded-lg bg-[var(--btn-regular-bg)] hover:bg-[var(--card-hover-bg)] transition-colors"
-		>
+		<div className="flex items-start gap-3 p-3 rounded-lg bg-[var(--btn-regular-bg)] hover:bg-[var(--card-hover-bg)] transition-colors">
 			{/* 图标 */}
 			<SafeIcon
 				icon="material-symbols:location-on-outline-rounded"
@@ -37,10 +35,7 @@ export function FootprintCard({ city }: FootprintCardProps) {
 				{city.highlights && city.highlights.length > 0 && (
 					<div className="flex flex-wrap gap-1 text-50 text-sm mb-1">
 						{city.highlights.map((h) => (
-							<span
-								key={h}
-								className="btn-regular h-5 text-xs px-1.5 rounded"
-							>
+							<span key={h} className="btn-regular h-5 text-xs px-1.5 rounded">
 								{h}
 							</span>
 						))}
@@ -54,9 +49,7 @@ export function FootprintCard({ city }: FootprintCardProps) {
 
 				{/* 停留时间 */}
 				{city.duration && (
-					<div className="text-50 text-xs mt-1">
-						停留：{city.duration}
-					</div>
+					<div className="text-50 text-xs mt-1">停留：{city.duration}</div>
 				)}
 			</div>
 		</div>

@@ -22,21 +22,29 @@ import type {
 
 // 懒加载模板组件 - FootprintsTemplate 包含 ECharts，需延迟加载
 const DefaultTemplate = lazy(() =>
-  import("@/components/page/templates/DefaultTemplate").then((m) => ({ default: m.DefaultTemplate }))
+	import("@/components/page/templates/DefaultTemplate").then((m) => ({
+		default: m.DefaultTemplate,
+	})),
 );
 const AboutTemplate = lazy(() =>
-  import("@/components/page/templates/AboutTemplate").then((m) => ({ default: m.AboutTemplate }))
+	import("@/components/page/templates/AboutTemplate").then((m) => ({
+		default: m.AboutTemplate,
+	})),
 );
 const ProjectsTemplate = lazy(() =>
-  import("@/components/page/templates/ProjectsTemplate").then((m) => ({ default: m.ProjectsTemplate }))
+	import("@/components/page/templates/ProjectsTemplate").then((m) => ({
+		default: m.ProjectsTemplate,
+	})),
 );
 const FootprintsTemplate = lazy(() =>
-  import("@/components/page/templates/FootprintsTemplate").then((m) => ({ default: m.FootprintsTemplate }))
+	import("@/components/page/templates/FootprintsTemplate").then((m) => ({
+		default: m.FootprintsTemplate,
+	})),
 );
 
 // 模板加载占位符
 function TemplateLoadingFallback() {
-  return <ArticleDetailSkeleton />;
+	return <ArticleDetailSkeleton />;
 }
 
 export function PageDetailPage() {
@@ -88,18 +96,13 @@ export function PageDetailPage() {
 			default:
 				return (
 					<Suspense fallback={<TemplateLoadingFallback />}>
-						<DefaultTemplate
-							markdown={markdown}
-							page={page}
-						/>
+						<DefaultTemplate markdown={markdown} page={page} />
 					</Suspense>
 				);
 		}
 	};
 
 	return (
-		<article className="flex-1 min-w-0 fade-in-up">
-			{renderTemplate()}
-		</article>
+		<article className="flex-1 min-w-0 fade-in-up">{renderTemplate()}</article>
 	);
 }
