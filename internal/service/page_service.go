@@ -2,22 +2,21 @@ package service
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
 
 	"gorm.io/gorm"
 
 	"gin-quickstart/internal/dto/response"
 	"gin-quickstart/internal/model"
+	"gin-quickstart/internal/pkg/errors"
 	"gin-quickstart/internal/pkg/slug"
 )
 
 var (
-	ErrPageNotFound        = errors.New("页面未找到")
-	ErrPageVersionConflict = errors.New("页面版本冲突，请刷新后重试")
-	ErrPageSlugExists      = errors.New("页面 Slug 已存在")
+	ErrPageVersionConflict = errors.NewBadRequest("页面版本冲突，请刷新后重试", nil)
+	ErrPageSlugExists      = errors.NewBadRequest("页面 Slug 已存在", nil)
 )
 
-// PageService 页面业务逻辑接口
 type PageService interface {
 	Create(ctx context.Context, title, pageSlug, template, content, summary, coverImage, status string, order int, showInNav bool) (*response.PageResponse, error)
 	GetByID(ctx context.Context, id uint) (*response.PageResponse, error)
@@ -28,7 +27,6 @@ type PageService interface {
 	Delete(ctx context.Context, id uint) error
 }
 
-// pageRepository 页面数据访问接口
 type pageRepository interface {
 	Create(ctx context.Context, page *model.Page) error
 	FindByID(ctx context.Context, id uint) (*model.Page, error)
@@ -40,37 +38,30 @@ type pageRepository interface {
 	ExistsBySlug(ctx context.Context, slug string) bool
 }
 
-// pageService 页面服务实现
 type pageService struct {
 	pageRepo pageRepository
 }
 
-// NewPageService 创建页面服务
 func NewPageService(pageRepo pageRepository) PageService {
 	return &pageService{
 		pageRepo: pageRepo,
 	}
 }
 
-// Create 创建页面
 func (s *pageService) Create(ctx context.Context, title, pageSlug, template, content, summary, coverImage, status string, order int, showInNav bool) (*response.PageResponse, error) {
-	// 生成或使用自定义 slug
 	finalSlug := pageSlug
 	if finalSlug == "" {
 		finalSlug = slug.Generate(title)
 	}
 
-	// 检查 slug 唯一性
 	if s.pageRepo.ExistsBySlug(ctx, finalSlug) {
 		finalSlug = slug.GenerateWithTimestamp(title)
 	}
 
-	// 默认模板
 	if template == "" {
 		template = model.TemplateDefault
 	}
 
-	// 默认状态
 	if status == "" {
 		status = model.PageStatusDraft
 	}
@@ -94,12 +85,11 @@ func (s *pageService) Create(ctx context.Context, title, pageSlug, template, con
 	return toPageResponse(page), nil
 }
 
-// GetByID 根据 ID 获取页面
 func (s *pageService) GetByID(ctx context.Context, id uint) (*response.PageResponse, error) {
 	page, err := s.pageRepo.FindByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrPageNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NewNotFound("页面未找到")
 		}
 		return nil, err
 	}
@@ -107,12 +97,11 @@ func (s *pageService) GetByID(ctx context.Context, id uint) (*response.PageRespo
 	return toPageResponse(page), nil
 }
 
-// GetBySlug 根据 Slug 获取页面（仅已发布）
 func (s *pageService) GetBySlug(ctx context.Context, slug string) (*response.PageResponse, error) {
 	page, err := s.pageRepo.FindBySlug(ctx, slug)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrPageNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NewNotFound("页面未找到")
 		}
 		return nil, err
 	}
@@ -120,7 +109,6 @@ func (s *pageService) GetBySlug(ctx context.Context, slug string) (*response.Pag
 	return toPageResponse(page), nil
 }
 
-// GetList 获取页面列表
 func (s *pageService) GetList(ctx context.Context, page, pageSize int, status, template string) (*response.PageListResponse, error) {
 	offset := (page - 1) * pageSize
 
@@ -142,7 +130,6 @@ func (s *pageService) GetList(ctx context.Context, page, pageSize int, status, t
 	}, nil
 }
 
-// GetNavPages 获取导航页面列表
 func (s *pageService) GetNavPages(ctx context.Context) ([]*response.NavPageResponse, error) {
 	pages, err := s.pageRepo.FindNavPages(ctx)
 	if err != nil {
@@ -161,29 +148,25 @@ func (s *pageService) GetNavPages(ctx context.Context) ([]*response.NavPageRespo
 	return items, nil
 }
 
-// Update 更新页面
 func (s *pageService) Update(ctx context.Context, id uint, version int, title, pageSlug, template, content, summary, coverImage, status string, order int, showInNav bool) (*response.PageResponse, error) {
 	page, err := s.pageRepo.FindByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrPageNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NewNotFound("页面未找到")
 		}
 		return nil, err
 	}
 
-	// 乐观锁检查
 	if page.Version != version {
 		return nil, ErrPageVersionConflict
 	}
 
-	// 更新字段
 	if title != "" {
 		page.Title = title
 	}
 	if pageSlug != "" {
 		newSlug := slug.Generate(pageSlug)
 		if newSlug != page.Slug {
-			// 检查新 slug 是否已被其他页面使用
 			existing, err := s.pageRepo.FindBySlug(ctx, newSlug)
 			if err == nil && existing != nil && existing.ID != page.ID {
 				return nil, ErrPageSlugExists
@@ -217,12 +200,11 @@ func (s *pageService) Update(ctx context.Context, id uint, version int, title, p
 	return toPageResponse(page), nil
 }
 
-// Delete 删除页面
 func (s *pageService) Delete(ctx context.Context, id uint) error {
 	_, err := s.pageRepo.FindByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrPageNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.NewNotFound("页面未找到")
 		}
 		return err
 	}
@@ -230,7 +212,6 @@ func (s *pageService) Delete(ctx context.Context, id uint) error {
 	return s.pageRepo.Delete(ctx, id)
 }
 
-// toPageResponse 转换为页面响应
 func toPageResponse(page *model.Page) *response.PageResponse {
 	return &response.PageResponse{
 		ID:         page.ID,
@@ -249,7 +230,6 @@ func toPageResponse(page *model.Page) *response.PageResponse {
 	}
 }
 
-// toPageListItem 转换为页面列表项
 func toPageListItem(page *model.Page) *response.PageListItem {
 	return &response.PageListItem{
 		ID:         page.ID,

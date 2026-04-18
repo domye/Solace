@@ -26,15 +26,6 @@ func (r *categoryRepo) FindByID(ctx context.Context, id uint) (*model.Category, 
 	return &category, nil
 }
 
-func (r *categoryRepo) FindBySlug(ctx context.Context, slug string) (*model.Category, error) {
-	var category model.Category
-	err := r.db.WithContext(ctx).Where("slug = ?", slug).First(&category).Error
-	if err != nil {
-		return nil, err
-	}
-	return &category, nil
-}
-
 func (r *categoryRepo) FindAll(ctx context.Context) ([]*model.Category, error) {
 	var categories []*model.Category
 	err := r.db.WithContext(ctx).

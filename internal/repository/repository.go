@@ -31,7 +31,6 @@ type ArticleRepository interface {
 // CategoryRepository 分类数据访问接口
 type CategoryRepository interface {
 	FindByID(ctx context.Context, id uint) (*model.Category, error)
-	FindBySlug(ctx context.Context, slug string) (*model.Category, error)
 	FindAll(ctx context.Context) ([]*model.Category, error)
 	FindAllWithCount(ctx context.Context) ([]*model.CategoryWithCount, error)
 	FindChildren(ctx context.Context, parentID uint) ([]*model.Category, error)
@@ -45,7 +44,6 @@ type CategoryRepository interface {
 // TagRepository 标签数据访问接口
 type TagRepository interface {
 	FindByID(ctx context.Context, id uint) (*model.Tag, error)
-	FindBySlug(ctx context.Context, slug string) (*model.Tag, error)
 	FindAll(ctx context.Context) ([]*model.Tag, error)
 	FindAllWithCount(ctx context.Context) ([]*model.TagWithCount, error)
 	FindByIDs(ctx context.Context, ids []uint) ([]*model.Tag, error)

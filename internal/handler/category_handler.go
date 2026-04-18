@@ -53,55 +53,6 @@ func (h *CategoryHandler) Create(c *gin.Context) {
 	RespondWithCreated(c, category)
 }
 
-// GetByID 根据ID获取分类
-// @Summary 根据ID获取分类
-// @Tags category
-// @Produce json
-// @Param id path int true "分类ID"
-// @Success 200 {object} Response
-// @Failure 404 {object} Response
-// @Router /categories/{id} [get]
-func (h *CategoryHandler) GetByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
-	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的分类ID", nil))
-		return
-	}
-
-	category, err := h.categoryService.GetByID(c.Request.Context(), uint(id))
-	if err != nil {
-		RespondWithError(c, err)
-		return
-	}
-
-	RespondWithSuccess(c, category)
-}
-
-// GetBySlug 根据Slug获取分类
-// @Summary 根据Slug获取分类
-// @Tags category
-// @Produce json
-// @Param slug path string true "分类Slug"
-// @Success 200 {object} Response
-// @Failure 404 {object} Response
-// @Router /categories/slug/{slug} [get]
-func (h *CategoryHandler) GetBySlug(c *gin.Context) {
-	slug := c.Param("slug")
-	if slug == "" {
-		RespondWithError(c, apperrors.NewBadRequest("分类Slug不能为空", nil))
-		return
-	}
-
-	category, err := h.categoryService.GetBySlug(c.Request.Context(), slug)
-	if err != nil {
-		RespondWithError(c, err)
-		return
-	}
-
-	RespondWithSuccess(c, category)
-}
-
 // GetList 获取分类列表
 // @Summary 获取分类列表
 // @Tags category

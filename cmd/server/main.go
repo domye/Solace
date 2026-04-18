@@ -89,7 +89,7 @@ func main() {
 	articleHandler := handler.NewArticleHandler(articleService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	tagHandler := handler.NewTagHandler(tagService)
-	sitemapHandler := handler.NewSitemapHandler(articleService, categoryService, tagService, cfg)
+	sitemapHandler := handler.NewSitemapHandler(articleService, categoryService, tagService, pageService, cfg)
 	pageHandler := handler.NewPageHandler(pageService)
 
 	// 设置路由

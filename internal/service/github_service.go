@@ -172,8 +172,8 @@ func (s *githubService) GetContributions(ctx context.Context, username string, f
 			}
 
 			// 高效年份解析：直接计算字符值
-			year := (int(day.Date[0]-'0')*1000 + int(day.Date[1]-'0')*100 +
-				int(day.Date[2]-'0')*10 + int(day.Date[3]-'0'))
+			year := int(day.Date[0]-'0')*1000 + int(day.Date[1]-'0')*100 +
+				int(day.Date[2]-'0')*10 + int(day.Date[3]-'0')
 
 			// 获取或创建年份组
 			group := yearGroups[year]

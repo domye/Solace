@@ -679,27 +679,6 @@ paths:
       summary: 删除分类
       tags:
       - category
-    get:
-      parameters:
-      - description: 分类ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/handler.Response'
-      summary: 根据ID获取分类
-      tags:
-      - category
     put:
       consumes:
       - application/json
@@ -735,28 +714,6 @@ paths:
           schema:
             $ref: '#/definitions/handler.Response'
       summary: 更新分类
-      tags:
-      - category
-  /categories/slug/{slug}:
-    get:
-      parameters:
-      - description: 分类Slug
-        in: path
-        name: slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/handler.Response'
-      summary: 根据Slug获取分类
       tags:
       - category
   /github/contributions:
@@ -1034,27 +991,6 @@ paths:
       summary: 删除标签
       tags:
       - tag
-    get:
-      parameters:
-      - description: 标签ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/handler.Response'
-      summary: 根据ID获取标签
-      tags:
-      - tag
     put:
       consumes:
       - application/json
@@ -1090,28 +1026,6 @@ paths:
           schema:
             $ref: '#/definitions/handler.Response'
       summary: 更新标签
-      tags:
-      - tag
-  /tags/slug/{slug}:
-    get:
-      parameters:
-      - description: 标签Slug
-        in: path
-        name: slug
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/handler.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/handler.Response'
-      summary: 根据Slug获取标签
       tags:
       - tag
 securityDefinitions:

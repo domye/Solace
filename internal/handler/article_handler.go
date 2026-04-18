@@ -140,7 +140,7 @@ func (h *ArticleHandler) GetList(c *gin.Context) {
 		query.Page = 1
 	}
 	if query.PageSize == 0 {
-		query.PageSize = 10
+		query.PageSize = 8
 	}
 
 	resp, err := h.articleService.GetList(

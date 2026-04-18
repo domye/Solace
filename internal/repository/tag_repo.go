@@ -26,15 +26,6 @@ func (r *tagRepo) FindByID(ctx context.Context, id uint) (*model.Tag, error) {
 	return &tag, nil
 }
 
-func (r *tagRepo) FindBySlug(ctx context.Context, slug string) (*model.Tag, error) {
-	var tag model.Tag
-	err := r.db.WithContext(ctx).Where("slug = ?", slug).First(&tag).Error
-	if err != nil {
-		return nil, err
-	}
-	return &tag, nil
-}
-
 func (r *tagRepo) FindAll(ctx context.Context) ([]*model.Tag, error) {
 	var tags []*model.Tag
 	err := r.db.WithContext(ctx).

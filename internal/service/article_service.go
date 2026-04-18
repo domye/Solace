@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"errors"
+	stderrors "errors"
 	"sort"
 	"strings"
 	"time"
@@ -11,16 +11,16 @@ import (
 
 	"gin-quickstart/internal/dto/response"
 	"gin-quickstart/internal/model"
+	"gin-quickstart/internal/pkg/errors"
 	"gin-quickstart/internal/pkg/slug"
 )
 
 var (
-	ErrArticleNotFound        = errors.New("文章未找到")
-	ErrArticleVersionConflict = errors.New("文章版本冲突，请刷新后重试")
-	ErrCategoryNotFound       = errors.New("分类未找到")
-	ErrCategoryHasArticles    = errors.New("分类下存在文章，无法删除")
-	ErrTagNotFound            = errors.New("标签未找到")
-	ErrTagAlreadyExists       = errors.New("标签已存在")
+	ErrArticleVersionConflict = errors.NewBadRequest("文章版本冲突，请刷新后重试", nil)
+	ErrCategoryNotFound       = errors.NewNotFound("分类未找到")
+	ErrCategoryHasArticles    = errors.NewBadRequest("分类下存在文章，无法删除", nil)
+	ErrTagNotFound            = errors.NewNotFound("标签未找到")
+	ErrTagAlreadyExists       = errors.NewBadRequest("标签已存在", nil)
 )
 
 // ArticleService 文章业务逻辑接口
@@ -60,7 +60,6 @@ type articleRepository interface {
 // categoryRepository 分类数据访问接口
 type categoryRepository interface {
 	FindByID(ctx context.Context, id uint) (*model.Category, error)
-	FindBySlug(ctx context.Context, slug string) (*model.Category, error)
 	FindAllWithCount(ctx context.Context) ([]*model.CategoryWithCount, error)
 	Create(ctx context.Context, category *model.Category) error
 	Update(ctx context.Context, category *model.Category) error
@@ -72,7 +71,6 @@ type categoryRepository interface {
 // tagRepository 标签数据访问接口
 type tagRepository interface {
 	FindByID(ctx context.Context, id uint) (*model.Tag, error)
-	FindBySlug(ctx context.Context, slug string) (*model.Tag, error)
 	FindByIDs(ctx context.Context, ids []uint) ([]*model.Tag, error)
 	FindAllWithCount(ctx context.Context) ([]*model.TagWithCount, error)
 	Create(ctx context.Context, tag *model.Tag) error
@@ -163,8 +161,8 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 func (s *articleService) GetByID(ctx context.Context, id uint) (*response.ArticleResponse, error) {
 	article, err := s.articleRepo.FindByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrArticleNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NewNotFound("文章未找到")
 		}
 		return nil, err
 	}
@@ -175,8 +173,8 @@ func (s *articleService) GetByID(ctx context.Context, id uint) (*response.Articl
 func (s *articleService) GetBySlug(ctx context.Context, articleSlug string) (*response.ArticleResponse, error) {
 	article, prev, next, err := s.articleRepo.FindBySlugWithNav(ctx, articleSlug)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrArticleNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NewNotFound("文章未找到")
 		}
 		return nil, err
 	}
@@ -309,13 +307,12 @@ func (s *articleService) GetRecent(ctx context.Context, limit int) ([]*response.
 func (s *articleService) Update(ctx context.Context, id uint, version int, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
 	article, err := s.articleRepo.FindByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, ErrArticleNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NewNotFound("文章未找到")
 		}
 		return nil, err
 	}
 
-	// 乐观锁检查
 	if article.Version != version {
 		return nil, ErrArticleVersionConflict
 	}
@@ -389,8 +386,8 @@ func (s *articleService) Update(ctx context.Context, id uint, version int, title
 func (s *articleService) Delete(ctx context.Context, id uint) error {
 	_, err := s.articleRepo.FindByID(ctx, id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ErrArticleNotFound
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.NewNotFound("文章未找到")
 		}
 		return err
 	}

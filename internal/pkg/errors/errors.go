@@ -70,7 +70,14 @@ func NewUnauthorized(message string) AppError {
 	}
 }
 
-// IsAppError 检查错误是否为 AppError 类型
+func NewNotFound(message string) AppError {
+	return &appError{
+		code:       "NOT_FOUND",
+		message:    message,
+		httpStatus: http.StatusNotFound,
+	}
+}
+
 func IsAppError(err error) bool {
 	_, ok := err.(AppError)
 	return ok

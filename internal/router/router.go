@@ -79,28 +79,23 @@ func (r *Router) Setup(mode string) *gin.Engine {
 		// GitHub 贡献数据（公开）
 		v1.GET("/github/contributions", r.githubHandler.GetContributions)
 
+		// 分类路由（公开）
+		v1.GET("/categories", r.categoryHandler.GetList)
+
+		// 标签路由（公开）
+		v1.GET("/tags", r.tagHandler.GetList)
+
+		// 公开页面路由（导航列表）
+		v1.GET("/pages/nav", r.pageHandler.GetNavPages)
+
+		// 公开页面路由（按 slug 访问）
+		v1.GET("/pages/slug/:slug", r.pageHandler.GetBySlug)
 		// 认证路由（公开）
 		auth := v1.Group("/auth")
 		{
 			auth.POST("/login", r.authHandler.Login)
 			auth.POST("/refresh", r.authHandler.Refresh)
 			auth.POST("/logout", r.authHandler.Logout)
-		}
-
-		// 分类路由（公开）
-		categories := v1.Group("/categories")
-		{
-			categories.GET("", r.categoryHandler.GetList)
-			categories.GET("/:id", r.categoryHandler.GetByID)
-			categories.GET("/slug/:slug", r.categoryHandler.GetBySlug)
-		}
-
-		// 标签路由（公开）
-		tags := v1.Group("/tags")
-		{
-			tags.GET("", r.tagHandler.GetList)
-			tags.GET("/:id", r.tagHandler.GetByID)
-			tags.GET("/slug/:slug", r.tagHandler.GetBySlug)
 		}
 
 		// 公开文章路由
@@ -111,15 +106,8 @@ func (r *Router) Setup(mode string) *gin.Engine {
 			articles.GET("/search", r.articleHandler.Search)
 			articles.GET("/random", r.articleHandler.GetRandom)
 			articles.GET("/recent", r.articleHandler.GetRecent)
-			articles.GET("/:id", r.articleHandler.GetByID)
 			articles.GET("/slug/:slug", r.articleHandler.GetBySlug)
 		}
-
-		// 公开页面路由（导航列表）
-		v1.GET("/pages/nav", r.pageHandler.GetNavPages)
-
-		// 公开页面路由（按 slug 访问）
-		v1.GET("/pages/slug/:slug", r.pageHandler.GetBySlug)
 
 		// 受保护路由
 		protected := v1.Group("")
@@ -128,6 +116,7 @@ func (r *Router) Setup(mode string) *gin.Engine {
 			// 受保护的文章路由
 			protectedArticles := protected.Group("/articles")
 			{
+				articles.GET("/:id", r.articleHandler.GetByID)
 				protectedArticles.POST("", r.articleHandler.Create)
 				protectedArticles.PUT("/:id", r.articleHandler.Update)
 				protectedArticles.DELETE("/:id", r.articleHandler.Delete)

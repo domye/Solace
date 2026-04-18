@@ -14,6 +14,7 @@ type SitemapHandler struct {
 	articleService  service.ArticleService
 	categoryService service.CategoryService
 	tagService      service.TagService
+	pageService     service.PageService
 	cfg             *config.Config
 }
 
@@ -21,12 +22,14 @@ func NewSitemapHandler(
 	articleService service.ArticleService,
 	categoryService service.CategoryService,
 	tagService service.TagService,
+	pageService service.PageService,
 	cfg *config.Config,
 ) *SitemapHandler {
 	return &SitemapHandler{
 		articleService:  articleService,
 		categoryService: categoryService,
 		tagService:      tagService,
+		pageService:     pageService,
 		cfg:             cfg,
 	}
 }
@@ -44,6 +47,11 @@ func (h *SitemapHandler) GetSitemap(c *gin.Context) {
 
 	xml += h.buildURL(baseURL, "", "1.0", "daily")
 	xml += h.buildURL(baseURL+"/archive", "", "0.8", "weekly")
+
+	pages, _ := h.pageService.GetList(c.Request.Context(), 1, 100, "published", "")
+	for _, pg := range pages.Items {
+		xml += h.buildURL(baseURL+"/pages/"+pg.Slug, "", "0.6", "monthly")
+	}
 
 	categories, _ := h.categoryService.GetList(c.Request.Context())
 	for _, cat := range categories.Items {
