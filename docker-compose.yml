@@ -1,0 +1,40 @@
+# 博客系统 Docker Compose（服务器部署）
+# 使用预构建镜像，配置文件目录持久化
+
+services:
+  # 后端 API
+  backend:
+    image: domye/blog-backend:latest
+    container_name: blog-backend
+    restart: unless-stopped
+    volumes:
+      # 挂载配置目录（持久化，首次启动自动从示例复制）
+      - ./config:/app/config:rw
+    environment:
+      # 指定配置文件路径
+      CONFIG_PATH: /app/config/config.toml
+    networks:
+      - 1panel-network
+
+  # 前端
+  frontend:
+    image: domye/blog-frontend:latest
+    container_name: blog-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE: /api/v1
+      SITE_BASE_URL: https://blog.domye.top
+      SITE_NAME: Domyeの小屋
+      SITE_DESCRIPTION: 记录技术与生活的点点滴滴
+    ports:
+      - "8088:80"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - 1panel-network
+
+# 使用 1Panel 已存在的外部网络
+networks:
+  1panel-network:
+    external: true
