@@ -16,7 +16,6 @@ export { Tags } from "./Tags";
 export { SearchModal } from "./SearchModal";
 export { TableOfContents, type TocHeading } from "./TableOfContents";
 export { ContributionCalendar } from "./ContributionCalendar";
-export { Timeline } from "./Timeline";
 export { ProjectCard } from "./ProjectCard";
 export { FootprintCard } from "./FootprintCard";
 // FootprintsMap 移除静态导出 - 使用懒加载防止 ECharts 打入首屏

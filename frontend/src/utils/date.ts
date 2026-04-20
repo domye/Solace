@@ -15,21 +15,6 @@ export function formatShortDate(dateStr?: string): string {
 	return `${(d.getMonth() + 1).toString().padStart(2, "0")}-${d.getDate().toString().padStart(2, "0")}`;
 }
 
-export function formatTimelineDate(dateStr?: string): string {
-	if (!dateStr) return "";
-	const parts = dateStr.split("-");
-	if (parts.length === 2) {
-		const month = parts[1];
-		return `${parts[0]}.${month ? month.padStart(2, "0") : ""}`;
-	}
-	if (parts.length === 3) {
-		const month = parts[1];
-		const day = parts[2];
-		return `${parts[0]}.${month ? month.padStart(2, "0") : ""}.${day ? day.padStart(2, "0") : ""}`;
-	}
-	return dateStr;
-}
-
 export function formatTags(tags?: { id: number; name: string }[]): string {
 	return tags?.length ? tags.map((t) => `#${t.name}`).join(" ") : "";
 }

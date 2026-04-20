@@ -13,17 +13,14 @@ import {
 } from "@/components";
 import {
 	ProjectsEditor,
-	TimelineEditor,
 	FootprintsEditor,
 } from "@/components/admin";
 import { request_CreatePageRequest } from "@/api";
 import { parseFrontmatter, stringifyFrontmatter } from "@/utils/frontmatter";
 import type {
 	Project,
-	TimelineEvent,
 	FootprintCity,
 	ProjectsFrontmatter,
-	AboutFrontmatter,
 	FootprintsFrontmatter,
 } from "@/types";
 
@@ -43,7 +40,7 @@ const templateOptions: {
 	{
 		value: request_CreatePageRequest.template.ABOUT,
 		label: "关于我",
-		description: "时间线 + 个人介绍",
+		description: "个人介绍页面",
 	},
 	{
 		value: request_CreatePageRequest.template.PROJECTS,
@@ -60,16 +57,6 @@ const templateOptions: {
 const templateExamples: Record<PageTemplate, string> = {
 	[request_CreatePageRequest.template.DEFAULT]: "",
 	[request_CreatePageRequest.template.ABOUT]: `---
-timeline:
-  - date: "2024-03-15"
-    title: "开始写博客"
-    description: "搭建个人博客系统"
-    type: "milestone"
-  - date: "2023-09-01"
-    title: "入职某公司"
-    type: "work"
----
-
 ## 关于我
 
 欢迎来到我的博客！`,
@@ -114,7 +101,6 @@ cities:
 // 判断模板是否需要可视化编辑器
 function isVisualTemplate(template: PageTemplate): boolean {
 	return (
-		template === request_CreatePageRequest.template.ABOUT ||
 		template === request_CreatePageRequest.template.PROJECTS ||
 		template === request_CreatePageRequest.template.FOOTPRINTS
 	);
@@ -146,7 +132,6 @@ export function PageEditorPage() {
 
 	// 各模板专用 state
 	const [projects, setProjects] = useState<Project[]>([]);
-	const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
 	const [cities, setCities] = useState<FootprintCity[]>([]);
 	const [markdownContent, setMarkdownContent] = useState("");
 
@@ -171,9 +156,7 @@ export function PageEditorPage() {
 				setProjects(parsed.frontmatter.projects || []);
 				setMarkdownContent(parsed.markdown);
 			} else if (existingPage.template === "about") {
-				const parsed = parseFrontmatter<AboutFrontmatter>(existingPage.content);
-				setTimeline(parsed.frontmatter.timeline || []);
-				setMarkdownContent(parsed.markdown);
+				setMarkdownContent(existingPage.content);
 			} else if (existingPage.template === "footprints") {
 				const parsed = parseFrontmatter<FootprintsFrontmatter>(
 					existingPage.content,
@@ -199,12 +182,6 @@ export function PageEditorPage() {
 		syncFrontmatter({ projects: newProjects }, markdownContent);
 	};
 
-	// Timeline 数据变更
-	const handleTimelineChange = (newTimeline: TimelineEvent[]) => {
-		setTimeline(newTimeline);
-		syncFrontmatter({ timeline: newTimeline }, markdownContent);
-	};
-
 	// Cities 数据变更
 	const handleCitiesChange = (newCities: FootprintCity[]) => {
 		setCities(newCities);
@@ -217,8 +194,6 @@ export function PageEditorPage() {
 		let frontmatterData: Record<string, unknown> = {};
 		if (template === request_CreatePageRequest.template.PROJECTS) {
 			frontmatterData = { projects };
-		} else if (template === request_CreatePageRequest.template.ABOUT) {
-			frontmatterData = { timeline };
 		} else if (template === request_CreatePageRequest.template.FOOTPRINTS) {
 			frontmatterData = { cities };
 		}
@@ -240,11 +215,7 @@ export function PageEditorPage() {
 				setProjects(parsed.frontmatter.projects || []);
 				setMarkdownContent(parsed.markdown);
 			} else if (newTemplate === request_CreatePageRequest.template.ABOUT) {
-				const parsed = parseFrontmatter<AboutFrontmatter>(
-					templateExamples[newTemplate],
-				);
-				setTimeline(parsed.frontmatter.timeline || []);
-				setMarkdownContent(parsed.markdown);
+				setMarkdownContent(templateExamples[newTemplate]);
 			} else if (
 				newTemplate === request_CreatePageRequest.template.FOOTPRINTS
 			) {
@@ -261,9 +232,7 @@ export function PageEditorPage() {
 				setProjects(parsed.frontmatter.projects || []);
 				setMarkdownContent(parsed.markdown);
 			} else if (newTemplate === request_CreatePageRequest.template.ABOUT) {
-				const parsed = parseFrontmatter<AboutFrontmatter>(content);
-				setTimeline(parsed.frontmatter.timeline || []);
-				setMarkdownContent(parsed.markdown);
+				setMarkdownContent(content);
 			} else if (
 				newTemplate === request_CreatePageRequest.template.FOOTPRINTS
 			) {
@@ -319,11 +288,6 @@ export function PageEditorPage() {
 		if (template === request_CreatePageRequest.template.PROJECTS) {
 			return (
 				<ProjectsEditor projects={projects} onChange={handleProjectsChange} />
-			);
-		}
-		if (template === request_CreatePageRequest.template.ABOUT) {
-			return (
-				<TimelineEditor timeline={timeline} onChange={handleTimelineChange} />
 			);
 		}
 		if (template === request_CreatePageRequest.template.FOOTPRINTS) {

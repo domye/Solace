@@ -20,6 +20,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkDirective from "remark-directive";
+import remarkBreaks from "remark-breaks";
 import React, {
 	memo,
 	useEffect,
@@ -478,7 +479,7 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
 	return (
 		<div className={`custom-md ${className}`}>
 			<ReactMarkdown
-				remarkPlugins={[remarkGfm, remarkDirective, remarkGallery]}
+				remarkPlugins={[remarkGfm, remarkDirective, remarkGallery, remarkBreaks]}
 				components={MARKDOWN_COMPONENTS}
 			>
 				{content}

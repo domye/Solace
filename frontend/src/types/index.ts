@@ -237,20 +237,8 @@ export interface NavPage {
 
 // ============ Frontmatter 类型 ============
 
-/** 时间线事件 */
-export interface TimelineEvent {
-	date: string;
-	title: string;
-	description?: string;
-	icon?: string;
-	type: "work" | "education" | "milestone" | "award";
-	link?: { url: string; label: string };
-}
-
 /** 关于我模板 frontmatter */
-export interface AboutFrontmatter {
-	timeline?: TimelineEvent[];
-}
+export interface AboutFrontmatter {}
 
 /** GitHub 仓库信息（API 返回） */
 export interface GitHubRepoInfo {

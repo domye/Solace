@@ -2,7 +2,6 @@ export {
 	formatDate,
 	formatDateTime,
 	formatShortDate,
-	formatTimelineDate,
 	formatTags,
 	getArticleDate,
 } from "./date";
