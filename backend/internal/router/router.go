@@ -1,10 +1,13 @@
 package router
 
 import (
+	"time"
+
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
+	"gin-quickstart/internal/config"
 	"gin-quickstart/internal/handler"
 	"gin-quickstart/internal/middleware"
 	"gin-quickstart/internal/service"
@@ -52,20 +55,19 @@ func NewRouter(
 }
 
 // Setup 初始化路由并注册所有路由
-func (r *Router) Setup(mode string) *gin.Engine {
-	// 设置 Gin 模式
-	gin.SetMode(mode)
+func (r *Router) Setup(cfg *config.Config) *gin.Engine {
+	gin.SetMode(cfg.ServerMode())
 
 	engine := gin.New()
 
-	// 全局中间件
-	engine.Use(middleware.CORS())
+	engine.Use(middleware.CORS(cfg))
 	engine.Use(middleware.RequestID())
 	engine.Use(middleware.Logging())
 	engine.Use(middleware.Recovery())
 
-	// Swagger 文档路由
-	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	if cfg.EnableSwagger() {
+		engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	}
 
 	// 站点地图
 	engine.GET("/sitemap.xml", r.sitemapHandler.GetSitemap)
@@ -96,9 +98,12 @@ func (r *Router) Setup(mode string) *gin.Engine {
 
 		// 公开页面路由（按 slug 访问）
 		v1.GET("/pages/slug/:slug", r.pageHandler.GetBySlug)
-		// 认证路由（公开）
 		auth := v1.Group("/auth")
 		{
+			if cfg.RateLimit() > 0 {
+				limiter := middleware.NewRateLimiter(cfg.RateLimit(), time.Minute)
+				auth.Use(middleware.RateLimit(limiter))
+			}
 			auth.POST("/login", r.authHandler.Login)
 			auth.POST("/refresh", r.authHandler.Refresh)
 			auth.POST("/logout", r.authHandler.Logout)
@@ -109,10 +114,17 @@ func (r *Router) Setup(mode string) *gin.Engine {
 		{
 			articles.GET("", r.articleHandler.GetList)
 			articles.GET("/archive", r.articleHandler.GetArchive)
-			articles.GET("/search", r.articleHandler.Search)
 			articles.GET("/random", r.articleHandler.GetRandom)
 			articles.GET("/recent", r.articleHandler.GetRecent)
 			articles.GET("/slug/:slug", r.articleHandler.GetBySlug)
+		}
+
+		// 搜索接口（单独限流）
+		if cfg.SearchRateLimit() > 0 {
+			searchLimiter := middleware.NewRateLimiter(cfg.SearchRateLimit(), time.Minute)
+			v1.GET("/articles/search", middleware.RateLimit(searchLimiter), r.articleHandler.Search)
+		} else {
+			v1.GET("/articles/search", r.articleHandler.Search)
 		}
 
 		// 受保护路由

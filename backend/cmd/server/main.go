@@ -106,7 +106,7 @@ func main() {
 		rssHandler,
 		pageHandler,
 	)
-	r := appRouter.Setup(cfg.ServerMode())
+	r := appRouter.Setup(cfg)
 
 	// 创建 HTTP 服务器
 	srv := &http.Server{

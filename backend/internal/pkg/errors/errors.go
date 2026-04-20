@@ -78,6 +78,14 @@ func NewNotFound(message string) AppError {
 	}
 }
 
+func NewTooManyRequests(message string) AppError {
+	return &appError{
+		code:       "TOO_MANY_REQUESTS",
+		message:    message,
+		httpStatus: http.StatusTooManyRequests,
+	}
+}
+
 func IsAppError(err error) bool {
 	_, ok := err.(AppError)
 	return ok
