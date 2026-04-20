@@ -25,4 +25,4 @@ CREATE INDEX idx_pages_deleted_at ON pages(deleted_at);
 
 -- 插入默认页面示例
 INSERT INTO pages (title, slug, template, content, status, page_order, show_in_nav) VALUES
-('关于我', 'about', 'about', '---\ntimeline:\n  - date: "2024-03"\n    title: "开始写博客"\n    type: "milestone"\n---\n\n## 关于我\n\n欢迎来到我的博客！\n\n这是一个关于页面示例。', 'published', 1, true);
+('关于我', 'about', 'about', '## 关于我\n\n欢迎来到我的博客！\n\n这是一个关于页面示例。', 'published', 1, true);
