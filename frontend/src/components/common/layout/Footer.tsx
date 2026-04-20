@@ -8,9 +8,11 @@ export function Footer() {
 			<div className="rounded-2xl mb-4 flex flex-col items-center justify-center px-4">
 				<p className="text-50 text-sm text-center leading-relaxed space-y-1">
 					<span className="block">
-						&copy; {currentYear} Solace. All Rights Reserved.
-						<FooterLink href="/sitemap.xml">Sitemap</FooterLink>/
-						<FooterLink href="/rss.xml">RSS</FooterLink>
+						&copy; {currentYear}{" "}
+						<FooterLink href="https://github.com/domye/Solace">
+							Solace
+						</FooterLink>{" "}
+						By Domye . All Rights Reserved.
 					</span>
 					<span className="block">
 						<FooterLink href="https://beian.miit.gov.cn">
@@ -19,14 +21,6 @@ export function Footer() {
 						/
 						<FooterLink href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=34130202000763">
 							皖公网安备34130202000763号
-						</FooterLink>
-					</span>
-					<span className="block">
-						Powered by
-						<FooterLink href="https://go.dev">Go</FooterLink>&
-						<FooterLink href="https://react.dev">React</FooterLink>/
-						<FooterLink href="https://github.com/domye/Solace">
-							Solace
 						</FooterLink>
 					</span>
 				</p>
