@@ -12,16 +12,29 @@ export function Footer() {
 				<p className="text-50 text-sm text-center leading-relaxed space-y-2">
 					{/* 版权信息 */}
 					<span className="block">
-						&copy; {currentYear} Blog. All Rights Reserved. /
-						<FooterLink href="/sitemap.xml">Sitemap</FooterLink>
+						&copy; {currentYear} Solace. All Rights Reserved.
+						<FooterLink href="/sitemap.xml">Sitemap</FooterLink>/
+						<FooterLink href="/rss.xml">RSS</FooterLink>
+					</span>
+
+					{/* ICP备案 */}
+					<span className="block">
+						<FooterLink href="https://beian.miit.gov.cn">
+							皖ICP备2024052746号
+						</FooterLink>
+						/
+						<FooterLink href="https://www.beian.gov.cn/portal/registerSystemInfo?recordcode=34130202000763">
+							皖公网安备34130202000763号
+						</FooterLink>
 					</span>
 
 					{/* Powered by */}
 					<span className="block">
 						Powered by
-						<FooterLink href="https://react.dev">React</FooterLink>&
-						<FooterLink href="https://github.com/saicaca/fuwari">
-							Fuwari
+						<FooterLink href="https://go.dev">Go</FooterLink>&
+						<FooterLink href="https://react.dev">React</FooterLink>/
+						<FooterLink href="https://github.com/domye/Solace">
+							Solace
 						</FooterLink>
 					</span>
 				</p>

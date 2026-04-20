@@ -90,6 +90,7 @@ func main() {
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	tagHandler := handler.NewTagHandler(tagService)
 	sitemapHandler := handler.NewSitemapHandler(articleService, categoryService, tagService, pageService, cfg)
+	rssHandler := handler.NewRSSHandler(articleService, ownerService, cfg)
 	pageHandler := handler.NewPageHandler(pageService)
 
 	// 设置路由
@@ -102,6 +103,7 @@ func main() {
 		githubHandler,
 		authService,
 		sitemapHandler,
+		rssHandler,
 		pageHandler,
 	)
 	r := appRouter.Setup(cfg.ServerMode())

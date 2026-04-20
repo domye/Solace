@@ -19,6 +19,7 @@ type Router struct {
 	ownerHandler    *handler.OwnerHandler
 	githubHandler   *handler.GitHubHandler
 	sitemapHandler  *handler.SitemapHandler
+	rssHandler      *handler.RSSHandler
 	pageHandler     *handler.PageHandler
 	authService     service.AuthService
 }
@@ -33,6 +34,7 @@ func NewRouter(
 	githubHandler *handler.GitHubHandler,
 	authService service.AuthService,
 	sitemapHandler *handler.SitemapHandler,
+	rssHandler *handler.RSSHandler,
 	pageHandler *handler.PageHandler,
 ) *Router {
 	return &Router{
@@ -44,6 +46,7 @@ func NewRouter(
 		githubHandler:   githubHandler,
 		authService:     authService,
 		sitemapHandler:  sitemapHandler,
+		rssHandler:      rssHandler,
 		pageHandler:     pageHandler,
 	}
 }
@@ -66,6 +69,9 @@ func (r *Router) Setup(mode string) *gin.Engine {
 
 	// 站点地图
 	engine.GET("/sitemap.xml", r.sitemapHandler.GetSitemap)
+
+	// RSS 订阅
+	engine.GET("/rss.xml", r.rssHandler.GetRSS)
 
 	// API v1 路由
 	v1 := engine.Group("/api/v1")
