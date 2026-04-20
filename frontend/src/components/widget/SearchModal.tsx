@@ -19,7 +19,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
 	const debouncedSearch = useDebouncedCallback(
 		(q: string) => (q.trim() ? q : ""),
-		300,
+		1000,
 	);
 	const { data: results, isLoading } = useSearch(
 		debouncedSearch.isPending() ? "" : query,

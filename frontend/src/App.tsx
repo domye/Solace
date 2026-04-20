@@ -18,6 +18,7 @@ import { useEffect } from "react";
 import { useAuthStore, useThemeStore } from "@/stores";
 import { useAutoHideScrollbar } from "@/hooks";
 import { routes, layouts, LazyRoute } from "@/router";
+import { ToastContainer, showToast } from "@/components";
 
 /** 受保护路由 - 未登录时跳转到登录页 */
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -84,6 +85,21 @@ function ScrollbarController() {
 	return null;
 }
 
+/** API 错误监听器 - 处理限流等错误 */
+function ApiErrorListener() {
+	useEffect(() => {
+		const handleRateLimited = (e: CustomEvent<{ message: string }>) => {
+			showToast(e.detail.message, "error");
+		};
+
+		window.addEventListener("api:rate-limited", handleRateLimited as EventListener);
+		return () => {
+			window.removeEventListener("api:rate-limited", handleRateLimited as EventListener);
+		};
+	}, []);
+	return null;
+}
+
 /** React Query 客户端配置 */
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -103,6 +119,8 @@ function App() {
 				<BrowserRouter>
 					<ThemeInitializer />
 					<ScrollbarController />
+					<ApiErrorListener />
+					<ToastContainer />
 					<SplashScreen />
 					<Routes>
 					{/* 公开路由 - 主布局 */}

@@ -155,15 +155,31 @@ OpenAPI.TOKEN = async (): Promise<string> => {
 };
 
 /**
- * 拦截 fetch 请求，处理 401 响应
- * 只在已登录用户 Token 过期时尝试刷新，未登录用户直接返回 401
+ * 拦截 fetch 请求，处理 401 和 429 响应
  */
 const originalFetch = window.fetch;
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-  const response = await originalFetch(input, init);
+	const response = await originalFetch(input, init);
 
-  // 检查是否为 401 响应
-  if (response.status === 401) {
+	// 处理 429 限流响应
+	if (response.status === 429) {
+		try {
+			const clonedResponse = response.clone();
+			const data = await clonedResponse.json();
+			const message = data?.error?.message || "请求过于频繁，请稍后再试";
+			window.dispatchEvent(new CustomEvent('api:rate-limited', {
+				detail: { message, code: data?.error?.code || 'TOO_MANY_REQUESTS' }
+			}));
+		} catch {
+			window.dispatchEvent(new CustomEvent('api:rate-limited', {
+				detail: { message: "请求过于频繁，请稍后再试", code: 'TOO_MANY_REQUESTS' }
+			}));
+		}
+		return response;
+	}
+
+	// 检查是否为 401 响应
+	if (response.status === 401) {
     const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
 
     // 认证接口（登录、注册、刷新）不重试
