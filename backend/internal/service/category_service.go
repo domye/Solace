@@ -9,6 +9,7 @@ import (
 	"gin-quickstart/internal/dto/response"
 	"gin-quickstart/internal/model"
 	"gin-quickstart/internal/pkg/errors"
+	"gin-quickstart/internal/pkg/logger"
 	"gin-quickstart/internal/pkg/slug"
 )
 
@@ -31,6 +32,9 @@ func NewCategoryService(categoryRepo categoryRepository) CategoryService {
 }
 
 func (s *categoryService) Create(ctx context.Context, name, customSlug, description string, parentID *uint, sortOrder int) (*response.CategoryResponse, error) {
+	log := logger.WithContext(ctx)
+	log.Info().Str("name", name).Interface("parent_id", parentID).Msg("创建分类开始")
+
 	// 生成或使用自定义 slug
 	categorySlug := customSlug
 	if categorySlug == "" {
@@ -44,6 +48,7 @@ func (s *categoryService) Create(ctx context.Context, name, customSlug, descript
 	// 检查 slug 唯一性
 	if s.categoryRepo.ExistsBySlug(ctx, categorySlug) {
 		categorySlug = slug.GenerateWithTimestamp(name)
+		log.Debug().Str("new_slug", categorySlug).Msg("slug 已存在，生成新 slug")
 	}
 
 	category := &model.Category{
@@ -55,9 +60,11 @@ func (s *categoryService) Create(ctx context.Context, name, customSlug, descript
 	}
 
 	if err := s.categoryRepo.Create(ctx, category); err != nil {
+		log.Error().Err(err).Msg("创建分类失败")
 		return nil, err
 	}
 
+	log.Info().Uint("category_id", category.ID).Str("slug", categorySlug).Msg("分类创建成功")
 	return toCategoryResponse(category, 0), nil
 }
 
@@ -84,11 +91,16 @@ func (s *categoryService) GetList(ctx context.Context) (*response.CategoryListRe
 }
 
 func (s *categoryService) Update(ctx context.Context, id uint, name, customSlug, description string, parentID *uint, sortOrder int) (*response.CategoryResponse, error) {
+	log := logger.WithContext(ctx)
+	log.Info().Uint("category_id", id).Msg("更新分类开始")
+
 	category, err := s.categoryRepo.FindByID(ctx, id)
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn().Uint("category_id", id).Msg("分类不存在")
 			return nil, errors.NewNotFound("分类未找到")
 		}
+		log.Error().Err(err).Uint("category_id", id).Msg("获取分类失败")
 		return nil, err
 	}
 
@@ -114,20 +126,32 @@ func (s *categoryService) Update(ctx context.Context, id uint, name, customSlug,
 	}
 
 	if err := s.categoryRepo.Update(ctx, category); err != nil {
+		log.Error().Err(err).Uint("category_id", id).Msg("更新分类失败")
 		return nil, err
 	}
 
+	log.Info().Uint("category_id", id).Msg("分类更新成功")
 	articleCount := s.categoryRepo.CountArticles(ctx, id)
 	return toCategoryResponse(category, articleCount), nil
 }
 
 func (s *categoryService) Delete(ctx context.Context, id uint) error {
+	log := logger.WithContext(ctx)
+	log.Info().Uint("category_id", id).Msg("删除分类开始")
+
 	// 检查是否存在文章
 	if count := s.categoryRepo.CountArticles(ctx, id); count > 0 {
+		log.Warn().Uint("category_id", id).Int("article_count", count).Msg("分类下存在文章，无法删除")
 		return ErrCategoryHasArticles
 	}
 
-	return s.categoryRepo.Delete(ctx, id)
+	if err := s.categoryRepo.Delete(ctx, id); err != nil {
+		log.Error().Err(err).Uint("category_id", id).Msg("删除分类失败")
+		return err
+	}
+
+	log.Info().Uint("category_id", id).Msg("分类删除成功")
+	return nil
 }
 
 func toCategoryResponse(category *model.Category, articleCount int) *response.CategoryResponse {

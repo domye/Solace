@@ -55,8 +55,13 @@ type JWTConfig struct {
 
 // LoggingConfig 日志配置
 type LoggingConfig struct {
-	Level string `toml:"level"` // trace, debug, info, warn, error, fatal, panic
-	Env   string `toml:"env"`   // development, production
+	Level      string `toml:"level"`       // trace, debug, info, warn, error, fatal, panic
+	Env        string `toml:"env"`         // development, production
+	OutputFile string `toml:"output_file"` // 日志文件路径，空则不输出到文件
+	MaxSize    int    `toml:"max_size"`    // 单文件最大 MB
+	MaxBackups int    `toml:"max_backups"` // 保留旧文件数
+	MaxAge     int    `toml:"max_age"`     // 保留天数
+	Compress   bool   `toml:"compress"`    // 压缩旧文件
 }
 
 // MigrationConfig 迁移配置
@@ -150,8 +155,13 @@ func (c *Config) SearchRateLimit() int        { return c.Server.SearchRateLimit 
 func (c *Config) EnableSwagger() bool         { return c.Server.EnableSwagger }
 
 // Logging 配置访问器
-func (c *Config) LogLevel() string { return c.Logging.Level }
-func (c *Config) LogEnv() string   { return c.Logging.Env }
+func (c *Config) LogLevel() string        { return c.Logging.Level }
+func (c *Config) LogEnv() string          { return c.Logging.Env }
+func (c *Config) LogOutputFile() string   { return c.Logging.OutputFile }
+func (c *Config) LogMaxSize() int         { return c.Logging.MaxSize }
+func (c *Config) LogMaxBackups() int      { return c.Logging.MaxBackups }
+func (c *Config) LogMaxAge() int          { return c.Logging.MaxAge }
+func (c *Config) LogCompress() bool       { return c.Logging.Compress }
 
 // JWT 配置访问器
 func (c *Config) JWTSecret() string                 { return c.JWT.Secret }

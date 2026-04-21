@@ -43,7 +43,15 @@ func main() {
 	cfg := config.Load()
 
 	// 初始化日志
-	logger.Init(cfg.LogLevel(), cfg.LogEnv())
+	logger.Init(logger.Config{
+		Level:      cfg.LogLevel(),
+		Env:        cfg.LogEnv(),
+		OutputFile: cfg.LogOutputFile(),
+		MaxSize:    cfg.LogMaxSize(),
+		MaxBackups: cfg.LogMaxBackups(),
+		MaxAge:     cfg.LogMaxAge(),
+		Compress:   cfg.LogCompress(),
+	})
 
 	logger.Info().
 		Str("port", cfg.ServerPort()).

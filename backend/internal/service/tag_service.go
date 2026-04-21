@@ -9,6 +9,7 @@ import (
 	"gin-quickstart/internal/dto/response"
 	"gin-quickstart/internal/model"
 	"gin-quickstart/internal/pkg/errors"
+	"gin-quickstart/internal/pkg/logger"
 	"gin-quickstart/internal/pkg/slug"
 )
 
@@ -31,7 +32,11 @@ func NewTagService(tagRepo tagRepository) TagService {
 }
 
 func (s *tagService) Create(ctx context.Context, name, customSlug string) (*response.TagResponse, error) {
+	log := logger.WithContext(ctx)
+	log.Info().Str("name", name).Msg("创建标签开始")
+
 	if s.tagRepo.ExistsByName(ctx, name) {
+		log.Warn().Str("name", name).Msg("标签已存在")
 		return nil, errors.NewBadRequest("标签已存在", nil)
 	}
 
@@ -44,6 +49,7 @@ func (s *tagService) Create(ctx context.Context, name, customSlug string) (*resp
 
 	if s.tagRepo.ExistsBySlug(ctx, tagSlug) {
 		tagSlug = slug.GenerateWithTimestamp(name)
+		log.Debug().Str("new_slug", tagSlug).Msg("slug 已存在，生成新 slug")
 	}
 
 	tag := &model.Tag{
@@ -52,9 +58,11 @@ func (s *tagService) Create(ctx context.Context, name, customSlug string) (*resp
 	}
 
 	if err := s.tagRepo.Create(ctx, tag); err != nil {
+		log.Error().Err(err).Msg("创建标签失败")
 		return nil, err
 	}
 
+	log.Info().Uint("tag_id", tag.ID).Str("slug", tagSlug).Msg("标签创建成功")
 	return toTagResponse(tag, 0), nil
 }
 
@@ -78,16 +86,22 @@ func (s *tagService) GetList(ctx context.Context) (*response.TagListResponse, er
 }
 
 func (s *tagService) Update(ctx context.Context, id uint, name, customSlug string) (*response.TagResponse, error) {
+	log := logger.WithContext(ctx)
+	log.Info().Uint("tag_id", id).Msg("更新标签开始")
+
 	tag, err := s.tagRepo.FindByID(ctx, id)
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn().Uint("tag_id", id).Msg("标签不存在")
 			return nil, errors.NewNotFound("标签未找到")
 		}
+		log.Error().Err(err).Uint("tag_id", id).Msg("获取标签失败")
 		return nil, err
 	}
 
 	if name != "" {
 		if name != tag.Name && s.tagRepo.ExistsByName(ctx, name) {
+			log.Warn().Str("name", name).Msg("标签名称已存在")
 			return nil, errors.NewBadRequest("标签已存在", nil)
 		}
 		tag.Name = name
@@ -102,15 +116,26 @@ func (s *tagService) Update(ctx context.Context, id uint, name, customSlug strin
 	}
 
 	if err := s.tagRepo.Update(ctx, tag); err != nil {
+		log.Error().Err(err).Uint("tag_id", id).Msg("更新标签失败")
 		return nil, err
 	}
 
+	log.Info().Uint("tag_id", id).Msg("标签更新成功")
 	articleCount := s.tagRepo.CountArticles(ctx, id)
 	return toTagResponse(tag, articleCount), nil
 }
 
 func (s *tagService) Delete(ctx context.Context, id uint) error {
-	return s.tagRepo.Delete(ctx, id)
+	log := logger.WithContext(ctx)
+	log.Info().Uint("tag_id", id).Msg("删除标签开始")
+
+	if err := s.tagRepo.Delete(ctx, id); err != nil {
+		log.Error().Err(err).Uint("tag_id", id).Msg("删除标签失败")
+		return err
+	}
+
+	log.Info().Uint("tag_id", id).Msg("标签删除成功")
+	return nil
 }
 
 func toTagResponse(tag *model.Tag, articleCount int) *response.TagResponse {

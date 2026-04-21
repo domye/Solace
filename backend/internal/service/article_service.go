@@ -12,6 +12,7 @@ import (
 	"gin-quickstart/internal/dto/response"
 	"gin-quickstart/internal/model"
 	"gin-quickstart/internal/pkg/errors"
+	"gin-quickstart/internal/pkg/logger"
 	"gin-quickstart/internal/pkg/slug"
 )
 
@@ -98,9 +99,19 @@ func NewArticleService(articleRepo articleRepository, categoryRepo categoryRepos
 }
 
 func (s *articleService) Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
+	log := logger.WithContext(ctx)
+
+	log.Info().
+		Str("title", title).
+		Str("status", status).
+		Interface("category_id", categoryID).
+		Interface("tag_ids", tagIDs).
+		Msg("创建文章开始")
+
 	// 验证分类是否存在
 	if categoryID != nil {
 		if _, err := s.categoryRepo.FindByID(ctx, *categoryID); err != nil {
+			log.Warn().Uint("category_id", *categoryID).Msg("分类不存在")
 			return nil, ErrCategoryNotFound
 		}
 	}
@@ -109,6 +120,7 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 	if len(tagIDs) > 0 {
 		tags, err := s.tagRepo.FindByIDs(ctx, tagIDs)
 		if err != nil || len(tags) != len(tagIDs) {
+			log.Warn().Interface("tag_ids", tagIDs).Msg("部分标签不存在")
 			return nil, ErrTagNotFound
 		}
 	}
@@ -122,6 +134,7 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 	existing, err := s.articleRepo.FindBySlug(ctx, finalSlug)
 	if err == nil && existing != nil {
 		finalSlug = slug.GenerateWithTimestamp(title)
+		log.Debug().Str("original_slug", articleSlug).Str("new_slug", finalSlug).Msg("slug 已存在，生成新 slug")
 	}
 
 	now := time.Now()
@@ -142,13 +155,17 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 
 	if len(tagIDs) > 0 {
 		if err := s.articleRepo.CreateWithTags(ctx, article, tagIDs); err != nil {
+			log.Error().Err(err).Msg("创建文章失败")
 			return nil, err
 		}
 	} else {
 		if err := s.articleRepo.Create(ctx, article); err != nil {
+			log.Error().Err(err).Msg("创建文章失败")
 			return nil, err
 		}
 	}
+
+	log.Info().Uint("article_id", article.ID).Str("slug", finalSlug).Msg("文章创建成功")
 
 	article, err = s.articleRepo.FindByID(ctx, article.ID)
 	if err != nil {
@@ -159,26 +176,36 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 }
 
 func (s *articleService) GetByID(ctx context.Context, id uint) (*response.ArticleResponse, error) {
+	log := logger.WithContext(ctx)
+
 	article, err := s.articleRepo.FindByID(ctx, id)
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn().Uint("article_id", id).Msg("文章不存在")
 			return nil, errors.NewNotFound("文章未找到")
 		}
+		log.Error().Err(err).Uint("article_id", id).Msg("获取文章失败")
 		return nil, err
 	}
 
+	log.Debug().Uint("article_id", id).Str("title", article.Title).Msg("获取文章成功")
 	return toArticleResponse(article, nil, nil), nil
 }
 
 func (s *articleService) GetBySlug(ctx context.Context, articleSlug string) (*response.ArticleResponse, error) {
+	log := logger.WithContext(ctx)
+
 	article, prev, next, err := s.articleRepo.FindBySlugWithNav(ctx, articleSlug)
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn().Str("slug", articleSlug).Msg("文章不存在")
 			return nil, errors.NewNotFound("文章未找到")
 		}
+		log.Error().Err(err).Str("slug", articleSlug).Msg("获取文章失败")
 		return nil, err
 	}
 
+	log.Debug().Uint("article_id", article.ID).Str("slug", articleSlug).Msg("获取文章成功")
 	return toArticleResponse(article, prev, next), nil
 }
 
@@ -256,12 +283,18 @@ func (s *articleService) GetArchive(ctx context.Context) (*response.ArchiveRespo
 }
 
 func (s *articleService) Search(ctx context.Context, query string, page, pageSize int) (*response.ArticleListResponse, error) {
+	log := logger.WithContext(ctx)
+	log.Debug().Str("query", query).Int("page", page).Int("page_size", pageSize).Msg("搜索文章")
+
 	offset := (page - 1) * pageSize
 
 	articles, total, err := s.articleRepo.Search(ctx, query, pageSize, offset)
 	if err != nil {
+		log.Error().Err(err).Str("query", query).Msg("搜索文章失败")
 		return nil, err
 	}
+
+	log.Debug().Str("query", query).Int64("total", total).Msg("搜索文章完成")
 
 	items := make([]*response.ArticleSummary, len(articles))
 	for i, article := range articles {
@@ -305,21 +338,37 @@ func (s *articleService) GetRecent(ctx context.Context, limit int) ([]*response.
 }
 
 func (s *articleService) Update(ctx context.Context, id uint, version int, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
+	log := logger.WithContext(ctx)
+
+	log.Info().
+		Uint("article_id", id).
+		Int("version", version).
+		Str("status", status).
+		Msg("更新文章开始")
+
 	article, err := s.articleRepo.FindByID(ctx, id)
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn().Uint("article_id", id).Msg("文章不存在")
 			return nil, errors.NewNotFound("文章未找到")
 		}
+		log.Error().Err(err).Uint("article_id", id).Msg("获取文章失败")
 		return nil, err
 	}
 
 	if article.Version != version {
+		log.Warn().
+			Uint("article_id", id).
+			Int("expected_version", version).
+			Int("actual_version", article.Version).
+			Msg("版本冲突")
 		return nil, ErrArticleVersionConflict
 	}
 
 	// 验证分类是否存在
 	if categoryID != nil && *categoryID != 0 {
 		if _, err := s.categoryRepo.FindByID(ctx, *categoryID); err != nil {
+			log.Warn().Uint("category_id", *categoryID).Msg("分类不存在")
 			return nil, ErrCategoryNotFound
 		}
 	}
@@ -367,13 +416,17 @@ func (s *articleService) Update(ctx context.Context, id uint, version int, title
 
 	if tagIDs != nil {
 		if err := s.articleRepo.UpdateWithTags(ctx, article, tagIDs); err != nil {
+			log.Error().Err(err).Uint("article_id", id).Msg("更新文章失败")
 			return nil, err
 		}
 	} else {
 		if err := s.articleRepo.Update(ctx, article); err != nil {
+			log.Error().Err(err).Uint("article_id", id).Msg("更新文章失败")
 			return nil, err
 		}
 	}
+
+	log.Info().Uint("article_id", id).Int("new_version", article.Version).Msg("文章更新成功")
 
 	article, err = s.articleRepo.FindByID(ctx, id)
 	if err != nil {
@@ -384,15 +437,27 @@ func (s *articleService) Update(ctx context.Context, id uint, version int, title
 }
 
 func (s *articleService) Delete(ctx context.Context, id uint) error {
+	log := logger.WithContext(ctx)
+
+	log.Info().Uint("article_id", id).Msg("删除文章开始")
+
 	_, err := s.articleRepo.FindByID(ctx, id)
 	if err != nil {
 		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			log.Warn().Uint("article_id", id).Msg("文章不存在")
 			return errors.NewNotFound("文章未找到")
 		}
+		log.Error().Err(err).Uint("article_id", id).Msg("获取文章失败")
 		return err
 	}
 
-	return s.articleRepo.Delete(ctx, id)
+	if err := s.articleRepo.Delete(ctx, id); err != nil {
+		log.Error().Err(err).Uint("article_id", id).Msg("删除文章失败")
+		return err
+	}
+
+	log.Info().Uint("article_id", id).Msg("文章删除成功")
+	return nil
 }
 
 func calculateWordCount(content string) int {

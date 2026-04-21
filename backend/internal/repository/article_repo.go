@@ -2,8 +2,10 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"gin-quickstart/internal/model"
+	"gin-quickstart/internal/pkg/logger"
 	"gorm.io/gorm"
 )
 
@@ -18,18 +20,22 @@ func NewArticleRepository(db *gorm.DB) ArticleRepository {
 }
 
 func (r *articleRepo) FindByID(ctx context.Context, id uint) (*model.Article, error) {
+	start := time.Now()
 	var article model.Article
 	err := r.db.WithContext(ctx).
 		Preload("Category").
 		Preload("Tags").
 		First(&article, id).Error
 	if err != nil {
+		logger.Debug().Err(err).Uint("article_id", id).Dur("duration", time.Since(start)).Msg("FindByID 失败")
 		return nil, err
 	}
+	logger.Debug().Uint("article_id", id).Dur("duration", time.Since(start)).Msg("FindByID 成功")
 	return &article, nil
 }
 
 func (r *articleRepo) FindBySlug(ctx context.Context, slug string) (*model.Article, error) {
+	start := time.Now()
 	var article model.Article
 	err := r.db.WithContext(ctx).
 		Preload("Category").
@@ -37,8 +43,10 @@ func (r *articleRepo) FindBySlug(ctx context.Context, slug string) (*model.Artic
 		Where("slug = ?", slug).
 		First(&article).Error
 	if err != nil {
+		logger.Debug().Err(err).Str("slug", slug).Dur("duration", time.Since(start)).Msg("FindBySlug 失败")
 		return nil, err
 	}
+	logger.Debug().Uint("article_id", article.ID).Str("slug", slug).Dur("duration", time.Since(start)).Msg("FindBySlug 成功")
 	return &article, nil
 }
 
@@ -228,6 +236,7 @@ func (r *articleRepo) GetArchive(ctx context.Context) ([]*model.Article, error) 
 }
 
 func (r *articleRepo) Search(ctx context.Context, query string, limit, offset int) ([]*model.Article, int64, error) {
+	start := time.Now()
 	var articles []*model.Article
 	var total int64
 
@@ -241,6 +250,7 @@ func (r *articleRepo) Search(ctx context.Context, query string, limit, offset in
 
 	// 统计总数
 	if err := dbQuery.Count(&total).Error; err != nil {
+		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 统计失败")
 		return nil, 0, err
 	}
 
@@ -249,18 +259,28 @@ func (r *articleRepo) Search(ctx context.Context, query string, limit, offset in
 		Offset(offset).
 		Limit(limit).
 		Find(&articles).Error; err != nil {
+		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 查询失败")
 		return nil, 0, err
 	}
 
+	logger.Debug().Str("query", query).Int64("total", total).Dur("duration", time.Since(start)).Msg("Search 成功")
 	return articles, total, nil
 }
 
 func (r *articleRepo) Create(ctx context.Context, article *model.Article) error {
-	return r.db.WithContext(ctx).Create(article).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Create(article).Error
+	if err != nil {
+		logger.Error().Err(err).Str("title", article.Title).Dur("duration", time.Since(start)).Msg("Create 文章失败")
+		return err
+	}
+	logger.Debug().Uint("article_id", article.ID).Dur("duration", time.Since(start)).Msg("Create 文章成功")
+	return nil
 }
 
 func (r *articleRepo) CreateWithTags(ctx context.Context, article *model.Article, tagIDs []uint) error {
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	start := time.Now()
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 创建文章
 		if err := tx.Create(article).Error; err != nil {
 			return err
@@ -279,14 +299,28 @@ func (r *articleRepo) CreateWithTags(ctx context.Context, article *model.Article
 
 		return nil
 	})
+	if err != nil {
+		logger.Error().Err(err).Str("title", article.Title).Interface("tag_ids", tagIDs).Dur("duration", time.Since(start)).Msg("CreateWithTags 失败")
+		return err
+	}
+	logger.Debug().Uint("article_id", article.ID).Interface("tag_ids", tagIDs).Dur("duration", time.Since(start)).Msg("CreateWithTags 成功")
+	return nil
 }
 
 func (r *articleRepo) Update(ctx context.Context, article *model.Article) error {
-	return r.db.WithContext(ctx).Save(article).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Save(article).Error
+	if err != nil {
+		logger.Error().Err(err).Uint("article_id", article.ID).Dur("duration", time.Since(start)).Msg("Update 文章失败")
+		return err
+	}
+	logger.Debug().Uint("article_id", article.ID).Dur("duration", time.Since(start)).Msg("Update 文章成功")
+	return nil
 }
 
 func (r *articleRepo) UpdateWithTags(ctx context.Context, article *model.Article, tagIDs []uint) error {
-	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+	start := time.Now()
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		// 更新文章
 		if err := tx.Save(article).Error; err != nil {
 			return err
@@ -307,10 +341,23 @@ func (r *articleRepo) UpdateWithTags(ctx context.Context, article *model.Article
 
 		return nil
 	})
+	if err != nil {
+		logger.Error().Err(err).Uint("article_id", article.ID).Interface("tag_ids", tagIDs).Dur("duration", time.Since(start)).Msg("UpdateWithTags 失败")
+		return err
+	}
+	logger.Debug().Uint("article_id", article.ID).Interface("tag_ids", tagIDs).Dur("duration", time.Since(start)).Msg("UpdateWithTags 成功")
+	return nil
 }
 
 func (r *articleRepo) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&model.Article{}, id).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Delete(&model.Article{}, id).Error
+	if err != nil {
+		logger.Error().Err(err).Uint("article_id", id).Dur("duration", time.Since(start)).Msg("Delete 文章失败")
+		return err
+	}
+	logger.Debug().Uint("article_id", id).Dur("duration", time.Since(start)).Msg("Delete 文章成功")
+	return nil
 }
 
 func (r *articleRepo) SyncTags(ctx context.Context, articleID uint, tagIDs []uint) error {

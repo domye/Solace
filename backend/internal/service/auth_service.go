@@ -10,6 +10,7 @@ import (
 	apperrors "gin-quickstart/internal/pkg/errors"
 	"gin-quickstart/internal/pkg/hash"
 	"gin-quickstart/internal/pkg/jwt"
+	"gin-quickstart/internal/pkg/logger"
 )
 
 // 认证相关错误
@@ -48,41 +49,59 @@ func NewAuthService(
 }
 
 func (s *authService) Login(ctx context.Context, req *request.LoginRequest) (*response.AuthResponse, error) {
+	log := logger.WithContext(ctx)
+
+	log.Info().Str("email", req.Email).Msg("登录尝试")
+
 	// 验证邮箱是否匹配配置的管理员邮箱
 	if req.Email != s.cfg.AdminEmail() {
+		log.Warn().Str("email", req.Email).Msg("邮箱不匹配")
 		return nil, ErrInvalidCredentials
 	}
 
 	// 验证密码
 	if !hash.CheckPassword(req.Password, s.cfg.AdminPasswordHash()) {
+		log.Warn().Str("email", req.Email).Msg("密码错误")
 		return nil, ErrInvalidCredentials
 	}
 
 	// 生成令牌
+	log.Info().Str("email", req.Email).Msg("登录成功")
 	return s.generateTokens()
 }
 
 func (s *authService) Logout(ctx context.Context, refreshToken string) error {
+	log := logger.WithContext(ctx)
+	log.Info().Msg("用户登出")
 	// 单用户模式，登出无需额外处理
 	return nil
 }
 
 func (s *authService) Refresh(ctx context.Context, req *request.RefreshTokenRequest) (*response.RefreshResponse, error) {
+	log := logger.WithContext(ctx)
+
+	log.Debug().Msg("刷新令牌")
+
 	// 验证刷新令牌
 	if err := s.jwtManager.ValidateRefreshToken(req.RefreshToken); err != nil {
+		log.Warn().Err(err).Msg("刷新令牌验证失败")
 		return nil, ErrTokenExpired
 	}
 
 	// 生成新令牌
 	accessToken, err := s.jwtManager.GenerateAccessToken(1, s.cfg.AdminUsername(), "admin")
 	if err != nil {
+		log.Error().Err(err).Msg("生成访问令牌失败")
 		return nil, err
 	}
 
 	refreshToken, _, err := s.jwtManager.GenerateRefreshToken(1)
 	if err != nil {
+		log.Error().Err(err).Msg("生成刷新令牌失败")
 		return nil, err
 	}
+
+	log.Info().Msg("令牌刷新成功")
 
 	return &response.RefreshResponse{
 		AccessToken:  accessToken,
