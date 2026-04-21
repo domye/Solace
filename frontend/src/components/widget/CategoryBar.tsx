@@ -95,6 +95,7 @@ function NavPill({
 	icon,
 	count,
 	className,
+	ariaLabel,
 }: {
 	to: string;
 	label: string;
@@ -103,6 +104,7 @@ function NavPill({
 	icon?: string;
 	count?: number;
 	className?: string;
+	ariaLabel?: string;
 }) {
 	return (
 		<Link
@@ -110,6 +112,7 @@ function NavPill({
 			onClick={onClick}
 			className={`${className || PILL_BASE_CLASS} ${isActive ? PILL_ACTIVE_CLASS : PILL_INACTIVE_CLASS}`}
 			data-active={isActive || undefined}
+			aria-label={ariaLabel}
 		>
 			{icon ? <SafeIcon icon={icon} size="1.125rem" /> : label}
 			{!icon && count !== undefined && count > 0 && (
@@ -235,6 +238,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
 					onClick={scrollToTop}
 					icon="material-symbols:home"
 					className={PILL_BASE_CLASS.replace("px-3", "px-2")}
+					ariaLabel="首页"
 				/>
 
 				{/* 归档按钮 */}

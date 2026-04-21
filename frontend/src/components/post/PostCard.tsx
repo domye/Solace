@@ -53,14 +53,14 @@ function CoverImage({
 	wrapperClassName,
 }: {
 	src: string;
-	alt: string;
+	alt?: string;
 	className?: string;
 	wrapperClassName?: string;
 }) {
 	return (
 		<LazyImage
 			src={src}
-			alt={alt}
+			alt={alt || ""}
 			className={className}
 			wrapperClassName={wrapperClassName}
 			aspectRatio="4/3"
@@ -83,6 +83,7 @@ function DesktopCover({
 		<Link
 			to={url}
 			className="group w-[var(--coverWidth)] absolute top-2.5 bottom-2.5 right-2.5 rounded-[var(--radius-small)] overflow-hidden"
+			aria-label={`查看文章: ${title}`}
 		>
 			<div className="absolute inset-0 group-hover:bg-black/30" />
 			<ArrowIcon
@@ -91,7 +92,6 @@ function DesktopCover({
 			/>
 			<CoverImage
 				src={cover_image}
-				alt={title}
 				className="w-full h-full object-cover group-hover:scale-105 transition-transform"
 				wrapperClassName="w-full h-full"
 			/>
@@ -105,6 +105,7 @@ function DesktopArrow({ url }: { url: string }) {
 		<Link
 			to={url}
 			className="btn-regular w-12 absolute right-2.5 top-2.5 bottom-2.5 hover:bg-[var(--btn-regular-bg-hover)] transition-colors"
+			aria-label="阅读全文"
 		>
 			<ArrowIcon size="2rem" className="mx-auto" />
 		</Link>
@@ -114,14 +115,12 @@ function DesktopArrow({ url }: { url: string }) {
 /** 移动端封面 */
 function MobileCover({
 	cover_image,
-	title,
 }: {
 	cover_image: string;
-	title: string;
 }) {
 	return (
 		<div className="flex-shrink-0 self-end rounded-[var(--radius-small)] overflow-hidden w-[110px]">
-			<CoverImage src={cover_image} alt={title} className="w-full h-full object-cover" wrapperClassName="w-full" />
+			<CoverImage src={cover_image} className="w-full h-full object-cover" wrapperClassName="w-full" />
 		</div>
 	);
 }
@@ -186,7 +185,6 @@ export function PostCard({
 				{hasCover && (
 					<MobileCover
 						cover_image={article.cover_image!}
-						title={article.title}
 					/>
 				)}
 			</Link>

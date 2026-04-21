@@ -23,7 +23,7 @@
 	--float-panel-bg: rgba(255, 255, 255, 0.9);
 
 	/* === 按钮色 === */
-	--btn-content: oklch(0.55 0.12 var(--hue));
+	--btn-content: oklch(0.45 0.1 var(--hue));
 	--btn-regular-bg: oklch(0.95 0.025 var(--hue));
 	--btn-regular-bg-hover: oklch(0.92 0.04 var(--hue));
 	--btn-regular-bg-active: oklch(0.88 0.06 var(--hue));

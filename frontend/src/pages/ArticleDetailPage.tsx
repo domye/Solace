@@ -86,16 +86,16 @@ export function ArticleDetailPage() {
 							{article.summary}
 						</div>
 					)}
-					{article.cover_image && (
-						<LazyImage
-							src={article.cover_image}
-							alt={article.title}
-							className="w-full h-full object-cover rounded-xl"
-							wrapperClassName="w-full rounded-xl overflow-hidden mb-6"
-							aspectRatio="16/9"
-							effect="blur"
-						/>
-					)}
+				{article.cover_image && (
+					<LazyImage
+						src={article.cover_image}
+						alt=""
+						className="w-full h-full object-cover rounded-xl"
+						wrapperClassName="w-full rounded-xl overflow-hidden mb-6"
+						aspectRatio="16/9"
+						effect="blur"
+					/>
+				)}
 					<MarkdownRenderer
 						content={article.content}
 						className="mt-6"

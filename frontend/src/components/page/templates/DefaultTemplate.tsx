@@ -24,7 +24,7 @@ export function DefaultTemplate({ markdown, page }: DefaultTemplateProps) {
 			{page.cover_image && (
 				<LazyImage
 					src={page.cover_image}
-					alt={page.title}
+					alt=""
 					className="w-full rounded-xl mb-6"
 					wrapperClassName="w-full aspect-video rounded-xl overflow-hidden mb-6"
 					effect="blur"

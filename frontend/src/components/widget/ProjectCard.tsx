@@ -57,7 +57,7 @@ function GitHubRepoCard({ project }: ProjectCardProps) {
 					{avatar ? (
 						<img
 							src={avatar}
-							alt={project.name}
+							alt=""
 							className="project-card-avatar"
 						/>
 					) : (
@@ -118,7 +118,7 @@ function ManualProjectCard({ project }: ProjectCardProps) {
 					{avatar ? (
 						<img
 							src={avatar}
-							alt={project.name}
+							alt=""
 							className="project-card-avatar"
 						/>
 					) : (

@@ -21,6 +21,7 @@ export function Profile() {
 			<Link
 				to="/about"
 				className="group block relative mx-auto mt-0.5 lg:mx-0 lg:mt-0 mb-2 max-w-[10rem] lg:max-w-none aspect-square overflow-hidden rounded-lg active:scale-95"
+				aria-label="关于我"
 			>
 				<div className="absolute inset-0 pointer-events-none group-hover:bg-black/30 group-active:bg-black/50 z-50 flex items-center justify-center">
 					<SafeIcon
