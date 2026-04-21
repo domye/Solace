@@ -91,13 +91,15 @@ export function InputField({
 	help,
 	className,
 }: InputFieldProps) {
+	const id = `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
 	return (
 		<div className={className}>
-			<label className="block text-[var(--text-50)] text-xs mb-1">
+			<label htmlFor={id} className="block text-[var(--text-50)] text-xs mb-1">
 				{label}
 				{required && <span className="text-red-400 ml-1">*</span>}
 			</label>
 			<input
+				id={id}
 				type={type}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
@@ -120,13 +122,15 @@ export function TextAreaField({
 	help,
 	className,
 }: TextAreaFieldProps) {
+	const id = `textarea-${label.toLowerCase().replace(/\s+/g, "-")}`;
 	return (
 		<div className={className}>
-			<label className="block text-[var(--text-50)] text-xs mb-1">
+			<label htmlFor={id} className="block text-[var(--text-50)] text-xs mb-1">
 				{label}
 				{required && <span className="text-red-400 ml-1">*</span>}
 			</label>
 			<textarea
+				id={id}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={placeholder}
@@ -181,11 +185,13 @@ export function TagsField({
 	placeholder = "输入后按 Enter",
 	className,
 }: TagsFieldProps) {
+	const id = `tags-${label.toLowerCase().replace(/\s+/g, "-")}`;
 	return (
 		<div className={className}>
-			<label className="block text-[var(--text-50)] text-xs mb-1">{label}</label>
+			<label htmlFor={id} className="block text-[var(--text-50)] text-xs mb-1">{label}</label>
 			<div className="flex gap-2">
 				<input
+					id={id}
 					type="text"
 					value={inputValue}
 					onChange={(e) => onInputChange(e.target.value)}
@@ -218,6 +224,7 @@ export function TagsField({
 								type="button"
 								onClick={() => onRemove(tag)}
 								className="hover:bg-white/20 rounded"
+								aria-label={`移除标签 ${tag}`}
 							>
 								<SafeIcon icon="material-symbols:close-rounded" size={12} />
 							</button>
@@ -236,26 +243,36 @@ export function CoordsField({
 	onChange,
 	className,
 }: CoordsFieldProps) {
+	const latId = "coords-lat";
+	const lngId = "coords-lng";
 	return (
 		<div className={className}>
-			<label className="block text-[var(--text-50)] text-xs mb-1">{label}</label>
+			<span className="block text-[var(--text-50)] text-xs mb-1">{label}</span>
 			<div className="flex gap-2">
-				<input
-					type="number"
-					step="any"
-					value={value.lat ?? ""}
-					onChange={(e) => onChange({ ...value, lat: Number(e.target.value) || undefined })}
-					placeholder="纬度"
-					className="input-base flex-1"
-				/>
-				<input
-					type="number"
-					step="any"
-					value={value.lng ?? ""}
-					onChange={(e) => onChange({ ...value, lng: Number(e.target.value) || undefined })}
-					placeholder="经度"
-					className="input-base flex-1"
-				/>
+				<div className="flex-1">
+					<label htmlFor={latId} className="sr-only">纬度</label>
+					<input
+						id={latId}
+						type="number"
+						step="any"
+						value={value.lat ?? ""}
+						onChange={(e) => onChange({ ...value, lat: Number(e.target.value) || undefined })}
+						placeholder="纬度"
+						className="input-base w-full"
+					/>
+				</div>
+				<div className="flex-1">
+					<label htmlFor={lngId} className="sr-only">经度</label>
+					<input
+						id={lngId}
+						type="number"
+						step="any"
+						value={value.lng ?? ""}
+						onChange={(e) => onChange({ ...value, lng: Number(e.target.value) || undefined })}
+						placeholder="经度"
+						className="input-base w-full"
+					/>
+				</div>
 			</div>
 		</div>
 	);

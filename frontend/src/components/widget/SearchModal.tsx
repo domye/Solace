@@ -51,7 +51,12 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 	const showEmpty = query.trim() && !isLoading && !results?.data?.length;
 
 	return (
-		<div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 fade-in-up">
+		<div
+			className="fixed inset-0 z-[100] flex items-start justify-center pt-20 fade-in-up"
+			role="dialog"
+			aria-modal="true"
+			aria-label="搜索文章"
+		>
 			<div
 				className="absolute inset-0 bg-[var(--klein-blue)]/20 dark:bg-[var(--klein-blue)]/40 backdrop-blur-sm"
 				onClick={onClose}
@@ -70,6 +75,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 						placeholder="搜索文章..."
 						className="input-base flex-1 border-none shadow-none focus:ring-0"
 						autoFocus
+						aria-label="搜索关键词"
 					/>
 					{isLoading && (
 						<div className="w-5 h-5 rounded-full border-2 border-[var(--primary)] border-t-transparent animate-spin" />
@@ -77,6 +83,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 					<button
 						onClick={onClose}
 						className="btn-plain rounded-[var(--radius-medium)] h-10 w-10 scale-animation ripple"
+						aria-label="关闭搜索"
 					>
 						<SafeIcon icon="material-symbols:close-rounded" size="1.25rem" />
 					</button>

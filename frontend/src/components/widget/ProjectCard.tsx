@@ -50,6 +50,7 @@ function GitHubRepoCard({ project }: ProjectCardProps) {
 			target="_blank"
 			rel="noopener noreferrer"
 			className="project-card project-card-link"
+			aria-label={`查看项目: ${project.name}`}
 		>
 			<div className="project-card-header">
 				<div className="project-card-avatar-box">
@@ -110,6 +111,7 @@ function ManualProjectCard({ project }: ProjectCardProps) {
 			target="_blank"
 			rel="noopener noreferrer"
 			className="project-card project-card-link"
+			aria-label={`查看项目: ${project.name}`}
 		>
 			<div className="project-card-header">
 				<div className="project-card-avatar-box">

@@ -137,11 +137,12 @@ export function ArticleEditorPage() {
 
 				{/* Slug 输入 */}
 				<div className="mb-4">
-					<label className="block text-75 text-sm font-medium mb-2">
+					<label htmlFor="article-slug" className="block text-75 text-sm font-medium mb-2">
 						Slug{" "}
 						<span className="text-50 text-xs ml-1">(留空自动从标题生成)</span>
 					</label>
 					<input
+						id="article-slug"
 						type="text"
 						value={slug}
 						onChange={(e) => setSlug(e.target.value)}
@@ -171,8 +172,9 @@ export function ArticleEditorPage() {
 
 				{/* 分类选择 */}
 				<div className="mb-4">
-					<label className="block text-75 text-sm font-medium mb-2">分类</label>
+					<label htmlFor="article-category" className="block text-75 text-sm font-medium mb-2">分类</label>
 					<select
+						id="article-category"
 						value={categoryId || ""}
 						onChange={(e) =>
 							setCategoryId(e.target.value ? Number(e.target.value) : undefined)

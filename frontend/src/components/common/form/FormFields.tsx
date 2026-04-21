@@ -7,15 +7,17 @@ function FormFieldWrapper({
 	required,
 	error,
 	children,
+	htmlFor,
 }: {
 	label: string;
 	required?: boolean;
 	error?: string;
 	children: React.ReactNode;
+	htmlFor?: string;
 }) {
 	return (
 		<div className="mb-4">
-			<label className="block text-75 text-sm font-medium mb-2">
+			<label htmlFor={htmlFor} className="block text-75 text-sm font-medium mb-2">
 				{label}
 				{required && <span className="text-[var(--primary)] ml-1">*</span>}
 			</label>
@@ -64,6 +66,7 @@ export function InputField({
 	value,
 	onChange,
 	required,
+	id,
 }: {
 	label: string;
 	error?: string;
@@ -72,10 +75,13 @@ export function InputField({
 	value: string;
 	onChange: (value: string) => void;
 	required?: boolean;
+	id?: string;
 }) {
+	const inputId = id || `input-${label.toLowerCase().replace(/\s+/g, "-")}`;
 	return (
-		<FormFieldWrapper label={label} required={required} error={error}>
+		<FormFieldWrapper label={label} required={required} error={error} htmlFor={inputId}>
 			<input
+				id={inputId}
 				type={type}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
@@ -94,6 +100,7 @@ export function TextAreaField({
 	onChange,
 	rows = 4,
 	required,
+	id,
 }: {
 	label: string;
 	error?: string;
@@ -102,10 +109,13 @@ export function TextAreaField({
 	onChange: (value: string) => void;
 	rows?: number;
 	required?: boolean;
+	id?: string;
 }) {
+	const inputId = id || `textarea-${label.toLowerCase().replace(/\s+/g, "-")}`;
 	return (
-		<FormFieldWrapper label={label} required={required} error={error}>
+		<FormFieldWrapper label={label} required={required} error={error} htmlFor={inputId}>
 			<textarea
+				id={inputId}
 				value={value}
 				onChange={(e) => onChange(e.target.value)}
 				placeholder={placeholder}

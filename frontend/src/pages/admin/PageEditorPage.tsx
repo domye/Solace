@@ -327,11 +327,12 @@ export function PageEditorPage() {
 				/>
 
 				<div className="mb-4">
-					<label className="block text-75 text-sm font-medium mb-2">
+					<label htmlFor="page-slug" className="block text-75 text-sm font-medium mb-2">
 						Slug{" "}
 						<span className="text-50 text-xs ml-1">(留空自动从标题生成)</span>
 					</label>
 					<input
+						id="page-slug"
 						type="text"
 						value={slug}
 						onChange={(e) => setSlug(e.target.value)}
@@ -383,7 +384,7 @@ export function PageEditorPage() {
 				/>
 
 				<div className="mb-4">
-					<label className="block text-75 text-sm font-medium mb-2">
+					<label htmlFor="page-content" className="block text-75 text-sm font-medium mb-2">
 						内容{" "}
 						<span className="text-50 text-xs ml-1">
 							(Markdown + YAML frontmatter)
@@ -395,6 +396,7 @@ export function PageEditorPage() {
 					)}
 
 					<textarea
+						id="page-content"
 						value={isVisualTemplate(template) ? markdownContent : content}
 						onChange={(e) => {
 							if (isVisualTemplate(template)) {
@@ -424,10 +426,11 @@ export function PageEditorPage() {
 
 				<div className="mb-4 flex gap-4 flex-wrap">
 					<div className="flex-1 min-w-[120px]">
-						<label className="block text-75 text-sm font-medium mb-2">
+						<label htmlFor="page-order" className="block text-75 text-sm font-medium mb-2">
 							排序
 						</label>
 						<input
+							id="page-order"
 							type="number"
 							value={order}
 							onChange={(e) => setOrder(Number(e.target.value))}
