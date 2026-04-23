@@ -139,7 +139,7 @@ function MobileMenuPanel({
 	return (
 		<div
 			ref={menuRef}
-			className={`float-panel absolute top-full left-4 right-4 p-2 md:hidden transition-all ${isOpen ? "" : "float-panel-closed"}`}
+			className={`absolute top-full left-4 right-4 p-2 md:hidden transition-all rounded-[var(--radius-large)] bg-white dark:bg-[oklch(0.18_0.015_var(--hue))] border-2 border-[var(--showa-border-color)] shadow-[4px_4px_0_var(--showa-shadow-color)] z-50 ${isOpen ? "" : "float-panel-closed"}`}
 		>
 			{items.map((item) => (
 				<MobileMenuItem
@@ -284,7 +284,7 @@ function UserMenu({ onLogout }: { onLogout: () => void }) {
 			</button>
 
 			{isOpen && (
-				<div className="absolute right-0 top-full mt-2 w-48 py-2 rounded-[var(--radius-large)] bg-[var(--card-bg)] border border-[var(--showa-border-color)] shadow-[4px_4px_0_var(--showa-shadow-color)] z-50 fade-in-down">
+				<div className="absolute right-0 top-full mt-2 w-48 py-2 rounded-[var(--radius-large)] bg-white dark:bg-[oklch(0.18_0.015_var(--hue))] border border-[var(--showa-border-color)] shadow-[4px_4px_0_var(--showa-shadow-color)] z-50 fade-in-down">
 					<DropdownMenuItem
 						path="/admin"
 						icon="material-symbols:admin-panel-settings-outline-rounded"
