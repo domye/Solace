@@ -111,7 +111,7 @@ export function ArticleEditorPage() {
 				</div>
 			)}
 
-			<div className="card-base p-6 h-[calc(100vh-12rem)] flex flex-col">
+			<div className="card-base p-6 h-[calc(100vh-12rem)] flex flex-col !transform-none hover:!transform-none hover:!shadow-[var(--showa-shadow-offset)_var(--showa-shadow-offset)_0_var(--showa-shadow-color)]">
 				<InputField
 					label="标题"
 					value={title}
