@@ -3,6 +3,7 @@ package router
 import (
 	"time"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -60,6 +61,7 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 
 	engine := gin.New()
 
+	engine.Use(gzip.Gzip(gzip.DefaultCompression))
 	engine.Use(middleware.CORS(cfg))
 	engine.Use(middleware.RequestID())
 	engine.Use(middleware.Logging())
