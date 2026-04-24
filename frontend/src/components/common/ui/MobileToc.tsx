@@ -128,23 +128,23 @@ function TocButton({ onClick }: { onClick: () => void }) {
 
 function TocHeader({ onClose }: { onClose: () => void }) {
 	return (
-		<div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border-light)]">
-			<div className="flex items-center gap-2">
+		<div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-light)]">
+			<div className="flex items-center gap-1.5">
 				<SafeIcon
 					icon="material-symbols:toc"
-					size="1.25rem"
+					size="1rem"
 					className="text-[var(--primary)]"
 				/>
-				<span className="font-bold text-lg text-90">目录</span>
+				<span className="font-bold text-sm text-90">目录</span>
 			</div>
 			<button
 				onClick={onClose}
-				className="w-9 h-9 rounded-full flex items-center justify-center bg-[var(--btn-plain-bg-hover)] hover:bg-[var(--border-light)] transition-colors"
+				className="w-7 h-7 rounded-full flex items-center justify-center bg-[var(--btn-plain-bg-hover)] hover:bg-[var(--border-light)] transition-colors"
 				aria-label="关闭"
 			>
 				<SafeIcon
 					icon="material-symbols:close"
-					size="1.25rem"
+					size="1rem"
 					className="text-[var(--text-75)]"
 				/>
 			</button>
@@ -161,7 +161,7 @@ interface TocListProps {
 
 const TocList = forwardRef<HTMLDivElement, TocListProps>(
 	({ headings, activeId, minDepth, onItemClick }, ref) => (
-		<nav ref={ref} className="relative flex flex-col px-4 py-3 overflow-y-auto">
+		<nav ref={ref} className="relative flex flex-col px-3 py-2 overflow-y-auto">
 			{headings.map((heading) => {
 				const isActive = activeId === heading.id;
 				const indentLevel = heading.depth - minDepth;
@@ -172,20 +172,20 @@ const TocList = forwardRef<HTMLDivElement, TocListProps>(
 						data-id={heading.id}
 						href={`#${heading.id}`}
 						onClick={(e) => onItemClick(e, heading.id)}
-						className={`w-full py-3 px-3 rounded-xl transition-all flex items-center ${
+						className={`w-full py-2 px-2 rounded-lg transition-all flex items-center ${
 							isActive
 								? "text-[var(--primary)] bg-[color-mix(in_srgb,var(--primary)_12%,transparent)]"
 								: "text-75 hover:bg-[var(--btn-plain-bg-hover)] hover:text-[var(--primary)]"
 						}`}
-						style={{ paddingLeft: `${indentLevel * 1.25 + 0.75}rem` }}
+						style={{ paddingLeft: `${indentLevel * 1 + 0.5}rem` }}
 					>
 						{indentLevel > 0 && (
-							<span className="w-[2px] h-4 bg-[var(--primary)] rounded-full mr-3 flex-shrink-0 opacity-40" />
+							<span className="w-[2px] h-3 bg-[var(--primary)] rounded-full mr-2 flex-shrink-0 opacity-40" />
 						)}
 						<span
-							className={`truncate text-[0.95rem] leading-relaxed ${
+							className={`truncate text-xs leading-relaxed ${
 								isActive ? "font-bold" : "font-medium"
-							} ${heading.depth > minDepth ? "text-[0.875rem] opacity-90" : ""}`}
+							} ${heading.depth > minDepth ? "text-[0.7rem] opacity-90" : ""}`}
 						>
 							{heading.text}
 						</span>
