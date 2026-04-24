@@ -77,8 +77,7 @@ export const TableOfContents = memo(function TableOfContents({
 				{/* 可滚动的标题列表 */}
 				<div
 					className="toc-scroll-container overflow-y-auto overflow-x-hidden max-h-[calc(100vh-280px)]
-            scrollbar-thin scrollbar-thumb-[var(--border-light)] scrollbar-track-transparent
-            hover:scrollbar-thumb-[var(--primary)]"
+            scrollbar-hide"
 					style={{ scrollbarGutter: "stable" }}
 				>
 					{filteredHeadings.map((heading) => {
