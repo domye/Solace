@@ -33,7 +33,6 @@ ENV TZ=Asia/Shanghai
 
 # 复制构建产物
 COPY --from=builder /app/server .
-COPY --from=builder /app/migrations ./migrations
 
 # 复制默认配置文件示例
 COPY config.toml.example config.toml.example
