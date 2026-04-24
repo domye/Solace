@@ -113,13 +113,9 @@ const CUSTOM_STYLE = {
 	background: "transparent",
 	fontSize: "0.85rem",
 	lineHeight: "1.6",
-	fontFamily:
-		"'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
 } as const;
 
 const CODE_TAG_STYLE = {
-	fontFamily:
-		"'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
 	background: "transparent",
 } as const;
 
@@ -237,8 +233,6 @@ export const CodeBlock = memo(function CodeBlock({
 				<pre
 					className="p-3 overflow-x-auto text-sm font-mono"
 					style={{
-						fontFamily:
-							"'JetBrains Mono Variable', ui-monospace, monospace",
 						background: "transparent",
 					}}
 				>
@@ -267,10 +261,9 @@ export const CodeBlock = memo(function CodeBlock({
 				<WindowControls />
 
 				<span
-					className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[0.7rem] font-medium tracking-wider"
+					className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[0.7rem] font-medium tracking-wider font-mono"
 					style={{
 						color: "var(--codeblock-lang-color, #888)",
-						fontFamily: "'JetBrains Mono Variable', monospace",
 					}}
 				>
 					{langDisplay}
@@ -316,10 +309,7 @@ export const CodeBlock = memo(function CodeBlock({
 					{Array.from({ length: lineCount }, (_, i) => (
 						<div
 							key={i}
-							className="text-[0.85rem] leading-[1.6]"
-							style={{
-								fontFamily: "'JetBrains Mono Variable', monospace",
-							}}
+							className="text-[0.85rem] leading-[1.6] font-mono"
 						>
 							{i + 1}
 						</div>
