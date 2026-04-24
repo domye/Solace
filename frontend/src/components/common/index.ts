@@ -16,3 +16,6 @@ export * from './layout';
 
 // SEO 组件
 export * from './seo';
+
+// 错误边界
+export * from './ErrorBoundary';

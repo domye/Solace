@@ -1,5 +1,8 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import {
 	useArticle,
 	useCreateArticle,
@@ -15,6 +18,19 @@ import {
 import { LazyMarkdownEditor } from "@/components/admin";
 import { request_CreateArticleRequest } from "@/api";
 
+const articleSchema = z.object({
+	title: z.string().min(1, "标题不能为空"),
+	slug: z.string().optional(),
+	content: z.string().min(1, "内容不能为空"),
+	summary: z.string().optional(),
+	cover_image: z.string().url("请输入有效的URL").optional().or(z.literal("")),
+	category_id: z.number().optional(),
+	tag_ids: z.array(z.number()).optional(),
+	status: z.nativeEnum(request_CreateArticleRequest.status),
+});
+
+type ArticleFormData = z.infer<typeof articleSchema>;
+
 export function ArticleEditorPage() {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
@@ -26,63 +42,60 @@ export function ArticleEditorPage() {
 	const createMutation = useCreateArticle();
 	const updateMutation = useUpdateArticle();
 
-	const [title, setTitle] = useState("");
-	const [slug, setSlug] = useState("");
-	const [content, setContent] = useState("");
-	const [summary, setSummary] = useState("");
-	const [coverImage, setCoverImage] = useState("");
-	const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
-	const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-	const [status, setStatus] = useState<request_CreateArticleRequest.status>(
-		request_CreateArticleRequest.status.DRAFT,
-	);
-	const [error, setError] = useState("");
+	const {
+		register,
+		control,
+		handleSubmit,
+		reset,
+		watch,
+		setValue,
+		formState: { errors },
+	} = useForm<ArticleFormData>({
+		resolver: zodResolver(articleSchema),
+		defaultValues: {
+			title: "",
+			slug: "",
+			content: "",
+			summary: "",
+			cover_image: "",
+			category_id: undefined,
+			tag_ids: [],
+			status: request_CreateArticleRequest.status.DRAFT,
+		},
+	});
+
+	const selectedTagIds = watch("tag_ids") || [];
 
 	useEffect(() => {
 		if (existingArticle) {
-			setTitle(existingArticle.title);
-			setSlug(existingArticle.slug || "");
-			setContent(existingArticle.content);
-			setSummary(existingArticle.summary || "");
-			setCoverImage(existingArticle.cover_image || "");
-			setCategoryId(existingArticle.category?.id);
-			setSelectedTagIds(existingArticle.tags?.map((t) => t.id) || []);
-			setStatus(existingArticle.status as request_CreateArticleRequest.status);
+			reset({
+				title: existingArticle.title,
+				slug: existingArticle.slug || "",
+				content: existingArticle.content,
+				summary: existingArticle.summary || "",
+				cover_image: existingArticle.cover_image || "",
+				category_id: existingArticle.category?.id,
+				tag_ids: existingArticle.tags?.map((t) => t.id) || [],
+				status: existingArticle.status as request_CreateArticleRequest.status,
+			});
 		}
-	}, [existingArticle]);
+	}, [existingArticle, reset]);
 
 	const toggleTag = (tagId: number) => {
-		setSelectedTagIds((prev) =>
-			prev.includes(tagId)
-				? prev.filter((id) => id !== tagId)
-				: [...prev, tagId],
-		);
+		const current = selectedTagIds;
+		const newTags = current.includes(tagId)
+			? current.filter((id: number) => id !== tagId)
+			: [...current, tagId];
+		setValue("tag_ids", newTags);
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		setError("");
-
-		if (!title.trim()) {
-			setError("标题不能为空");
-			return;
-		}
-
-		if (!content.trim()) {
-			setError("内容不能为空");
-			return;
-		}
-
+	const onSubmit = async (data: ArticleFormData) => {
 		try {
 			const articleData = {
-				title,
-				slug: slug.trim() || undefined,
-				content,
-				summary,
-				cover_image: coverImage || undefined,
-				category_id: categoryId,
-				tag_ids: selectedTagIds.length > 0 ? selectedTagIds : undefined,
-				status,
+				...data,
+				slug: data.slug?.trim() || undefined,
+				cover_image: data.cover_image || undefined,
+				tag_ids: data.tag_ids && data.tag_ids.length > 0 ? data.tag_ids : undefined,
 			};
 
 			if (isEdit && id) {
@@ -99,32 +112,39 @@ export function ArticleEditorPage() {
 				navigate("/admin");
 			}
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "保存失败");
+			console.error("Save failed:", err);
 		}
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
-			{error && (
+		<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+			{Object.keys(errors).length > 0 && (
 				<div className="bg-red-500/10 text-red-500 rounded-[var(--radius-medium)] p-3 mb-4 text-sm">
-					{error}
+					{errors.title?.message || errors.content?.message || "请检查表单内容"}
 				</div>
 			)}
 
 			<div className="card-base p-6 h-[calc(100vh-12rem)] flex flex-col !transform-none hover:!transform-none hover:!shadow-[var(--showa-shadow-offset)_var(--showa-shadow-offset)_0_var(--showa-shadow-color)]">
 				<InputField
 					label="标题"
-					value={title}
-					onChange={setTitle}
+					value={watch("title") || ""}
+					onChange={(v) => setValue("title", v)}
 					placeholder="文章标题"
 					required
+					error={errors.title?.message}
 				/>
 				<div className="flex-1 min-h-0 mt-4">
-					<LazyMarkdownEditor
-						value={content}
-						onChange={setContent}
-						placeholder="在这里撰写 Markdown 内容..."
-						height="100%"
+					<Controller
+						name="content"
+						control={control}
+						render={({ field }: { field: { value: string; onChange: (value: string) => void } }) => (
+							<LazyMarkdownEditor
+								value={field.value}
+								onChange={field.onChange}
+								placeholder="在这里撰写 Markdown 内容..."
+								height="100%"
+							/>
+						)}
 					/>
 				</div>
 			</div>
@@ -138,25 +158,25 @@ export function ArticleEditorPage() {
 						<input
 							id="article-slug"
 							type="text"
-							value={slug}
-							onChange={(e) => setSlug(e.target.value)}
+							{...register("slug")}
 							placeholder="例如: my-first-post"
 							className="input-base"
 						/>
 					</div>
 					<InputField
 						label="封面图片"
-						value={coverImage}
-						onChange={setCoverImage}
+						value={watch("cover_image") || ""}
+						onChange={(v) => setValue("cover_image", v)}
 						placeholder="https://example.com/cover.jpg"
 						type="url"
+						error={errors.cover_image?.message}
 					/>
-</div>
+				</div>
 
 				<TextAreaField
 					label="摘要"
-					value={summary}
-					onChange={setSummary}
+					value={watch("summary") || ""}
+					onChange={(v) => setValue("summary", v)}
 					placeholder="文章简要摘要"
 					rows={2}
 				/>
@@ -166,10 +186,7 @@ export function ArticleEditorPage() {
 						<label htmlFor="article-category" className="block text-75 text-sm font-medium mb-2">分类</label>
 						<select
 							id="article-category"
-							value={categoryId || ""}
-							onChange={(e) =>
-								setCategoryId(e.target.value ? Number(e.target.value) : undefined)
-							}
+							{...register("category_id", { valueAsNumber: true })}
 							className="input-base"
 						>
 							<option value="">无分类</option>
@@ -211,14 +228,14 @@ export function ArticleEditorPage() {
 							<button
 								key={s}
 								type="button"
-								onClick={() => setStatus(s)}
+								onClick={() => setValue("status", s)}
 								className={`btn-regular btn-sm py-1.5 px-3 ${
-									status === s
+									watch("status") === s
 										? "border-[var(--primary)] bg-[var(--btn-regular-bg-active)]"
 										: ""
 								}`}
 							>
-								{s === "published" ? "发布" : "草稿"}
+								{s === request_CreateArticleRequest.status.PUBLISHED ? "发布" : "草稿"}
 							</button>
 						))}
 					</div>

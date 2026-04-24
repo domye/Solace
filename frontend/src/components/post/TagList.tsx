@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import type { Tag } from "@/types";
 
@@ -9,7 +10,7 @@ interface TagListProps {
 	interactive?: boolean;
 }
 
-export function TagList({ tags, maxTags, interactive = true }: TagListProps) {
+export const TagList = memo(function TagList({ tags, maxTags, interactive = true }: TagListProps) {
 	const displayTags = maxTags ? tags?.slice(0, maxTags) : tags;
 
 	if (!displayTags || displayTags.length === 0) {
@@ -46,4 +47,4 @@ export function TagList({ tags, maxTags, interactive = true }: TagListProps) {
 			))}
 		</>
 	);
-}
+});

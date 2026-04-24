@@ -14,12 +14,9 @@ interface UseTocScrollOptions {
 
 export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 	const [activeId, setActiveId] = useState<string>("");
-	const [visibleHeadings, setVisibleHeadings] = useState<Set<string>>(
-		new Set(),
-	);
+	const visibleHeadingsRef = useRef<Set<string>>(new Set());
 	const observerRef = useRef<IntersectionObserver | null>(null);
 
-	// IntersectionObserver 监测可见标题
 	useEffect(() => {
 		if (headings.length === 0) return;
 
@@ -27,15 +24,15 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 
 		observerRef.current = new IntersectionObserver(
 			(entries) => {
-				const visible = new Set<string>(visibleHeadings);
 				entries.forEach((entry) => {
-					if (entry.isIntersecting) visible.add(entry.target.id);
-					else visible.delete(entry.target.id);
+					if (entry.isIntersecting) {
+						visibleHeadingsRef.current.add(entry.target.id);
+					} else {
+						visibleHeadingsRef.current.delete(entry.target.id);
+					}
 				});
 
-				setVisibleHeadings(new Set(visible));
-
-				// 找到第一个可见标题作为活动项
+				const visible = visibleHeadingsRef.current;
 				if (visible.size > 0) {
 					const visibleIds = Array.from(visible);
 					const firstVisible =
@@ -53,9 +50,8 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 		});
 
 		return () => observerRef.current?.disconnect();
-	}, [headings, visibleHeadings]);
+	}, [headings]);
 
-	// 滚动位置检测（备用方案）
 	useEffect(() => {
 		let scrollTimeout: ReturnType<typeof setTimeout>;
 
@@ -81,7 +77,7 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 					}
 				});
 
-				if (visibleHeadings.size === 0 && currentId && currentId !== activeId) {
+				if (visibleHeadingsRef.current.size === 0 && currentId) {
 					setActiveId(currentId);
 				}
 			}, 50);
@@ -92,9 +88,8 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 			window.removeEventListener("scroll", handleScroll);
 			if (scrollTimeout) clearTimeout(scrollTimeout);
 		};
-	}, [headings, activeId, visibleHeadings.size, offset]);
+	}, [headings, offset]);
 
-	// 点击导航项处理
 	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
 		e.preventDefault();
 		const element = document.getElementById(id);

@@ -1,16 +1,14 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { useTags } from "@/hooks";
+import { sidebarTitleStyle } from "@/utils";
 
 interface TagsProps {
 	className?: string;
 	style?: React.CSSProperties;
 }
 
-/** 侧边栏标题样式 */
-const sidebarTitleStyle =
-	"font-bold text-sm lg:text-base text-90 relative ml-5 lg:ml-6 mt-2.5 lg:mt-3 mb-1 lg:mb-1.5 before:w-0.5 before:h-3 lg:before:h-3.5 before:rounded-sm before:bg-[var(--primary)] before:absolute before:-left-2.5 lg:before:-left-3 before:top-[3.5px] lg:before:top-[4.5px]";
-
-export function Tags({ className, style }: TagsProps) {
+export const Tags = memo(function Tags({ className, style }: TagsProps) {
 	const { data: tags, isLoading, error } = useTags();
 
 	if (isLoading) {
@@ -37,7 +35,7 @@ export function Tags({ className, style }: TagsProps) {
 			style={style}
 		>
 			<div className={sidebarTitleStyle}>标签</div>
-			<div className="px-2.5 lg:px-3 flex gap-1 lg:gap-1.5 flex-wrap">
+			<nav className="px-2.5 lg:px-3 flex gap-1 lg:gap-1.5 flex-wrap" aria-label="标签导航">
 				{tags.map((tag) => (
 					<Link
 						key={tag.id}
@@ -48,7 +46,7 @@ export function Tags({ className, style }: TagsProps) {
 						{tag.name}
 					</Link>
 				))}
-			</div>
+			</nav>
 		</div>
 	);
-}
+});

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@hookform/resolvers": "^5.2.2",
     "@iconify/react": "^5.0.1",
     "@tanstack/react-query": "^5.62.0",
     "@types/react-lazy-load-image-component": "^1.6.5",
@@ -21,6 +22,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-helmet-async": "^3.0.0",
+    "react-hook-form": "^7.73.1",
     "react-lazy-load-image-component": "^1.6.3",
     "react-markdown": "^10.1.0",
     "react-markdown-editor-lite": "^1.4.2",
@@ -33,6 +35,7 @@
     "unist-util-visit": "^5.1.0",
     "use-debounce": "^10.1.1",
     "yet-another-react-lightbox": "^3.31.0",
+    "zod": "^4.3.6",
     "zustand": "^5.0.0"
   },
   "devDependencies": {

@@ -6,3 +6,4 @@ export {
 	getArticleDate,
 } from "./date";
 export { toPostCardArticle } from "./article";
+export { sidebarTitleStyle } from "./styles";

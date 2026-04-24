@@ -25,6 +25,7 @@ export function MobileToc() {
 	const [isVisible, setIsVisible] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const listRef = useRef<HTMLDivElement>(null);
+	const previousActiveElement = useRef<HTMLElement | null>(null);
 
 	const filteredHeadings = useMemo(
 		() => headings.filter((h) => h.depth <= 3),
@@ -45,9 +46,11 @@ export function MobileToc() {
 	const closePanel = useCallback(() => {
 		setIsVisible(false);
 		setTimeout(() => setIsOpen(false), ANIMATION_DURATION);
+		previousActiveElement.current?.focus();
 	}, []);
 
 	const openPanel = useCallback(() => {
+		previousActiveElement.current = document.activeElement as HTMLElement;
 		setIsOpen(true);
 		requestAnimationFrame(() => setIsVisible(true));
 	}, []);
@@ -77,6 +80,48 @@ export function MobileToc() {
 		}
 	}, [isOpen, isVisible, activeId]);
 
+	useEffect(() => {
+		if (isOpen && containerRef.current) {
+			const focusableElements = containerRef.current.querySelectorAll<HTMLElement>(
+				'button, a[href], [tabindex]:not([tabindex="-1"])'
+			);
+			const firstEl = focusableElements[0];
+			if (firstEl) {
+				firstEl.focus();
+			}
+		}
+	}, [isOpen]);
+
+	useEffect(() => {
+		if (!isOpen) return;
+
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key !== "Tab") return;
+
+			const container = containerRef.current;
+			if (!container) return;
+
+			const focusableElements = container.querySelectorAll<HTMLElement>(
+				'button, a[href], [tabindex]:not([tabindex="-1"])'
+			);
+			if (focusableElements.length === 0) return;
+
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+
+			if (e.shiftKey && document.activeElement === firstElement && lastElement) {
+				e.preventDefault();
+				lastElement.focus();
+			} else if (!e.shiftKey && document.activeElement === lastElement && firstElement) {
+				e.preventDefault();
+				firstElement.focus();
+			}
+		};
+
+		document.addEventListener("keydown", handleKeyDown);
+		return () => document.removeEventListener("keydown", handleKeyDown);
+	}, [isOpen]);
+
 	if (filteredHeadings.length === 0 || isArticleLoading) return null;
 
 	return (
@@ -85,7 +130,7 @@ export function MobileToc() {
 
 			{isOpen &&
 				createPortal(
-					<div className="fixed inset-0 z-[70] lg:hidden">
+					<div className="fixed inset-0 z-[70] lg:hidden" role="dialog" aria-modal="true" aria-label="文章目录">
 						<div
 							className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-[${ANIMATION_DURATION}ms] ${isVisible ? "opacity-100" : "opacity-0"}`}
 							onClick={closePanel}
@@ -115,7 +160,7 @@ function TocButton({ onClick }: { onClick: () => void }) {
 		<button
 			onClick={onClick}
 			className="fixed bottom-[4.5rem] right-6 z-50 w-10 h-10 rounded-full bg-[var(--card-bg)] border border-[var(--border-medium)] shadow-lg flex items-center justify-center hover:bg-[var(--btn-regular-bg-hover)] hover:border-[var(--primary)] transition-all duration-300 group lg:hidden"
-			aria-label="目录"
+			aria-label="打开目录"
 		>
 			<SafeIcon
 				icon="material-symbols:toc"
@@ -140,7 +185,7 @@ function TocHeader({ onClose }: { onClose: () => void }) {
 			<button
 				onClick={onClose}
 				className="w-7 h-7 rounded-full flex items-center justify-center bg-[var(--btn-plain-bg-hover)] hover:bg-[var(--border-light)] transition-colors"
-				aria-label="关闭"
+				aria-label="关闭目录"
 			>
 				<SafeIcon
 					icon="material-symbols:close"
@@ -161,7 +206,7 @@ interface TocListProps {
 
 const TocList = forwardRef<HTMLDivElement, TocListProps>(
 	({ headings, activeId, minDepth, onItemClick }, ref) => (
-		<nav ref={ref} className="relative flex flex-col px-3 py-2 overflow-y-auto">
+		<nav ref={ref} className="relative flex flex-col px-3 py-2 overflow-y-auto" aria-label="文章目录">
 			{headings.map((heading) => {
 				const isActive = activeId === heading.id;
 				const indentLevel = heading.depth - minDepth;

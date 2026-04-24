@@ -1,16 +1,14 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { useCategories } from "@/hooks";
+import { sidebarTitleStyle } from "@/utils";
 
 interface CategoriesProps {
 	className?: string;
 	style?: React.CSSProperties;
 }
 
-/** 侧边栏标题样式 */
-const sidebarTitleStyle =
-	"font-bold text-sm lg:text-base text-90 relative ml-5 lg:ml-6 mt-2.5 lg:mt-3 mb-1 lg:mb-1.5 before:w-0.5 before:h-3 lg:before:h-3.5 before:rounded-sm before:bg-[var(--primary)] before:absolute before:-left-2.5 lg:before:-left-3 before:top-[3.5px] lg:before:top-[4.5px]";
-
-export function Categories({ className, style }: CategoriesProps) {
+export const Categories = memo(function Categories({ className, style }: CategoriesProps) {
 	const { data: categories, isLoading, error } = useCategories();
 
 	if (isLoading) {
@@ -37,7 +35,7 @@ export function Categories({ className, style }: CategoriesProps) {
 			style={style}
 		>
 			<div className={sidebarTitleStyle}>分类</div>
-			<div className="px-2.5 lg:px-3 space-y-0.5">
+			<nav className="px-2.5 lg:px-3 space-y-0.5" aria-label="分类导航">
 				{categories.map((cat) => (
 					<Link
 						key={cat.id}
@@ -58,7 +56,7 @@ export function Categories({ className, style }: CategoriesProps) {
 						)}
 					</Link>
 				))}
-			</div>
+			</nav>
 		</div>
 	);
-}
+});
