@@ -62,14 +62,14 @@ function GitHubRepoCard({ project }: ProjectCardProps) {
 						/>
 					) : (
 						<div className="project-card-avatar-default">
-							<SafeIcon icon="fa6-brands:github" size={24} />
+							<SafeIcon icon="fa6-brands:github" size={20} className="md:!size-[24px]" />
 						</div>
 					)}
 				</div>
-				<div className="project-card-info">
+				<div className="project-card-info flex-1 min-w-0">
 					<h3 className="project-card-name">{project.name}</h3>
 					{project.tech.length > 0 && (
-						<div className="project-card-tech-inline">
+						<div className="project-card-tech-inline mt-1">
 							{project.tech.slice(0, 4).map((t) => (
 								<span key={t} className="project-card-tech-tag">
 									{t}
@@ -125,15 +125,16 @@ function ManualProjectCard({ project }: ProjectCardProps) {
 						<div className="project-card-avatar-default">
 							<SafeIcon
 								icon="material-symbols:folder-outline-rounded"
-								size={24}
+								size={20}
+								className="md:!size-[24px]"
 							/>
 						</div>
 					)}
 				</div>
-				<div className="project-card-info">
+				<div className="project-card-info flex-1 min-w-0">
 					<h3 className="project-card-name">{project.name}</h3>
 					{project.tech.length > 0 && (
-						<div className="project-card-tech-inline">
+						<div className="project-card-tech-inline mt-1">
 							{project.tech.slice(0, 4).map((t) => (
 								<span key={t} className="project-card-tech-tag">
 									{t}

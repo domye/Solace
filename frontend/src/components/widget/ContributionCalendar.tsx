@@ -105,10 +105,10 @@ function computeMaxCount(groups: ContributionsGroup[] | undefined): number {
 // 样式常量
 // ============================================================
 
-const TITLE_STYLE = "font-bold text-base text-90 relative ml-6 mt-3 mb-1.5 before:w-0.5 before:h-3.5 before:rounded-sm before:bg-[var(--primary)] before:absolute before:-left-3 before:top-[4.5px]";
-const WEEK_DAY_STYLE = "text-center text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5";
+const TITLE_STYLE = "font-bold text-sm lg:text-base text-90 relative ml-5 lg:ml-6 mt-2.5 lg:mt-3 mb-1 lg:mb-1.5 before:w-0.5 before:h-3 lg:before:h-3.5 before:rounded-sm before:bg-[var(--primary)] before:absolute before:-left-2.5 lg:before:-left-3 before:top-[3.5px] lg:before:top-[4.5px]";
+const WEEK_DAY_STYLE = "text-center text-[8px] lg:text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5";
 const CELL_BASE_STYLE = "aspect-square flex items-center justify-center rounded cursor-pointer relative transition-all duration-200";
-const NAV_BTN_STYLE = "p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-lg font-bold";
+const NAV_BTN_STYLE = "p-0.5 lg:p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-base lg:text-lg font-bold";
 
 export function ContributionCalendar({
 	className,
@@ -229,20 +229,20 @@ export function ContributionCalendar({
 	// 骨架屏
 	const renderSkeletonCalendar = () => (
 		<>
-			<div className="flex justify-between items-center mb-1.5 px-3">
+			<div className="flex justify-between items-center mb-1 lg:mb-1.5 px-2.5 lg:px-3">
 				<div className={TITLE_STYLE}>
-					<div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+					<div className="h-3.5 lg:h-4 w-14 lg:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
 				</div>
 				<div className="flex items-center gap-0.5 shrink-0 ml-2">
 					{[1, 2, 3].map((i) => (
-						<div key={i} className="p-1 rounded">
-							<div className="w-4 h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+						<div key={i} className="p-0.5 lg:p-1 rounded">
+							<div className="w-3.5 lg:w-4 h-3.5 lg:h-4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
 						</div>
 					))}
 				</div>
 			</div>
 
-			<div className="px-3">
+			<div className="px-2.5 lg:px-3">
 				<div className="grid grid-cols-7 gap-0.5 mb-0.5">
 					{WEEK_DAYS.map((day) => (
 						<div key={day} className={WEEK_DAY_STYLE}>
@@ -257,15 +257,15 @@ export function ContributionCalendar({
 							key={idx}
 							className="aspect-square flex items-center justify-center rounded bg-gray-100 dark:bg-gray-800"
 						>
-							<div className="w-2.5 h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+							<div className="w-2 lg:w-2.5 h-2 lg:h-2.5 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
 						</div>
 					))}
 				</div>
 			</div>
 
-			<div className="px-3 mt-1.5 flex items-center justify-between">
-				<div className="h-2.5 w-14 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-				<div className="h-2.5 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+			<div className="px-2.5 lg:px-3 mt-1 lg:mt-1.5 flex items-center justify-between">
+				<div className="h-2 lg:h-2.5 w-12 lg:w-14 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+				<div className="h-2 lg:h-2.5 w-14 lg:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
 			</div>
 		</>
 	);
@@ -300,9 +300,9 @@ export function ContributionCalendar({
 			style={style}
 		>
 			{/* 标题栏 */}
-			<div className="flex justify-between items-center mb-1.5 px-3">
+			<div className="flex justify-between items-center mb-1 lg:mb-1.5 px-2.5 lg:px-3">
 				<div className={TITLE_STYLE}>
-					<span className="text-sm font-bold select-none">
+					<span className="text-xs lg:text-sm font-bold select-none">
 						{currentYear}年{MONTH_NAMES[currentMonth]}
 					</span>
 				</div>
@@ -312,10 +312,10 @@ export function ContributionCalendar({
 					<button
 						type="button"
 						onClick={handleBackToToday}
-						className={`p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-[var(--primary)] transition-all ${isBackToTodayVisible ? "" : "invisible"}`}
+						className={`p-0.5 lg:p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-[var(--primary)] transition-all ${isBackToTodayVisible ? "" : "invisible"}`}
 						aria-label="返回今天"
 					>
-						<svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+						<svg className="w-3.5 lg:w-4 h-3.5 lg:h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
 							<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
 							<path d="M3 3v5h5" />
 						</svg>
@@ -332,7 +332,7 @@ export function ContributionCalendar({
 			</div>
 
 			{/* 日历网格 */}
-			<div className="px-3">
+			<div className="px-2.5 lg:px-3">
 				{/* 星期标签 */}
 				<div className="grid grid-cols-7 gap-0.5 mb-0.5">
 					{WEEK_DAYS.map((day) => (
@@ -363,7 +363,7 @@ export function ContributionCalendar({
 							title={`${cell.date}: ${cell.count} 次贡献`}
 						>
 							<span
-								className={`text-[10px] ${
+								className={`text-[8px] lg:text-[10px] ${
 									cell.isToday
 										? "font-bold text-neutral-500 dark:text-neutral-200"
 										: cell.count > 0
@@ -383,7 +383,7 @@ export function ContributionCalendar({
 			</div>
 
 			{/* 底部统计 */}
-			<div className="px-3 mt-1.5 flex items-center justify-between text-[9px] text-neutral-400 dark:text-neutral-500">
+			<div className="px-2.5 lg:px-3 mt-1 lg:mt-1.5 flex items-center justify-between text-[8px] lg:text-[9px] text-neutral-400 dark:text-neutral-500">
 				<span>
 					当月 <span className="font-medium text-[var(--primary)]">{monthTotal}</span> 次
 				</span>

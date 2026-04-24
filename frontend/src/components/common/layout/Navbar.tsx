@@ -21,7 +21,7 @@ const staticNavLinks = [
 /** 图标按钮 - 用于工具栏 */
 function IconButton({
 	icon,
-	size = "1.25rem",
+	size = "1.125rem",
 	onClick,
 	label,
 }: {
@@ -33,10 +33,10 @@ function IconButton({
 	return (
 		<button
 			onClick={onClick}
-			className="btn-plain scale-animation rounded-[var(--radius-small)] h-11 w-11"
+			className="btn-plain scale-animation rounded-[var(--radius-small)] h-9 w-9 md:h-11 md:w-11"
 			aria-label={label}
 		>
-			<SafeIcon icon={icon} size={size} />
+			<SafeIcon icon={icon} size={size} className="md:!size-[1.25rem]" />
 		</button>
 	);
 }
@@ -46,13 +46,13 @@ function BrandLogo() {
 	return (
 		<Link
 			to="/"
-			className="btn-plain scale-animation rounded-[var(--radius-small)] h-[3.25rem] px-5 font-bold"
+			className="btn-plain scale-animation rounded-[var(--radius-small)] h-[2.75rem] md:h-[3.25rem] px-3 md:px-5 font-bold"
 		>
-			<div className="flex items-center text-md text-[var(--primary)]">
+			<div className="flex items-center text-sm md:text-md text-[var(--primary)]">
 				<SafeIcon
 					icon="material-symbols:home-outline-rounded"
-					size="1.75rem"
-					className="mb-1 mr-2"
+					size="1.375rem"
+					className="mb-0.5 md:mb-1 mr-1.5 md:mr-2 md:!size-[1.75rem]"
 				/>
 				<span>Solace</span>
 			</div>
@@ -65,7 +65,7 @@ function DesktopNavLink({ path, name }: { path: string; name: string }) {
 	return (
 		<Link
 			to={path}
-			className="btn-plain scale-animation rounded-[var(--radius-small)] h-11 font-bold px-5"
+			className="btn-plain scale-animation rounded-[var(--radius-small)] h-11 font-bold px-5 text-sm"
 		>
 			{name}
 		</Link>
@@ -113,10 +113,10 @@ function Toolbar({
 			<button
 				ref={mobileMenuButtonRef}
 				onClick={onToggleMobileMenu}
-				className="btn-plain scale-animation rounded-[var(--radius-small)] w-11 h-11 md:hidden"
+				className="btn-plain scale-animation rounded-[var(--radius-small)] w-9 h-9 md:w-11 md:h-11 md:hidden"
 				aria-label="菜单"
 			>
-				<SafeIcon icon="material-symbols:menu-rounded" size="1.25rem" />
+				<SafeIcon icon="material-symbols:menu-rounded" size="1.125rem" className="md:!size-[1.25rem]" />
 			</button>
 		</div>
 	);
@@ -373,7 +373,7 @@ export function Navbar() {
 			>
 				<div className="absolute h-8 -left-4 -right-4 -top-8 bg-[var(--page-bg)]" />
 
-				<div className="card-base !overflow-visible h-[4.5rem] flex items-center justify-between px-4">
+				<div className="card-base !overflow-visible h-[3.5rem] md:h-[4.5rem] flex items-center justify-between px-3 md:px-4">
 					<BrandLogo />
 
 					<nav className="hidden md:flex">

@@ -85,14 +85,14 @@ export function MobileToc() {
 
 			{isOpen &&
 				createPortal(
-					<div className="fixed inset-0 z-[60] lg:hidden">
+					<div className="fixed inset-0 z-[70] lg:hidden">
 						<div
 							className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-[${ANIMATION_DURATION}ms] ${isVisible ? "opacity-100" : "opacity-0"}`}
 							onClick={closePanel}
 						/>
 						<div
 							ref={containerRef}
-							className={`absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl h-[60vh] flex flex-col overflow-hidden transition-transform duration-[${ANIMATION_DURATION}ms] ease-out ${isVisible ? "translate-y-0" : "translate-y-full"}`}
+							className={`absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl h-[70vh] flex flex-col overflow-hidden transition-transform duration-[${ANIMATION_DURATION}ms] ease-out ${isVisible ? "translate-y-0" : "translate-y-full"}`}
 						>
 							<TocHeader onClose={closePanel} />
 							<TocList

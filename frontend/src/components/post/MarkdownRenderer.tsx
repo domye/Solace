@@ -85,10 +85,10 @@ function generateHeadingId(text: string): string {
 
 /** 标题样式配置 */
 const HEADING_STYLES = {
-	h1: { size: "text-3xl", margin: "mt-8 mb-4" },
-	h2: { size: "text-2xl", margin: "mt-6 mb-3" },
-	h3: { size: "text-xl", margin: "mt-4 mb-2" },
-	h4: { size: "text-lg", margin: "mt-3 mb-2" },
+	h1: { size: "text-xl md:text-2xl lg:text-3xl", margin: "mt-6 md:mt-8 mb-3 md:mb-4" },
+	h2: { size: "text-lg md:text-xl lg:text-2xl", margin: "mt-5 md:mt-6 mb-2 md:mb-3" },
+	h3: { size: "text-base md:text-lg lg:text-xl", margin: "mt-4 md:mt-4 mb-2" },
+	h4: { size: "text-sm md:text-base lg:text-lg", margin: "mt-3 mb-2" },
 } as const;
 
 /** 从 markdown 内容提取标题 */

@@ -15,7 +15,7 @@
 		overflow-x: hidden;
 		overscroll-behavior-x: none;
 		touch-action: pan-y;
-		font-size: 14px;
+		font-size: 13px;
 		scroll-behavior: smooth;
 	}
 
@@ -30,6 +30,12 @@
 	}
 
 	@media (min-width: 768px) {
+		body {
+			font-size: 14px;
+		}
+	}
+
+	@media (min-width: 1024px) {
 		body {
 			font-size: 15px;
 		}
