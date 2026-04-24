@@ -13,3 +13,4 @@ export { SafeIcon } from "./SafeIcon";
 export type { SafeIconProps } from "./SafeIcon";
 export { ReadingProgress } from "./ReadingProgress";
 export { BackToTop } from "./BackToTop";
+export { MobileToc } from "./MobileToc";

@@ -32,7 +32,7 @@ import {
 	Categories,
 	Tags,
 } from "@/components/widget";
-import { BackToTop } from "@/components/common/ui";
+import { BackToTop, MobileToc } from "@/components/common/ui";
 import { useTocStore } from "@/stores";
 import { useMediaQuery, useOwner, useCategories, useTags } from "@/hooks";
 import { useMemo, lazy, Suspense } from "react";
@@ -197,6 +197,7 @@ export function MainLayout() {
 
 			{/* 返回顶部按钮 */}
 			<BackToTop />
+			<MobileToc />
 		</div>
 	);
 }
