@@ -69,11 +69,14 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
-	// 站点地图
-	engine.GET("/sitemap.xml", r.sitemapHandler.GetSitemap)
-
-	// RSS 订阅
-	engine.GET("/rss.xml", r.rssHandler.GetRSS)
+	if cfg.RateLimit() > 0 {
+		publicLimiter := middleware.NewRateLimiter(cfg.RateLimit(), time.Minute)
+		engine.GET("/sitemap.xml", middleware.RateLimit(publicLimiter), r.sitemapHandler.GetSitemap)
+		engine.GET("/rss.xml", middleware.RateLimit(publicLimiter), r.rssHandler.GetRSS)
+	} else {
+		engine.GET("/sitemap.xml", r.sitemapHandler.GetSitemap)
+		engine.GET("/rss.xml", r.rssHandler.GetRSS)
+	}
 
 	// API v1 路由
 	v1 := engine.Group("/api/v1")

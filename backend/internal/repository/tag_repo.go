@@ -2,42 +2,40 @@ package repository
 
 import (
 	"context"
+	stderrors "errors"
+	"time"
 
 	"gin-quickstart/internal/model"
+	"gin-quickstart/internal/pkg/logger"
+
 	"gorm.io/gorm"
 )
 
-// tagRepo 标签仓储实现
 type tagRepo struct {
 	db *gorm.DB
 }
 
-// NewTagRepository 创建标签仓储
 func NewTagRepository(db *gorm.DB) TagRepository {
 	return &tagRepo{db: db}
 }
 
 func (r *tagRepo) FindByID(ctx context.Context, id uint) (*model.Tag, error) {
+	start := time.Now()
 	var tag model.Tag
 	err := r.db.WithContext(ctx).First(&tag, id).Error
 	if err != nil {
+		logger.Debug().Err(err).Uint("tag_id", id).Dur("duration", time.Since(start)).Msg("FindByID 失败")
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
 		return nil, err
 	}
+	logger.Debug().Uint("tag_id", id).Dur("duration", time.Since(start)).Msg("FindByID 成功")
 	return &tag, nil
 }
 
-func (r *tagRepo) FindAll(ctx context.Context) ([]*model.Tag, error) {
-	var tags []*model.Tag
-	err := r.db.WithContext(ctx).
-		Order("name ASC").
-		Find(&tags).Error
-	if err != nil {
-		return nil, err
-	}
-	return tags, nil
-}
-
 func (r *tagRepo) FindAllWithCount(ctx context.Context) ([]*model.TagWithCount, error) {
+	start := time.Now()
 	var results []*model.TagWithCount
 
 	err := r.db.WithContext(ctx).
@@ -51,8 +49,10 @@ func (r *tagRepo) FindAllWithCount(ctx context.Context) ([]*model.TagWithCount, 
 		Scan(&results).Error
 
 	if err != nil {
+		logger.Error().Err(err).Dur("duration", time.Since(start)).Msg("FindAllWithCount 失败")
 		return nil, err
 	}
+	logger.Debug().Int("count", len(results)).Dur("duration", time.Since(start)).Msg("FindAllWithCount 成功")
 	return results, nil
 }
 
@@ -60,36 +60,53 @@ func (r *tagRepo) FindByIDs(ctx context.Context, ids []uint) ([]*model.Tag, erro
 	if len(ids) == 0 {
 		return []*model.Tag{}, nil
 	}
+	start := time.Now()
 	var tags []*model.Tag
 	err := r.db.WithContext(ctx).Find(&tags, ids).Error
 	if err != nil {
+		logger.Error().Err(err).Interface("ids", ids).Dur("duration", time.Since(start)).Msg("FindByIDs 失败")
 		return nil, err
 	}
+	logger.Debug().Int("count", len(tags)).Dur("duration", time.Since(start)).Msg("FindByIDs 成功")
 	return tags, nil
 }
 
 func (r *tagRepo) Create(ctx context.Context, tag *model.Tag) error {
-	return r.db.WithContext(ctx).Create(tag).Error
-}
-
-func (r *tagRepo) CreateIfNotExists(ctx context.Context, name string) (*model.Tag, error) {
-	var tag model.Tag
-	err := r.db.WithContext(ctx).
-		Where("name = ?", name).
-		Attrs(model.Tag{Name: name}).
-		FirstOrCreate(&tag).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Create(tag).Error
 	if err != nil {
-		return nil, err
+		logger.Error().Err(err).Str("name", tag.Name).Dur("duration", time.Since(start)).Msg("Create 失败")
+		return err
 	}
-	return &tag, nil
+	logger.Debug().Uint("tag_id", tag.ID).Dur("duration", time.Since(start)).Msg("Create 成功")
+	return nil
 }
 
 func (r *tagRepo) Update(ctx context.Context, tag *model.Tag) error {
-	return r.db.WithContext(ctx).Save(tag).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Save(tag).Error
+	if err != nil {
+		logger.Error().Err(err).Uint("tag_id", tag.ID).Dur("duration", time.Since(start)).Msg("Update 失败")
+		return err
+	}
+	logger.Debug().Uint("tag_id", tag.ID).Dur("duration", time.Since(start)).Msg("Update 成功")
+	return nil
 }
 
 func (r *tagRepo) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&model.Tag{}, id).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Where("tag_id = ?", id).Delete(&model.ArticleTag{}).Error; err != nil {
+			return err
+		}
+		return tx.Delete(&model.Tag{}, id).Error
+	})
+	if err != nil {
+		logger.Error().Err(err).Uint("tag_id", id).Dur("duration", time.Since(start)).Msg("Delete 失败")
+		return err
+	}
+	logger.Debug().Uint("tag_id", id).Dur("duration", time.Since(start)).Msg("Delete 成功")
+	return nil
 }
 
 func (r *tagRepo) ExistsBySlug(ctx context.Context, slug string) bool {

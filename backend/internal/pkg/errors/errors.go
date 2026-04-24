@@ -43,12 +43,6 @@ var (
 		message:    "需要身份验证",
 		httpStatus: http.StatusUnauthorized,
 	}
-
-	ErrForbidden = &appError{
-		code:       "FORBIDDEN",
-		message:    "访问被拒绝",
-		httpStatus: http.StatusForbidden,
-	}
 )
 
 // NewBadRequest 创建错误请求错误

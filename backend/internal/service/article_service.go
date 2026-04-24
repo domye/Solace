@@ -21,7 +21,6 @@ var (
 	ErrCategoryNotFound       = errors.NewNotFound("分类未找到")
 	ErrCategoryHasArticles    = errors.NewBadRequest("分类下存在文章，无法删除", nil)
 	ErrTagNotFound            = errors.NewNotFound("标签未找到")
-	ErrTagAlreadyExists       = errors.NewBadRequest("标签已存在", nil)
 )
 
 // ArticleService 文章业务逻辑接口
@@ -166,11 +165,6 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 	}
 
 	log.Info().Uint("article_id", article.ID).Str("slug", finalSlug).Msg("文章创建成功")
-
-	article, err = s.articleRepo.FindByID(ctx, article.ID)
-	if err != nil {
-		return nil, err
-	}
 
 	return toArticleResponse(article, nil, nil), nil
 }
@@ -427,11 +421,6 @@ func (s *articleService) Update(ctx context.Context, id uint, version int, title
 	}
 
 	log.Info().Uint("article_id", id).Int("new_version", article.Version).Msg("文章更新成功")
-
-	article, err = s.articleRepo.FindByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
 
 	return toArticleResponse(article, nil, nil), nil
 }

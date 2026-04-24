@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"gin-quickstart/internal/pkg/validator"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -34,6 +35,10 @@ func (h *PageHandler) Create(c *gin.Context) {
 	var req request.CreatePageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		RespondWithError(c, apperrors.NewBadRequest("无效的请求体", nil))
+		return
+	}
+	if err := validator.ValidateStruct(&req); err != nil {
+		RespondWithError(c, apperrors.NewBadRequest("请求参数校验失败", validator.FormatError(err)))
 		return
 	}
 
@@ -184,6 +189,10 @@ func (h *PageHandler) Update(c *gin.Context) {
 	var req request.UpdatePageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		RespondWithError(c, apperrors.NewBadRequest("无效的请求体", nil))
+		return
+	}
+	if err := validator.ValidateStruct(&req); err != nil {
+		RespondWithError(c, apperrors.NewBadRequest("请求参数校验失败", validator.FormatError(err)))
 		return
 	}
 

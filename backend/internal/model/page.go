@@ -42,13 +42,3 @@ const (
 	PageStatusDraft     = "draft"
 	PageStatusPublished = "published"
 )
-
-// IsPublished 返回页面是否已发布
-func (p *Page) IsPublished() bool {
-	return p.Status == PageStatusPublished
-}
-
-// Publish 将页面设置为已发布状态
-func (p *Page) Publish() {
-	p.Status = PageStatusPublished
-}

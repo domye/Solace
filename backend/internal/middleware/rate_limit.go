@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -18,13 +19,18 @@ type RateLimiter struct {
 	clients    map[string]*client
 	maxReqs    int
 	windowSize time.Duration
+	ctx        context.Context
+	cancel     context.CancelFunc
 }
 
 func NewRateLimiter(maxReqs int, windowSize time.Duration) *RateLimiter {
+	ctx, cancel := context.WithCancel(context.Background())
 	limiter := &RateLimiter{
 		clients:    make(map[string]*client),
 		maxReqs:    maxReqs,
 		windowSize: windowSize,
+		ctx:        ctx,
+		cancel:     cancel,
 	}
 
 	go limiter.cleanupExpiredClients()
@@ -57,16 +63,27 @@ func (rl *RateLimiter) Allow(ip string) bool {
 
 func (rl *RateLimiter) cleanupExpiredClients() {
 	ticker := time.NewTicker(time.Minute)
-	for range ticker.C {
-		rl.mu.Lock()
-		now := time.Now()
-		for ip, c := range rl.clients {
-			if now.After(c.expiresAt) {
-				delete(rl.clients, ip)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-rl.ctx.Done():
+			return
+		case <-ticker.C:
+			rl.mu.Lock()
+			now := time.Now()
+			for ip, c := range rl.clients {
+				if now.After(c.expiresAt) {
+					delete(rl.clients, ip)
+				}
 			}
+			rl.mu.Unlock()
 		}
-		rl.mu.Unlock()
 	}
+}
+
+func (rl *RateLimiter) Stop() {
+	rl.cancel()
 }
 
 func RateLimit(limiter *RateLimiter) gin.HandlerFunc {
