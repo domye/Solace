@@ -79,9 +79,6 @@ export function MobileToc() {
 
 	if (filteredHeadings.length === 0 || isArticleLoading) return null;
 
-	const panelClassName = `absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl h-[70vh] flex flex-col transition-transform duration-[${ANIMATION_DURATION}ms] ease-out ${isVisible ? "translate-y-0" : "translate-y-full"}`;
-	const overlayClassName = `absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-[${ANIMATION_DURATION}ms] ${isVisible ? "opacity-100" : "opacity-0"}`;
-
 	return (
 		<>
 			<TocButton onClick={openPanel} />
@@ -89,8 +86,14 @@ export function MobileToc() {
 			{isOpen &&
 				createPortal(
 					<div className="fixed inset-0 z-[60] lg:hidden">
-						<div className={overlayClassName} onClick={closePanel} />
-						<div ref={containerRef} className={panelClassName}>
+						<div
+							className={`absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-[${ANIMATION_DURATION}ms] ${isVisible ? "opacity-100" : "opacity-0"}`}
+							onClick={closePanel}
+						/>
+						<div
+							ref={containerRef}
+							className={`absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl h-[60vh] flex flex-col overflow-hidden transition-transform duration-[${ANIMATION_DURATION}ms] ease-out ${isVisible ? "translate-y-0" : "translate-y-full"}`}
+						>
 							<TocHeader onClose={closePanel} />
 							<TocList
 								ref={listRef}
@@ -180,7 +183,7 @@ const TocList = forwardRef<HTMLDivElement, TocListProps>(
 							<span className="w-[2px] h-4 bg-[var(--primary)] rounded-full mr-3 flex-shrink-0 opacity-40" />
 						)}
 						<span
-							className={`overflow-hidden text-left whitespace-nowrap overflow-ellipsis text-[0.95rem] leading-relaxed ${
+							className={`truncate text-[0.95rem] leading-relaxed ${
 								isActive ? "font-bold" : "font-medium"
 							} ${heading.depth > minDepth ? "text-[0.875rem] opacity-90" : ""}`}
 						>

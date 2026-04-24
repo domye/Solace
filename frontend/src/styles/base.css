@@ -5,13 +5,28 @@
 @tailwind base;
 
 @layer base {
-	body {
-		overflow-y: scroll;
+	html {
 		overflow-x: hidden;
-		/* 整体缩放 - 移动端 14px，桌面端 15px */
+		overscroll-behavior-x: none;
+	}
+
+	body {
+		overflow-y: auto;
+		overflow-x: hidden;
+		overscroll-behavior-x: none;
+		touch-action: pan-y;
 		font-size: 14px;
-		/* 平滑滚动 */
 		scroll-behavior: smooth;
+	}
+
+	@media (min-width: 1024px) {
+		html {
+			overflow-y: auto;
+		}
+
+		body {
+			overflow: visible;
+		}
 	}
 
 	@media (min-width: 768px) {
@@ -20,7 +35,6 @@
 		}
 	}
 
-	/* 默认透明滚动条 - 浅色模式 */
 	html {
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
@@ -39,21 +53,18 @@
 		border-radius: 6px;
 	}
 
-	/* 滚动时显示滚动条 - 浅色模式 */
 	html.scrolling {
 		scrollbar-color: oklch(0.5 0.08 var(--hue) / 0.5) transparent;
 	}
 
 	html.scrolling::-webkit-scrollbar-thumb {
 		background: oklch(0.5 0.08 var(--hue) / 0.5);
-		transition: background-color 0.3s ease;
 	}
 
 	html.scrolling::-webkit-scrollbar-thumb:hover {
 		background: oklch(0.5 0.12 var(--hue) / 0.8);
 	}
 
-	/* 深色模式滚动条 */
 	html.dark {
 		scrollbar-color: transparent transparent;
 	}
@@ -86,7 +97,6 @@
 		color: var(--text-90);
 		@apply antialiased transition;
 		line-height: 1.5;
-		font-display: swap;
 	}
 
 	::selection {
