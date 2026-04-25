@@ -40,3 +40,12 @@ username = ""      # GitHub 用户名
 
 [site]
 base_url = "https://yourdomain.com"  # 站点完整 URL，用于生成 sitemap
+
+[upload]
+dir = "uploads"
+
+[upload.imgbed]
+endpoint = ""
+token = ""
+field = "file"
+upload_folder = "Blog"

@@ -24,6 +24,8 @@ type Router struct {
 	sitemapHandler  *handler.SitemapHandler
 	rssHandler      *handler.RSSHandler
 	pageHandler     *handler.PageHandler
+	uploadHandler   *handler.UploadHandler
+	settingsHandler *handler.SettingsHandler
 	authService     service.AuthService
 }
 
@@ -39,6 +41,8 @@ func NewRouter(
 	sitemapHandler *handler.SitemapHandler,
 	rssHandler *handler.RSSHandler,
 	pageHandler *handler.PageHandler,
+	uploadHandler *handler.UploadHandler,
+	settingsHandler *handler.SettingsHandler,
 ) *Router {
 	return &Router{
 		authHandler:     authHandler,
@@ -51,6 +55,8 @@ func NewRouter(
 		sitemapHandler:  sitemapHandler,
 		rssHandler:      rssHandler,
 		pageHandler:     pageHandler,
+		uploadHandler:   uploadHandler,
+		settingsHandler: settingsHandler,
 	}
 }
 
@@ -98,6 +104,8 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 
 		// 公开页面路由（按 slug 访问）
 		v1.GET("/pages/slug/:slug", r.pageHandler.GetBySlug)
+		v1.GET("/settings/images", r.settingsHandler.GetImageSettings)
+		v1.Static("/uploads/images", r.uploadHandler.ImageDir())
 		auth := v1.Group("/auth")
 		{
 			if cfg.RateLimit() > 0 {
@@ -125,6 +133,11 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 			v1.GET("/articles/search", middleware.RateLimit(searchLimiter), r.articleHandler.Search)
 		} else {
 			v1.GET("/articles/search", r.articleHandler.Search)
+		}
+
+		var uploadLimiter gin.HandlerFunc
+		if cfg.RateLimit() > 0 {
+			uploadLimiter = middleware.RateLimit(middleware.NewRateLimiter(cfg.RateLimit(), time.Minute))
 		}
 
 		// 受保护路由
@@ -164,6 +177,20 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 				protectedPages.POST("", r.pageHandler.Create)
 				protectedPages.PUT("/:id", r.pageHandler.Update)
 				protectedPages.DELETE("/:id", r.pageHandler.Delete)
+			}
+
+			protectedSettings := protected.Group("/admin/settings")
+			{
+				protectedSettings.GET("/images", r.settingsHandler.GetImageSettings)
+				protectedSettings.PUT("/images", r.settingsHandler.UpdateImageSettings)
+			}
+
+			protectedUploads := protected.Group("/uploads")
+			if uploadLimiter != nil {
+				protectedUploads.Use(uploadLimiter)
+			}
+			{
+				protectedUploads.POST("/images", r.uploadHandler.UploadImage)
 			}
 		}
 	}

@@ -17,6 +17,7 @@ Thumbs.db
 # Backend (Go)
 .env
 config.toml
+config.personal.toml
 *.exe
 *.exe~
 *.dll
@@ -49,6 +50,7 @@ yarn-error.log*
 .env.*
 !.env.example
 !.env.example.*
+!.env.personal.example
 
 # Docker
 *.log

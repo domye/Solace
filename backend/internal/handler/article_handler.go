@@ -50,8 +50,21 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 		status = "draft"
 	}
 
+	authorValue, exists := c.Get("user_id")
+	if !exists {
+		RespondWithError(c, apperrors.NewUnauthorized("未认证用户"))
+		return
+	}
+
+	authorID, ok := authorValue.(uint)
+	if !ok || authorID == 0 {
+		RespondWithError(c, apperrors.NewUnauthorized("无效用户标识"))
+		return
+	}
+
 	article, err := h.articleService.Create(
 		c.Request.Context(),
+		authorID,
 		req.Title,
 		req.Slug,
 		req.Content,

@@ -378,10 +378,9 @@ export function FootprintsMap({ cities }: FootprintsMapProps) {
 				}
 
 				// 加载中国地图
-				let chinaGeoJson: GeoJSON;
 				const res = await fetch(CHINA_GEOJSON_URL);
 				if (!res.ok) throw new Error("加载中国地图失败");
-				chinaGeoJson = await res.json();
+				const chinaGeoJson: GeoJSON = await res.json();
 
 				const chinaTree = buildRTree(parseFeatures(chinaGeoJson));
 				const provinceMap = new Map<string, CityWithData[]>();

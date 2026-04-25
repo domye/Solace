@@ -1,0 +1,65 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: solace-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./backend/migrations/001_init_schema.up.sql:/docker-entrypoint-initdb.d/001_init_schema.sql:ro
+      - ./backend/migrations/002_categories_tags.up.sql:/docker-entrypoint-initdb.d/002_categories_tags.sql:ro
+      - ./backend/migrations/003_remove_view_count.up.sql:/docker-entrypoint-initdb.d/003_remove_view_count.sql:ro
+      - ./backend/migrations/004_remove_users.up.sql:/docker-entrypoint-initdb.d/004_remove_users.sql:ro
+      - ./backend/migrations/005_pages.up.sql:/docker-entrypoint-initdb.d/005_pages.sql:ro
+      - ./backend/migrations/006_settings.up.sql:/docker-entrypoint-initdb.d/006_settings.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+    container_name: solace-backend
+    restart: unless-stopped
+    environment:
+      CONFIG_PATH: /app/config/config.toml
+      UPLOAD_DIR: /app/uploads
+      IMGBED_ENDPOINT: ${IMGBED_ENDPOINT:-}
+      IMGBED_TOKEN: ${IMGBED_TOKEN:-}
+      IMGBED_FIELD: ${IMGBED_FIELD:-file}
+      IMGBED_UPLOAD_FOLDER: ${IMGBED_UPLOAD_FOLDER:-}
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+    volumes:
+      - ./config.personal.toml:/app/config/config.toml:ro
+      - ./uploads:/app/uploads:rw
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE: /api/v1
+    container_name: solace-frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE: /api/v1
+      SITE_BASE_URL: ${SITE_BASE_URL}
+      SITE_NAME: ${SITE_NAME}
+      SITE_DESCRIPTION: ${SITE_DESCRIPTION}
+    ports:
+      - "${FRONTEND_PORT:-8088}:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres-data:

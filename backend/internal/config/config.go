@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,6 +21,7 @@ type Config struct {
 	Admin     AdminConfig     `toml:"admin"`
 	GitHub    GitHubConfig    `toml:"github"`
 	Site      SiteConfig      `toml:"site"`
+	Upload    UploadConfig    `toml:"upload"`
 
 	// 缓存的密码哈希
 	adminPasswordHash string
@@ -28,12 +30,12 @@ type Config struct {
 
 // ServerConfig 服务器配置
 type ServerConfig struct {
-	Port              string   `toml:"port"`
-	Mode              string   `toml:"mode"`               // debug, release, test
-	AllowedOrigins    []string `toml:"allowed_origins"`    // CORS 允许的域名列表
-	RateLimit         int      `toml:"rate_limit"`         // 每分钟请求限制，0 表示不限制
-	SearchRateLimit   int      `toml:"search_rate_limit"`  // 搜索接口每分钟限制
-	EnableSwagger     bool     `toml:"enable_swagger"`     // 是否启用 Swagger 文档
+	Port            string   `toml:"port"`
+	Mode            string   `toml:"mode"`              // debug, release, test
+	AllowedOrigins  []string `toml:"allowed_origins"`   // CORS 允许的域名列表
+	RateLimit       int      `toml:"rate_limit"`        // 每分钟请求限制，0 表示不限制
+	SearchRateLimit int      `toml:"search_rate_limit"` // 搜索接口每分钟限制
+	EnableSwagger   bool     `toml:"enable_swagger"`    // 是否启用 Swagger 文档
 }
 
 // DatabaseConfig 数据库配置
@@ -89,6 +91,18 @@ type GitHubConfig struct {
 // SiteConfig 站点配置
 type SiteConfig struct {
 	BaseURL string `toml:"base_url"` // 站点基础 URL，如 https://example.com
+}
+
+type UploadConfig struct {
+	Dir    string       `toml:"dir"`
+	ImgBed ImgBedConfig `toml:"imgbed"`
+}
+
+type ImgBedConfig struct {
+	Endpoint     string `toml:"endpoint"`
+	Token        string `toml:"token"`
+	Field        string `toml:"field"`
+	UploadFolder string `toml:"upload_folder"`
 }
 
 // Load 从 TOML 文件加载配置
@@ -147,21 +161,21 @@ func (c *Config) GetAdminPasswordHash() string {
 }
 
 // Server 配置访问器
-func (c *Config) ServerPort() string          { return c.Server.Port }
-func (c *Config) ServerMode() string          { return c.Server.Mode }
-func (c *Config) AllowedOrigins() []string    { return c.Server.AllowedOrigins }
-func (c *Config) RateLimit() int              { return c.Server.RateLimit }
-func (c *Config) SearchRateLimit() int        { return c.Server.SearchRateLimit }
-func (c *Config) EnableSwagger() bool         { return c.Server.EnableSwagger }
+func (c *Config) ServerPort() string       { return c.Server.Port }
+func (c *Config) ServerMode() string       { return c.Server.Mode }
+func (c *Config) AllowedOrigins() []string { return c.Server.AllowedOrigins }
+func (c *Config) RateLimit() int           { return c.Server.RateLimit }
+func (c *Config) SearchRateLimit() int     { return c.Server.SearchRateLimit }
+func (c *Config) EnableSwagger() bool      { return c.Server.EnableSwagger }
 
 // Logging 配置访问器
-func (c *Config) LogLevel() string        { return c.Logging.Level }
-func (c *Config) LogEnv() string          { return c.Logging.Env }
-func (c *Config) LogOutputFile() string   { return c.Logging.OutputFile }
-func (c *Config) LogMaxSize() int         { return c.Logging.MaxSize }
-func (c *Config) LogMaxBackups() int      { return c.Logging.MaxBackups }
-func (c *Config) LogMaxAge() int          { return c.Logging.MaxAge }
-func (c *Config) LogCompress() bool       { return c.Logging.Compress }
+func (c *Config) LogLevel() string      { return c.Logging.Level }
+func (c *Config) LogEnv() string        { return c.Logging.Env }
+func (c *Config) LogOutputFile() string { return c.Logging.OutputFile }
+func (c *Config) LogMaxSize() int       { return c.Logging.MaxSize }
+func (c *Config) LogMaxBackups() int    { return c.Logging.MaxBackups }
+func (c *Config) LogMaxAge() int        { return c.Logging.MaxAge }
+func (c *Config) LogCompress() bool     { return c.Logging.Compress }
 
 // JWT 配置访问器
 func (c *Config) JWTSecret() string                 { return c.JWT.Secret }
@@ -187,3 +201,44 @@ func (c *Config) GitHubUsername() string { return c.GitHub.Username }
 
 // Site 配置访问器
 func (c *Config) SiteBaseURL() string { return c.Site.BaseURL }
+
+func (c *Config) UploadDir() string {
+	if value := strings.TrimSpace(os.Getenv("UPLOAD_DIR")); value != "" {
+		return value
+	}
+	if value := strings.TrimSpace(c.Upload.Dir); value != "" {
+		return value
+	}
+	return "uploads"
+}
+
+func (c *Config) ImgBedEndpoint() string {
+	if value := strings.TrimSpace(os.Getenv("IMGBED_ENDPOINT")); value != "" {
+		return value
+	}
+	return strings.TrimSpace(c.Upload.ImgBed.Endpoint)
+}
+
+func (c *Config) ImgBedToken() string {
+	if value := strings.TrimSpace(os.Getenv("IMGBED_TOKEN")); value != "" {
+		return value
+	}
+	return strings.TrimSpace(c.Upload.ImgBed.Token)
+}
+
+func (c *Config) ImgBedField() string {
+	if value := strings.TrimSpace(os.Getenv("IMGBED_FIELD")); value != "" {
+		return value
+	}
+	if value := strings.TrimSpace(c.Upload.ImgBed.Field); value != "" {
+		return value
+	}
+	return "file"
+}
+
+func (c *Config) ImgBedUploadFolder() string {
+	if value := strings.TrimSpace(os.Getenv("IMGBED_UPLOAD_FOLDER")); value != "" {
+		return value
+	}
+	return strings.TrimSpace(c.Upload.ImgBed.UploadFolder)
+}

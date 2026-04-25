@@ -57,3 +57,10 @@ export {
   useUpdatePage,
   useDeletePage,
 } from './pages';
+
+// 设置相关
+export {
+  imageSettingsQueryKey,
+  useImageSettings,
+  useUpdateImageSettings,
+} from './settings';

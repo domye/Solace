@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
 	useArticle,
@@ -7,18 +7,17 @@ import {
 	useCategories,
 	useTags,
 } from "@/hooks";
-import {
-	LoadingButton,
-	InputField,
-	TextAreaField,
-} from "@/components";
+import { LoadingButton, InputField, TextAreaField } from "@/components";
 import { LazyMarkdownEditor } from "@/components/admin";
 import { request_CreateArticleRequest } from "@/api";
+
+type ArticleStatus = request_CreateArticleRequest.status;
 
 export function ArticleEditorPage() {
 	const { id } = useParams<{ id: string }>();
 	const navigate = useNavigate();
 	const isEdit = Boolean(id);
+	const isSubmittingRef = useRef(false);
 
 	const { data: existingArticle } = useArticle(Number(id) || 0);
 	const { data: categories } = useCategories();
@@ -33,34 +32,40 @@ export function ArticleEditorPage() {
 	const [coverImage, setCoverImage] = useState("");
 	const [categoryId, setCategoryId] = useState<number | undefined>(undefined);
 	const [selectedTagIds, setSelectedTagIds] = useState<number[]>([]);
-	const [status, setStatus] = useState<request_CreateArticleRequest.status>(
+	const [status, setStatus] = useState<ArticleStatus>(
 		request_CreateArticleRequest.status.DRAFT,
 	);
+	const [pendingAction, setPendingAction] = useState<ArticleStatus | null>(null);
 	const [error, setError] = useState("");
 
 	useEffect(() => {
-		if (existingArticle) {
-			setTitle(existingArticle.title);
-			setSlug(existingArticle.slug || "");
-			setContent(existingArticle.content);
-			setSummary(existingArticle.summary || "");
-			setCoverImage(existingArticle.cover_image || "");
-			setCategoryId(existingArticle.category?.id);
-			setSelectedTagIds(existingArticle.tags?.map((t) => t.id) || []);
-			setStatus(existingArticle.status as request_CreateArticleRequest.status);
+		if (!existingArticle) {
+			return;
 		}
+
+		setTitle(existingArticle.title);
+		setSlug(existingArticle.slug || "");
+		setContent(existingArticle.content);
+		setSummary(existingArticle.summary || "");
+		setCoverImage(existingArticle.cover_image || "");
+		setCategoryId(existingArticle.category?.id);
+		setSelectedTagIds(existingArticle.tags?.map((t) => t.id) || []);
+		setStatus(existingArticle.status as ArticleStatus);
 	}, [existingArticle]);
 
 	const toggleTag = (tagId: number) => {
 		setSelectedTagIds((prev) =>
 			prev.includes(tagId)
-				? prev.filter((id) => id !== tagId)
+				? prev.filter((current) => current !== tagId)
 				: [...prev, tagId],
 		);
 	};
 
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
+	const saveArticle = async (nextStatus: ArticleStatus) => {
+		if (isSubmittingRef.current) {
+			return;
+		}
+
 		setError("");
 
 		if (!title.trim()) {
@@ -73,6 +78,9 @@ export function ArticleEditorPage() {
 			return;
 		}
 
+		isSubmittingRef.current = true;
+		setPendingAction(nextStatus);
+
 		try {
 			const articleData = {
 				title,
@@ -82,7 +90,7 @@ export function ArticleEditorPage() {
 				cover_image: coverImage || undefined,
 				category_id: categoryId,
 				tag_ids: selectedTagIds.length > 0 ? selectedTagIds : undefined,
-				status,
+				status: nextStatus as request_CreateArticleRequest.status,
 			};
 
 			if (isEdit && id) {
@@ -94,14 +102,25 @@ export function ArticleEditorPage() {
 					},
 				});
 				navigate("/admin");
-			} else {
-				await createMutation.mutateAsync(articleData);
-				navigate("/admin");
+				return;
 			}
+
+			await createMutation.mutateAsync(articleData);
+			navigate("/admin");
 		} catch (err) {
 			setError(err instanceof Error ? err.message : "保存失败");
+		} finally {
+			isSubmittingRef.current = false;
+			setPendingAction(null);
 		}
 	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		await saveArticle(status);
+	};
+
+	const isSaving = createMutation.isPending || updateMutation.isPending;
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
@@ -123,7 +142,7 @@ export function ArticleEditorPage() {
 					<LazyMarkdownEditor
 						value={content}
 						onChange={setContent}
-						placeholder="在这里撰写 Markdown 内容..."
+						placeholder="在这里编写 Markdown 内容..."
 						height="100%"
 					/>
 				</div>
@@ -132,7 +151,10 @@ export function ArticleEditorPage() {
 			<div className="card-base p-6 space-y-4">
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
-						<label htmlFor="article-slug" className="block text-75 text-sm font-medium mb-2">
+						<label
+							htmlFor="article-slug"
+							className="block text-75 text-sm font-medium mb-2"
+						>
 							Slug <span className="text-50 text-xs ml-1">(留空自动生成)</span>
 						</label>
 						<input
@@ -151,7 +173,7 @@ export function ArticleEditorPage() {
 						placeholder="https://example.com/cover.jpg"
 						type="url"
 					/>
-</div>
+				</div>
 
 				<TextAreaField
 					label="摘要"
@@ -163,7 +185,12 @@ export function ArticleEditorPage() {
 
 				<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<div>
-						<label htmlFor="article-category" className="block text-75 text-sm font-medium mb-2">分类</label>
+						<label
+							htmlFor="article-category"
+							className="block text-75 text-sm font-medium mb-2"
+						>
+							分类
+						</label>
 						<select
 							id="article-category"
 							value={categoryId || ""}
@@ -207,18 +234,18 @@ export function ArticleEditorPage() {
 				<div className="flex items-center justify-between pt-4 border-t border-[var(--border-light)]">
 					<div className="flex items-center gap-2">
 						<label className="text-75 text-sm font-medium">状态</label>
-						{Object.values(request_CreateArticleRequest.status).map((s) => (
+						{Object.values(request_CreateArticleRequest.status).map((currentStatus) => (
 							<button
-								key={s}
+								key={currentStatus}
 								type="button"
-								onClick={() => setStatus(s)}
+								onClick={() => setStatus(currentStatus)}
 								className={`btn-regular btn-sm py-1.5 px-3 ${
-									status === s
+									status === currentStatus
 										? "border-[var(--primary)] bg-[var(--btn-regular-bg-active)]"
 										: ""
 								}`}
 							>
-								{s === "published" ? "发布" : "草稿"}
+								{currentStatus === "published" ? "发布" : "草稿"}
 							</button>
 						))}
 					</div>
@@ -231,11 +258,22 @@ export function ArticleEditorPage() {
 							取消
 						</button>
 						<LoadingButton
-							type="submit"
-							loading={createMutation.isPending || updateMutation.isPending}
+							type="button"
+							onClick={() => saveArticle(request_CreateArticleRequest.status.DRAFT)}
+							loading={pendingAction === request_CreateArticleRequest.status.DRAFT}
+							disabled={isSaving}
 							className="btn-regular btn-sm py-1.5 px-4"
 						>
-							{isEdit ? "更新" : "创建"}
+							{isEdit ? "保存草稿" : "创建草稿"}
+						</LoadingButton>
+						<LoadingButton
+							type="button"
+							onClick={() => saveArticle(request_CreateArticleRequest.status.PUBLISHED)}
+							loading={pendingAction === request_CreateArticleRequest.status.PUBLISHED}
+							disabled={isSaving}
+							className="btn-regular btn-sm py-1.5 px-4 border-[var(--primary)] bg-[var(--btn-regular-bg-active)]"
+						>
+							{isEdit ? "发布更新" : "发布文章"}
 						</LoadingButton>
 					</div>
 				</div>

@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
 import { LazyLoadImage } from "react-lazy-load-image-component";
+import type { CSSProperties } from "react";
 import type { Effect } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 
@@ -18,6 +19,7 @@ interface LazyImageProps {
 	showSkeleton?: boolean;
 	/** 图片宽高比（用于预留空间，减少 CLS），如 '16/9' 或 '4/3' */
 	aspectRatio?: string;
+	style?: CSSProperties;
 }
 
 /**
@@ -45,6 +47,7 @@ export const LazyImage = memo(function LazyImage({
 	onClick,
 	showSkeleton = true,
 	aspectRatio,
+	style,
 }: LazyImageProps) {
 	const [isLoaded, setIsLoaded] = useState(false);
 
@@ -68,6 +71,7 @@ export const LazyImage = memo(function LazyImage({
 			<LazyLoadImage
 				src={src}
 				alt={alt}
+				style={style}
 				className={`${className} ${isLoaded ? "opacity-100" : "opacity-0"} transition-opacity duration-300`}
 				wrapperClassName="!block w-full h-full"
 				placeholderSrc={placeholderSrc}

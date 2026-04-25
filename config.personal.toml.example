@@ -1,0 +1,58 @@
+# Personal blog configuration template for Solace.
+# Copy this file to config.personal.toml before your first Docker run.
+
+[server]
+port = "8080"
+mode = "release"
+allowed_origins = [
+  "http://localhost:8088",
+  "https://blog.example.com",
+]
+rate_limit = 30
+search_rate_limit = 60
+enable_swagger = true
+
+[database]
+host = "postgres"
+port = "5432"
+user = "solace"
+password = "change-this-database-password"
+name = "solace"
+sslmode = "disable"
+
+[jwt]
+secret = "change-this-jwt-secret-to-a-long-random-string"
+access_duration = 15
+refresh_duration = 10080
+
+[logging]
+level = "info"
+env = "production"
+
+[migration]
+path = "migrations"
+
+[admin]
+username = "admin"
+email = "me@example.com"
+password = "change-this-admin-password"
+nickname = "Your Name"
+avatar_url = ""
+bio = "Write a short bio here."
+github = "https://github.com/yourname"
+
+[github]
+token = ""
+username = "yourname"
+
+[site]
+base_url = "https://blog.example.com"
+
+[upload]
+dir = "uploads"
+
+[upload.imgbed]
+endpoint = "https://cloudflare-imgbed-edp.pages.dev/upload?returnFormat=full"
+token = ""
+field = "file"
+upload_folder = "Blog"

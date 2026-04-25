@@ -72,16 +72,17 @@ func LoggingWithConfig(cfg LoggingConfig) gin.HandlerFunc {
 		start := time.Now()
 		method := c.Request.Method
 
-		// 读取请求体（用于日志记录）
 		var requestBody []byte
-		if cfg.LogRequestBody && c.Request.Body != nil {
+		if shouldLogRequestBody(c, cfg) {
 			requestBody, _ = io.ReadAll(io.LimitReader(c.Request.Body, int64(cfg.MaxBodySize)))
-			c.Request.Body = io.NopCloser(bytes.NewBuffer(requestBody))
+			c.Request.Body = io.NopCloser(io.MultiReader(bytes.NewReader(requestBody), c.Request.Body))
 		}
 
-		// 包装响应写入器以捕获响应体
-		blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
-		c.Writer = blw
+		var responseBody *bytes.Buffer
+		if cfg.LogResponseBody {
+			responseBody = bytes.NewBufferString("")
+			c.Writer = &bodyLogWriter{body: responseBody, ResponseWriter: c.Writer}
+		}
 
 		log := logger.FromGinContext(c)
 
@@ -116,9 +117,8 @@ func LoggingWithConfig(cfg LoggingConfig) gin.HandlerFunc {
 			Dur("duration_ms", duration).
 			Int("response_size", c.Writer.Size())
 
-		// 可选记录响应体
-		if cfg.LogResponseBody && blw.body.Len() > 0 && blw.body.Len() < cfg.MaxBodySize {
-			event = event.Interface("response", sanitizeResponseBody(blw.body.Bytes()))
+		if responseBody != nil && responseBody.Len() > 0 && responseBody.Len() < cfg.MaxBodySize {
+			event = event.Interface("response", sanitizeResponseBody(responseBody.Bytes()))
 		}
 
 		event.Msg("请求完成")
@@ -137,6 +137,13 @@ func LoggingWithConfig(cfg LoggingConfig) gin.HandlerFunc {
 }
 
 // sanitizeBody 处理请求体，脱敏敏感字段
+func shouldLogRequestBody(c *gin.Context, cfg LoggingConfig) bool {
+	if !cfg.LogRequestBody || c.Request.Body == nil || cfg.MaxBodySize <= 0 {
+		return false
+	}
+	return !strings.HasPrefix(strings.ToLower(c.GetHeader("Content-Type")), "multipart/form-data")
+}
+
 func sanitizeBody(body []byte, sensitiveFields []string) interface{} {
 	if len(body) == 0 {
 		return nil

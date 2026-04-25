@@ -26,6 +26,14 @@ export interface PagedResponse<T> {
 	totalPages: number;
 }
 
+// ============ 设置类型 ============
+
+export interface ImageSettings {
+	defaultWidth: number;
+	maxWidth: number;
+	appendWidthToPastedImages: boolean;
+}
+
 // ============ 用户类型 ============
 
 /** 用户信息 */
@@ -241,7 +249,7 @@ export interface NavPage {
 // ============ Frontmatter 类型 ============
 
 /** 关于我模板 frontmatter */
-export interface AboutFrontmatter {}
+export type AboutFrontmatter = Record<string, never>;
 
 /** GitHub 仓库信息（API 返回） */
 export interface GitHubRepoInfo {

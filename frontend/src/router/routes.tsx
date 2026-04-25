@@ -68,6 +68,11 @@ const PageEditorPage = lazy(() =>
 		default: m.PageEditorPage,
 	})),
 );
+const ImageSettingsPage = lazy(() =>
+	import("@/pages/admin/ImageSettingsPage").then((m) => ({
+		default: m.ImageSettingsPage,
+	})),
+);
 
 // ============ Fallback 组件 ============
 const skeletons = {
@@ -140,6 +145,11 @@ export const routes = {
 		{
 			path: "/admin/pages/:id/edit",
 			Component: PageEditorPage,
+			fallback: skeletons.center,
+		},
+		{
+			path: "/admin/settings/images",
+			Component: ImageSettingsPage,
 			fallback: skeletons.center,
 		},
 	],

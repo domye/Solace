@@ -37,6 +37,11 @@ const navItems = [
 		path: "/admin/tags",
 		icon: "material-symbols:label-outline-rounded",
 	},
+	{
+		name: "图片设置",
+		path: "/admin/settings/images",
+		icon: "material-symbols:image-outline-rounded",
+	},
 ];
 
 export function AdminLayout() {
@@ -59,6 +64,9 @@ export function AdminLayout() {
 		}
 		if (path === "/admin/tags") {
 			return location.pathname.startsWith("/admin/tags");
+		}
+		if (path === "/admin/settings/images") {
+			return location.pathname.startsWith("/admin/settings/images");
 		}
 		return location.pathname === path;
 	};

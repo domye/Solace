@@ -25,11 +25,11 @@ func StripMarkdown(markdown string) string {
 	text = regexp.MustCompile(`__(.+?)__`).ReplaceAllString(text, "$1")
 	text = regexp.MustCompile(`_(.+?)_`).ReplaceAllString(text, "$1")
 
+	// 移除图片标记 ![alt](url)
+	text = regexp.MustCompile(`!\[[^\]]*\]\([^)]+\)`).ReplaceAllString(text, "")
+
 	// 移除链接标记 [text](url)
 	text = regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`).ReplaceAllString(text, "$1")
-
-	// 移除图片标记 ![alt](url)
-	text = regexp.MustCompile(`!\[([^\]]*)\]\([^)]+\)`).ReplaceAllString(text, "$1")
 
 	// 移除行内代码标记 `code`
 	text = regexp.MustCompile("`([^`]+)`").ReplaceAllString(text, "$1")
@@ -72,6 +72,10 @@ func StripMarkdown(markdown string) string {
 
 // TruncateText 截取文本到指定长度，超出部分添加省略号
 func TruncateText(text string, maxLength int) string {
+	if maxLength < 0 {
+		return ""
+	}
+
 	if len(text) <= maxLength {
 		return text
 	}

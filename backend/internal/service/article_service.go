@@ -26,7 +26,7 @@ var (
 
 // ArticleService 文章业务逻辑接口
 type ArticleService interface {
-	Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error)
+	Create(ctx context.Context, authorID uint, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error)
 	GetByID(ctx context.Context, id uint) (*response.ArticleResponse, error)
 	GetBySlug(ctx context.Context, slug string) (*response.ArticleResponse, error)
 	GetList(ctx context.Context, page, pageSize int, status string, categorySlug, tagSlug string) (*response.ArticleListResponse, error)
@@ -98,7 +98,7 @@ func NewArticleService(articleRepo articleRepository, categoryRepo categoryRepos
 	}
 }
 
-func (s *articleService) Create(ctx context.Context, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
+func (s *articleService) Create(ctx context.Context, authorID uint, title, articleSlug, content, summary, coverImage string, categoryID *uint, tagIDs []uint, status string) (*response.ArticleResponse, error) {
 	log := logger.WithContext(ctx)
 
 	log.Info().
@@ -107,6 +107,10 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 		Interface("category_id", categoryID).
 		Interface("tag_ids", tagIDs).
 		Msg("创建文章开始")
+
+	if authorID == 0 {
+		return nil, errors.NewUnauthorized("无效用户标识")
+	}
 
 	// 验证分类是否存在
 	if categoryID != nil {
@@ -144,6 +148,7 @@ func (s *articleService) Create(ctx context.Context, title, articleSlug, content
 		Content:    content,
 		Summary:    summary,
 		CoverImage: coverImage,
+		AuthorID:   authorID,
 		CategoryID: categoryID,
 		Status:     status,
 		Version:    1,

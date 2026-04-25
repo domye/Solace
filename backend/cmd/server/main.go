@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -38,6 +39,13 @@ import (
 // @name Authorization
 // @description JWT 认证令牌，格式: Bearer {token}
 
+func ensureSettingsSchema(ctx context.Context, settingsRepo repository.SettingsRepository) error {
+	if err := settingsRepo.EnsureTable(ctx); err != nil {
+		return fmt.Errorf("ensure settings schema: %w", err)
+	}
+	return nil
+}
+
 func main() {
 	// 加载配置
 	cfg := config.Load()
@@ -69,6 +77,12 @@ func main() {
 	categoryRepo := repository.NewCategoryRepository(db)
 	tagRepo := repository.NewTagRepository(db)
 	pageRepo := repository.NewPageRepository(db)
+	settingsRepo := repository.NewSettingsRepository(db)
+	schemaCtx, cancelSchema := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancelSchema()
+	if err := ensureSettingsSchema(schemaCtx, settingsRepo); err != nil {
+		logger.Fatal().Err(err).Msg("settings 表初始化失败")
+	}
 
 	// 初始化 JWT 管理器
 	jwtManager := jwt.NewJWTManager(
@@ -89,6 +103,7 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepo)
 	tagService := service.NewTagService(tagRepo)
 	pageService := service.NewPageService(pageRepo)
+	settingsService := service.NewSettingsService(settingsRepo)
 
 	// 初始化处理器
 	authHandler := handler.NewAuthHandler(authService)
@@ -100,6 +115,11 @@ func main() {
 	sitemapHandler := handler.NewSitemapHandler(articleService, categoryService, tagService, pageService, cfg)
 	rssHandler := handler.NewRSSHandler(articleService, ownerService, cfg)
 	pageHandler := handler.NewPageHandler(pageService)
+	settingsHandler := handler.NewSettingsHandler(settingsService)
+	uploadHandler, err := handler.NewUploadHandler(cfg)
+	if err != nil {
+		logger.Fatal().Err(err).Msg("上传处理器初始化失败")
+	}
 
 	// 设置路由
 	appRouter := router.NewRouter(
@@ -113,6 +133,8 @@ func main() {
 		sitemapHandler,
 		rssHandler,
 		pageHandler,
+		uploadHandler,
+		settingsHandler,
 	)
 	r := appRouter.Setup(cfg)
 

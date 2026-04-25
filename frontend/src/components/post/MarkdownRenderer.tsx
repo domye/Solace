@@ -29,9 +29,12 @@ import React, {
 	Suspense,
 	type ReactNode,
 } from "react";
+import type { CSSProperties } from "react";
 import type { TocHeading } from "@/components/widget/TableOfContents";
 import { LazyImage } from "@/components/common/ui";
+import { useImageSettings } from "@/hooks";
 import { remarkGallery } from "@/lib/remark/gallery";
+import { getImageRenderMetadata } from "@/utils/image";
 
 // 懒加载 JetBrains Mono 字体 - 仅在首次渲染 Markdown 时加载
 let fontLoaded = false;
@@ -45,6 +48,8 @@ function loadJetBrainsMono() {
 }
 
 // 懒加载 CodeBlock - 代码高亮仅在需要时加载 (~70 KB)
+const DEFAULT_IMAGE_MAX_WIDTH = 1000;
+
 const CodeBlock = lazy(() =>
 	import("@/components/common/ui/CodeBlock").then((m) => ({
 		default: m.CodeBlock,
@@ -330,10 +335,20 @@ const Image = memo(function Image({
 	src?: string;
 	alt?: string;
 }) {
+	const { data: settings } = useImageSettings();
+	const metadata = getImageRenderMetadata(
+		src,
+		settings?.maxWidth ?? DEFAULT_IMAGE_MAX_WIDTH,
+	);
+	const style = metadata.width
+		? ({ width: metadata.width, maxWidth: "100%", height: "auto" } satisfies CSSProperties)
+		: undefined;
+
 	return (
 		<LazyImage
-			src={src || ""}
+			src={metadata.src}
 			alt={alt}
+			style={style}
 			className="max-w-full h-auto rounded-[var(--radius-large)] my-4 mx-auto"
 			effect="blur"
 		/>

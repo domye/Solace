@@ -55,3 +55,9 @@ type TagRepository interface {
 	ExistsByName(ctx context.Context, name string) bool
 	CountArticles(ctx context.Context, tagID uint) int
 }
+
+type SettingsRepository interface {
+	EnsureTable(ctx context.Context) error
+	FindByKey(ctx context.Context, key string) (*model.Setting, error)
+	Upsert(ctx context.Context, setting *model.Setting) error
+}
