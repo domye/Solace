@@ -24,12 +24,14 @@ func NewOwnerService(cfg *config.Config) OwnerService {
 
 func (s *ownerService) GetOwner(ctx context.Context) (*response.OwnerResponse, error) {
 	return &response.OwnerResponse{
-		Nickname:   s.cfg.AdminNickname(),
-		AvatarURL:  s.cfg.AdminAvatarURL(),
-		Bio:        s.cfg.AdminBio(),
-		GitHubURL:  s.cfg.AdminGitHub(),
-		Email:      s.cfg.AdminEmail(),
-		RSSURL:     s.cfg.SiteBaseURL() + "/rss.xml",
-		SitemapURL: s.cfg.SiteBaseURL() + "/sitemap.xml",
+		Nickname:    s.cfg.AdminNickname(),
+		AvatarURL:   s.cfg.AdminAvatarURL(),
+		Bio:         s.cfg.AdminBio(),
+		GitHubURL:   s.cfg.AdminGitHub(),
+		BilibiliURL: s.cfg.AdminBilibili(),
+		XURL:        s.cfg.AdminX(),
+		Email:       s.cfg.AdminEmail(),
+		RSSURL:      s.cfg.SiteBaseURL() + "/rss.xml",
+		SitemapURL:  s.cfg.SiteBaseURL() + "/sitemap.xml",
 	}, nil
 }

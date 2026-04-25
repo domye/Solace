@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"gin-quickstart/internal/config"
@@ -85,23 +86,12 @@ func (h *RSSHandler) GetRSS(c *gin.Context) {
 }
 
 func escapeXML(s string) string {
-	s = replaceAll(s, "&", "&amp;")
-	s = replaceAll(s, "<", "&lt;")
-	s = replaceAll(s, ">", "&gt;")
-	s = replaceAll(s, "\"", "&quot;")
-	s = replaceAll(s, "'", "&apos;")
-	return s
-}
-
-func replaceAll(s, old, new string) string {
-	result := ""
-	for i := 0; i < len(s); i++ {
-		if i <= len(s)-len(old) && s[i:i+len(old)] == old {
-			result += new
-			i += len(old) - 1
-		} else {
-			result += string(s[i])
-		}
-	}
-	return result
+	replacer := strings.NewReplacer(
+		"&", "&amp;",
+		"<", "&lt;",
+		">", "&gt;",
+		"\"", "&quot;",
+		"'", "&apos;",
+	)
+	return replacer.Replace(s)
 }

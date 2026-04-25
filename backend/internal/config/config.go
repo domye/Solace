@@ -80,6 +80,8 @@ type AdminConfig struct {
 	AvatarURL string `toml:"avatar_url"`
 	Bio       string `toml:"bio"`
 	GitHub    string `toml:"github"`
+	Bilibili  string `toml:"bilibili"`
+	X         string `toml:"x"`
 }
 
 // GitHubConfig GitHub API 配置
@@ -193,6 +195,8 @@ func (c *Config) AdminNickname() string     { return c.Admin.Nickname }
 func (c *Config) AdminAvatarURL() string    { return c.Admin.AvatarURL }
 func (c *Config) AdminBio() string          { return c.Admin.Bio }
 func (c *Config) AdminGitHub() string       { return c.Admin.GitHub }
+func (c *Config) AdminBilibili() string     { return c.Admin.Bilibili }
+func (c *Config) AdminX() string            { return c.Admin.X }
 func (c *Config) AdminPasswordHash() string { return c.GetAdminPasswordHash() }
 
 // GitHub 配置访问器
