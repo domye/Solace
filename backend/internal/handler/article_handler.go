@@ -3,7 +3,6 @@ package handler
 import (
 	"gin-quickstart/internal/pkg/text"
 	"gin-quickstart/internal/pkg/validator"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -83,14 +82,13 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /articles/{id} [get]
 func (h *ArticleHandler) GetByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的文章ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
-	article, err := h.articleService.GetByID(c.Request.Context(), uint(id))
+	article, err := h.articleService.GetByID(c.Request.Context(), id)
 	if err != nil {
 		RespondWithError(c, err)
 		return
@@ -196,17 +194,9 @@ func (h *ArticleHandler) Search(c *gin.Context) {
 		return
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	pageSize, _ := strconv.Atoi(c.DefaultQuery("pageSize", "10"))
+	pagination := ParsePagination(c, 10, 100)
 
-	if page < 1 {
-		page = 1
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
-	}
-
-	resp, err := h.articleService.Search(c.Request.Context(), query, page, pageSize)
+	resp, err := h.articleService.Search(c.Request.Context(), query, pagination.Page, pagination.PageSize)
 	if err != nil {
 		RespondWithError(c, err)
 		return
@@ -228,11 +218,9 @@ func (h *ArticleHandler) Search(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /articles/{id} [put]
 func (h *ArticleHandler) Update(c *gin.Context) {
-	idStr := c.Param("id")
-
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的文章ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
@@ -254,7 +242,7 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 
 	article, err := h.articleService.Update(
 		c.Request.Context(),
-		uint(id),
+		id,
 		req.Version,
 		req.Title,
 		req.Slug,
@@ -283,15 +271,13 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /articles/{id} [delete]
 func (h *ArticleHandler) Delete(c *gin.Context) {
-	idStr := c.Param("id")
-
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的文章ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
-	if err := h.articleService.Delete(c.Request.Context(), uint(id)); err != nil {
+	if err := h.articleService.Delete(c.Request.Context(), id); err != nil {
 		RespondWithError(c, err)
 		return
 	}
@@ -307,10 +293,7 @@ func (h *ArticleHandler) Delete(c *gin.Context) {
 // @Success 200 {object} Response
 // @Router /articles/random [get]
 func (h *ArticleHandler) GetRandom(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
-	if limit < 1 || limit > 20 {
-		limit = 5
-	}
+	limit := ParseLimit(c, 5, 20)
 
 	articles, err := h.articleService.GetRandom(c.Request.Context(), limit)
 	if err != nil {
@@ -329,10 +312,7 @@ func (h *ArticleHandler) GetRandom(c *gin.Context) {
 // @Success 200 {object} Response
 // @Router /articles/recent [get]
 func (h *ArticleHandler) GetRecent(c *gin.Context) {
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "5"))
-	if limit < 1 || limit > 20 {
-		limit = 5
-	}
+	limit := ParseLimit(c, 5, 20)
 
 	articles, err := h.articleService.GetRecent(c.Request.Context(), limit)
 	if err != nil {

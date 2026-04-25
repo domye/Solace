@@ -2,7 +2,6 @@ package handler
 
 import (
 	"gin-quickstart/internal/pkg/validator"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
@@ -71,14 +70,13 @@ func (h *PageHandler) Create(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /pages/{id} [get]
 func (h *PageHandler) GetByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的页面ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
-	page, err := h.pageService.GetByID(c.Request.Context(), uint(id))
+	page, err := h.pageService.GetByID(c.Request.Context(), id)
 	if err != nil {
 		RespondWithError(c, err)
 		return
@@ -128,11 +126,12 @@ func (h *PageHandler) GetList(c *gin.Context) {
 		return
 	}
 
+	pagination := ParsePagination(c, 10, 100)
 	if query.Page == 0 {
-		query.Page = 1
+		query.Page = pagination.Page
 	}
 	if query.PageSize == 0 {
-		query.PageSize = 10
+		query.PageSize = pagination.PageSize
 	}
 
 	resp, err := h.pageService.GetList(
@@ -179,10 +178,9 @@ func (h *PageHandler) GetNavPages(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /pages/{id} [put]
 func (h *PageHandler) Update(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的页面ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
@@ -198,7 +196,7 @@ func (h *PageHandler) Update(c *gin.Context) {
 
 	page, err := h.pageService.Update(
 		c.Request.Context(),
-		uint(id),
+		id,
 		req.Version,
 		req.Title,
 		req.Slug,
@@ -228,14 +226,13 @@ func (h *PageHandler) Update(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /pages/{id} [delete]
 func (h *PageHandler) Delete(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的页面ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
-	if err := h.pageService.Delete(c.Request.Context(), uint(id)); err != nil {
+	if err := h.pageService.Delete(c.Request.Context(), id); err != nil {
 		RespondWithError(c, err)
 		return
 	}
