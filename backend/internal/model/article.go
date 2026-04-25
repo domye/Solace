@@ -22,6 +22,7 @@ type Article struct {
 	CreatedAt   time.Time      `json:"created_at"`
 	UpdatedAt   time.Time      `json:"updated_at"`
 	DeletedAt   gorm.DeletedAt `gorm:"index" json:"-"`
+	SearchVec   *string        `gorm:"type:tsvector;index:index_article_search,classifier:tsvector_ops" json:"-"`
 
 	Category *Category `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
 	Tags     []Tag     `gorm:"many2many:article_tags;" json:"tags,omitempty"`

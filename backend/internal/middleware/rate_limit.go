@@ -83,6 +83,9 @@ func (rl *RateLimiter) cleanupExpiredClients() {
 }
 
 func (rl *RateLimiter) Stop() {
+	rl.mu.Lock()
+	rl.clients = nil
+	rl.mu.Unlock()
 	rl.cancel()
 }
 

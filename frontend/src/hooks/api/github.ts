@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { apiClient } from "@/api";
+import { queryKeys } from "@/lib/queryKeys";
 import { extractData } from "./utils";
 import { useOwner } from "./owner";
 import type { service_ContributionsResponse, service_ContributionsGroup } from "@/api/generated";
@@ -22,7 +23,7 @@ export function useGitHubContributions() {
 	const githubUsername = extractGitHubUsername(owner?.github_url);
 
 	return useQuery({
-		queryKey: ["github-contributions", githubUsername],
+		queryKey: queryKeys.github.contributions(githubUsername ?? undefined),
 		queryFn: async (): Promise<service_ContributionsResponse> => {
 			const response = await apiClient.github.getGithubContributions();
 			return extractData<service_ContributionsResponse>(response as unknown as {

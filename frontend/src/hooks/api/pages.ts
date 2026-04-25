@@ -6,6 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/api";
+import { queryKeys } from "@/lib/queryKeys";
 import { extractData, extractPagedData } from "./utils";
 import type { Page, PageListItem, NavPage } from "@/types";
 import type {
@@ -21,7 +22,7 @@ export function usePages(params?: {
 	template?: string;
 }) {
 	return useQuery({
-		queryKey: ["pages", params],
+		queryKey: queryKeys.pages.list(params),
 		queryFn: async () => {
 			const response = await apiClient.page.getPages(
 				params?.page ?? 1,
@@ -31,37 +32,40 @@ export function usePages(params?: {
 			);
 			return extractPagedData<PageListItem>(response);
 		},
+		staleTime: 2 * 60 * 1000,
 	});
 }
 
 /** 获取单个页面（按 ID） - 管理用 */
 export function usePage(id: number) {
 	return useQuery({
-		queryKey: ["page", id],
+		queryKey: queryKeys.pages.detail(id),
 		queryFn: async () => {
 			const response = await apiClient.page.getPages1(id);
 			return extractData<Page>(response);
 		},
 		enabled: id > 0,
+		staleTime: 5 * 60 * 1000,
 	});
 }
 
 /** 获取单个页面（按 slug） - 公开访问 */
 export function usePageBySlug(slug: string) {
 	return useQuery({
-		queryKey: ["page", slug],
+		queryKey: queryKeys.pages.bySlug(slug),
 		queryFn: async () => {
 			const response = await apiClient.page.getPagesSlug(slug);
 			return extractData<Page>(response);
 		},
 		enabled: slug.length > 0,
+		staleTime: 10 * 60 * 1000,
 	});
 }
 
 /** 获取导航页面列表 */
 export function useNavPages() {
 	return useQuery({
-		queryKey: ["nav-pages"],
+		queryKey: queryKeys.pages.nav(),
 		queryFn: async () => {
 			const response = await apiClient.page.getPagesNav();
 			return extractData<NavPage[]>(response);
@@ -80,8 +84,8 @@ export function useCreatePage() {
 			return extractData<Page>(response);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["pages"] });
-			queryClient.invalidateQueries({ queryKey: ["nav-pages"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.pages.list() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.pages.nav() });
 		},
 	});
 }
@@ -102,9 +106,9 @@ export function useUpdatePage() {
 			return extractData<Page>(response);
 		},
 		onSuccess: (_, { id }) => {
-			queryClient.invalidateQueries({ queryKey: ["pages"] });
-			queryClient.invalidateQueries({ queryKey: ["page", id] });
-			queryClient.invalidateQueries({ queryKey: ["nav-pages"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.pages.list() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.pages.detail(id) });
+			queryClient.invalidateQueries({ queryKey: queryKeys.pages.nav() });
 		},
 	});
 }
@@ -118,8 +122,8 @@ export function useDeletePage() {
 			await apiClient.page.deletePages(id);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["pages"] });
-			queryClient.invalidateQueries({ queryKey: ["nav-pages"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.pages.list() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.pages.nav() });
 		},
 	});
 }

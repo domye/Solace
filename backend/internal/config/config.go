@@ -29,11 +29,12 @@ type Config struct {
 // ServerConfig 服务器配置
 type ServerConfig struct {
 	Port              string   `toml:"port"`
-	Mode              string   `toml:"mode"`               // debug, release, test
-	AllowedOrigins    []string `toml:"allowed_origins"`    // CORS 允许的域名列表
-	RateLimit         int      `toml:"rate_limit"`         // 每分钟请求限制，0 表示不限制
-	SearchRateLimit   int      `toml:"search_rate_limit"`  // 搜索接口每分钟限制
-	EnableSwagger     bool     `toml:"enable_swagger"`     // 是否启用 Swagger 文档
+	Mode              string   `toml:"mode"`                 // debug, release, test
+	AllowedOrigins    []string `toml:"allowed_origins"`      // CORS 允许的域名列表
+	RateLimit         int      `toml:"rate_limit"`           // 每分钟请求限制，0 表示不限制
+	SearchRateLimit   int      `toml:"search_rate_limit"`    // 搜索接口每分钟限制
+	EnableSwagger     bool     `toml:"enable_swagger"`       // 是否启用 Swagger 文档
+	MaxSearchQueryLen int      `toml:"max_search_query_len"` // 搜索查询最大长度，默认 100
 }
 
 // DatabaseConfig 数据库配置
@@ -147,21 +148,27 @@ func (c *Config) GetAdminPasswordHash() string {
 }
 
 // Server 配置访问器
-func (c *Config) ServerPort() string          { return c.Server.Port }
-func (c *Config) ServerMode() string          { return c.Server.Mode }
-func (c *Config) AllowedOrigins() []string    { return c.Server.AllowedOrigins }
-func (c *Config) RateLimit() int              { return c.Server.RateLimit }
-func (c *Config) SearchRateLimit() int        { return c.Server.SearchRateLimit }
-func (c *Config) EnableSwagger() bool         { return c.Server.EnableSwagger }
+func (c *Config) ServerPort() string       { return c.Server.Port }
+func (c *Config) ServerMode() string       { return c.Server.Mode }
+func (c *Config) AllowedOrigins() []string { return c.Server.AllowedOrigins }
+func (c *Config) RateLimit() int           { return c.Server.RateLimit }
+func (c *Config) SearchRateLimit() int     { return c.Server.SearchRateLimit }
+func (c *Config) EnableSwagger() bool      { return c.Server.EnableSwagger }
+func (c *Config) MaxSearchQueryLen() int {
+	if c.Server.MaxSearchQueryLen <= 0 {
+		return 100
+	}
+	return c.Server.MaxSearchQueryLen
+}
 
 // Logging 配置访问器
-func (c *Config) LogLevel() string        { return c.Logging.Level }
-func (c *Config) LogEnv() string          { return c.Logging.Env }
-func (c *Config) LogOutputFile() string   { return c.Logging.OutputFile }
-func (c *Config) LogMaxSize() int         { return c.Logging.MaxSize }
-func (c *Config) LogMaxBackups() int      { return c.Logging.MaxBackups }
-func (c *Config) LogMaxAge() int          { return c.Logging.MaxAge }
-func (c *Config) LogCompress() bool       { return c.Logging.Compress }
+func (c *Config) LogLevel() string      { return c.Logging.Level }
+func (c *Config) LogEnv() string        { return c.Logging.Env }
+func (c *Config) LogOutputFile() string { return c.Logging.OutputFile }
+func (c *Config) LogMaxSize() int       { return c.Logging.MaxSize }
+func (c *Config) LogMaxBackups() int    { return c.Logging.MaxBackups }
+func (c *Config) LogMaxAge() int        { return c.Logging.MaxAge }
+func (c *Config) LogCompress() bool     { return c.Logging.Compress }
 
 // JWT 配置访问器
 func (c *Config) JWTSecret() string                 { return c.JWT.Secret }

@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/api';
+import { queryKeys } from '@/lib/queryKeys';
 import { extractData } from './utils';
 import type { Category } from '@/types';
 import type { request_CreateCategoryRequest, request_UpdateCategoryRequest } from '@/api';
@@ -9,7 +10,7 @@ import type { request_CreateCategoryRequest, request_UpdateCategoryRequest } fro
  */
 export function useCategories() {
   return useQuery({
-    queryKey: ['categories'],
+    queryKey: queryKeys.categories.all(),
     queryFn: async () => {
       const response = await apiClient.category.getCategories();
       return extractData<Category[]>(response);
@@ -30,7 +31,7 @@ export function useCreateCategory() {
       return extractData<Category>(response);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories.all() });
     },
   });
 }
@@ -47,7 +48,7 @@ export function useUpdateCategory() {
       return extractData<Category>(response);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories.all() });
     },
   });
 }
@@ -63,7 +64,7 @@ export function useDeleteCategory() {
       await apiClient.category.deleteCategories(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: queryKeys.categories.all() });
     },
   });
 }

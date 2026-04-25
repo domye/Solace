@@ -79,9 +79,12 @@ func LoggingWithConfig(cfg LoggingConfig) gin.HandlerFunc {
 			c.Request.Body = io.NopCloser(bytes.NewBuffer(requestBody))
 		}
 
-		// 包装响应写入器以捕获响应体
-		blw := &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
-		c.Writer = blw
+		// 仅在需要记录响应体时包装 ResponseWriter
+		var blw *bodyLogWriter
+		if cfg.LogResponseBody {
+			blw = &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
+			c.Writer = blw
+		}
 
 		log := logger.FromGinContext(c)
 
@@ -117,7 +120,7 @@ func LoggingWithConfig(cfg LoggingConfig) gin.HandlerFunc {
 			Int("response_size", c.Writer.Size())
 
 		// 可选记录响应体
-		if cfg.LogResponseBody && blw.body.Len() > 0 && blw.body.Len() < cfg.MaxBodySize {
+		if cfg.LogResponseBody && blw != nil && blw.body.Len() > 0 && blw.body.Len() < cfg.MaxBodySize {
 			event = event.Interface("response", sanitizeResponseBody(blw.body.Bytes()))
 		}
 

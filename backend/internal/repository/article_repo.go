@@ -2,6 +2,8 @@ package repository
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"gin-quickstart/internal/model"
@@ -9,14 +11,20 @@ import (
 	"gorm.io/gorm"
 )
 
+const defaultMaxSearchQueryLen = 100
+
 // articleRepo 文章仓储实现
 type articleRepo struct {
-	db *gorm.DB
+	db                *gorm.DB
+	maxSearchQueryLen int
 }
 
 // NewArticleRepository 创建文章仓储
-func NewArticleRepository(db *gorm.DB) ArticleRepository {
-	return &articleRepo{db: db}
+func NewArticleRepository(db *gorm.DB, maxSearchQueryLen int) ArticleRepository {
+	if maxSearchQueryLen <= 0 {
+		maxSearchQueryLen = defaultMaxSearchQueryLen
+	}
+	return &articleRepo{db: db, maxSearchQueryLen: maxSearchQueryLen}
 }
 
 func (r *articleRepo) FindByID(ctx context.Context, id uint) (*model.Article, error) {
@@ -223,31 +231,44 @@ func (r *articleRepo) Search(ctx context.Context, query string, limit, offset in
 	var articles []*model.Article
 	var total int64
 
-	if len(query) > maxSearchQueryLength {
-		query = query[:maxSearchQueryLength]
+	if len(query) > r.maxSearchQueryLen {
+		query = query[:r.maxSearchQueryLen]
 	}
 
-	searchPattern := "%" + query + "%"
-
-	dbQuery := r.db.WithContext(ctx).
-		Model(&model.Article{}).
-		Preload("Category").
-		Where("status = ?", model.StatusPublished).
-		Where("title ILIKE ? OR content ILIKE ?", searchPattern, searchPattern)
+	// 使用 PostgreSQL 全文搜索
+	// plainto_tsquery 自动处理用户输入，'simple' 配置适合中文
+	tsQuery := fmt.Sprintf("plainto_tsquery('simple', '%s')", strings.ReplaceAll(query, "'", "''"))
 
 	// 统计总数
-	if err := dbQuery.Count(&total).Error; err != nil {
+	countSQL := fmt.Sprintf(`
+		SELECT COUNT(*) FROM articles
+		WHERE status = 'published' AND deleted_at IS NULL
+		AND search_vec @@ %s
+	`, tsQuery)
+	if err := r.db.WithContext(ctx).Raw(countSQL).Scan(&total).Error; err != nil {
 		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 统计失败")
 		return nil, 0, err
 	}
 
-	// 获取分页结果
-	if err := dbQuery.Order("published_at DESC").
-		Offset(offset).
-		Limit(limit).
-		Find(&articles).Error; err != nil {
+	// 获取分页结果，按相关度排序
+	searchSQL := fmt.Sprintf(`
+		SELECT * FROM articles
+		WHERE status = 'published' AND deleted_at IS NULL
+		AND search_vec @@ %s
+		ORDER BY ts_rank(search_vec, %s) DESC, published_at DESC
+		LIMIT ? OFFSET ?
+	`, tsQuery, tsQuery)
+	if err := r.db.WithContext(ctx).Raw(searchSQL, limit, offset).Scan(&articles).Error; err != nil {
 		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 查询失败")
 		return nil, 0, err
+	}
+
+	// 加载关联数据
+	for _, article := range articles {
+		if article.CategoryID != nil {
+			r.db.WithContext(ctx).First(&article.Category, *article.CategoryID)
+		}
+		r.db.WithContext(ctx).Model(article).Association("Tags").Find(&article.Tags)
 	}
 
 	logger.Debug().Str("query", query).Int64("total", total).Dur("duration", time.Since(start)).Msg("Search 成功")

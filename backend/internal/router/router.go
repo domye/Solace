@@ -56,7 +56,9 @@ func NewRouter(
 }
 
 // Setup 初始化路由并注册所有路由
-func (r *Router) Setup(cfg *config.Config) *gin.Engine {
+// 返回 gin.Engine 和所有创建的 RateLimiter 列表（用于服务关闭时调用 Stop）
+func (r *Router) Setup(cfg *config.Config) (*gin.Engine, []*middleware.RateLimiter) {
+	var limiters []*middleware.RateLimiter
 	gin.SetMode(cfg.ServerMode())
 
 	engine := gin.New()
@@ -73,6 +75,7 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 
 	if cfg.RateLimit() > 0 {
 		publicLimiter := middleware.NewRateLimiter(cfg.RateLimit(), time.Minute)
+		limiters = append(limiters, publicLimiter)
 		engine.GET("/sitemap.xml", middleware.RateLimit(publicLimiter), r.sitemapHandler.GetSitemap)
 		engine.GET("/rss.xml", middleware.RateLimit(publicLimiter), r.rssHandler.GetRSS)
 	} else {
@@ -107,6 +110,7 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		{
 			if cfg.RateLimit() > 0 {
 				limiter := middleware.NewRateLimiter(cfg.RateLimit(), time.Minute)
+				limiters = append(limiters, limiter)
 				auth.Use(middleware.RateLimit(limiter))
 			}
 			auth.POST("/login", r.authHandler.Login)
@@ -127,6 +131,7 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		// 搜索接口（单独限流）
 		if cfg.SearchRateLimit() > 0 {
 			searchLimiter := middleware.NewRateLimiter(cfg.SearchRateLimit(), time.Minute)
+			limiters = append(limiters, searchLimiter)
 			v1.GET("/articles/search", middleware.RateLimit(searchLimiter), r.articleHandler.Search)
 		} else {
 			v1.GET("/articles/search", r.articleHandler.Search)
@@ -173,5 +178,5 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		}
 	}
 
-	return engine
+	return engine, limiters
 }
