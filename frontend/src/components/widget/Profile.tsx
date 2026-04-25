@@ -65,6 +65,28 @@ export function Profile() {
 							<SafeIcon icon="fa6-brands:github" size="1.125rem" />
 						</a>
 					)}
+					{owner?.bilibili_url && (
+						<a
+							href={owner.bilibili_url}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="w-8 h-8 rounded-full flex items-center justify-center text-50 hover:bg-[var(--primary)] hover:text-white transition-all"
+							aria-label="Bilibili"
+						>
+							<SafeIcon icon="ri:bilibili-fill" size="1.125rem" />
+						</a>
+					)}
+					{owner?.x_url && (
+						<a
+							href={owner.x_url}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="w-8 h-8 rounded-full flex items-center justify-center text-50 hover:bg-[var(--primary)] hover:text-white transition-all"
+							aria-label="X"
+						>
+							<SafeIcon icon="fa6-brands:x-twitter" size="1.125rem" />
+						</a>
+					)}
 					{owner?.email && (
 						<a
 							href={`mailto:${owner.email}`}

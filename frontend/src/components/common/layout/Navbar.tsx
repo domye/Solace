@@ -6,6 +6,7 @@ import { useAuthStore } from "@/stores";
 import { useClickOutside, useNavPages } from "@/hooks";
 import { ThemeToggle, SafeIcon } from "@/components/common/ui";
 import { SearchModal } from "@/components/widget";
+import { getSiteName } from "@/config/runtime";
 import { useState, useRef, useMemo, useCallback } from "react";
 
 // ============ 常量定义 ============
@@ -43,6 +44,8 @@ function IconButton({
 
 /** Logo 品牌 */
 function BrandLogo() {
+	const siteName = getSiteName();
+
 	return (
 		<Link
 			to="/"
@@ -54,7 +57,7 @@ function BrandLogo() {
 					size="1.75rem"
 					className="mb-1 mr-2"
 				/>
-				<span>Solace</span>
+				<span>{siteName}</span>
 			</div>
 		</Link>
 	);

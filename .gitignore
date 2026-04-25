@@ -4,11 +4,13 @@
 .vscode/
 *.swp
 *.swo
+.omx
 
 # AI Tools
 .claude/
 .opencode/
 .trellis/
+CLAUDE.md
 
 # OS
 .DS_Store

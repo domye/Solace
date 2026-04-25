@@ -1,6 +1,9 @@
 /** 页脚组件 - Mizuki 风格 */
+import { getSiteName } from "@/config/runtime";
+
 export function Footer() {
 	const currentYear = new Date().getFullYear();
+	const siteName = getSiteName();
 
 	return (
 		<footer className="w-full">
@@ -9,10 +12,10 @@ export function Footer() {
 				<p className="text-50 text-sm text-center leading-relaxed space-y-1">
 					<span className="block">
 						&copy; {currentYear}{" "}
-						<FooterLink href="https://github.com/domye/Solace">
-							Solace
+						<FooterLink href="https://github.com/HSJ-BanFan">
+							{siteName}
 						</FooterLink>{" "}
-						By Domye . All Rights Reserved.
+						By HSJ-BanFan . All Rights Reserved.
 					</span>
 					<span className="block">
 						<FooterLink href="https://beian.miit.gov.cn">

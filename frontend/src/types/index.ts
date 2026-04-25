@@ -56,6 +56,8 @@ export interface Owner {
 	avatar_url?: string;
 	bio?: string;
 	github_url?: string;
+	bilibili_url?: string;
+	x_url?: string;
 	email?: string;
 	rss_url?: string;
 	sitemap_url?: string;
