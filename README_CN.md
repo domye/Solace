@@ -350,7 +350,8 @@ expire = 24  # hours
 ---
 
 <div align="center">
- [![Stargazers over time](https://starchart.cc/domye/Solace.svg?variant=adaptive)](https://starchart.cc/domye/Solace)
+
+![Stargazers over time](https://starchart.cc/domye/Solace.svg?variant=adaptive)
 
 **[⬆ 返回顶部](#solace)**
 
