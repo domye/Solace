@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"net/url"
@@ -23,8 +24,8 @@ import (
 )
 
 const (
-	maxImageUploadBytes        = 10 << 20
-	maxMultipartImageBodyBytes = maxImageUploadBytes + 1<<20
+	maxImageUploadBytes        = 50 << 20
+	maxMultipartImageBodyBytes = maxImageUploadBytes + 2<<20
 )
 
 var allowedImageTypes = map[string]string{
@@ -87,6 +88,15 @@ func (h *UploadHandler) UploadImage(c *gin.Context) {
 
 	file, header, err := c.Request.FormFile("image")
 	if err != nil {
+		if strings.Contains(err.Error(), "request body too large") {
+			RespondWithError(c, apperrors.NewTooLarge("图片文件过大，请上传 50MB 以内的图片"))
+			return
+		}
+		slog.Error("FormFile parse failed",
+			"error", err,
+			"content_type", c.GetHeader("Content-Type"),
+			"content_length", c.GetHeader("Content-Length"),
+		)
 		RespondWithError(c, apperrors.NewBadRequest("image file is required", nil))
 		return
 	}
@@ -149,7 +159,7 @@ func imageExtension(file multipart.File, header *multipart.FileHeader) (string, 
 	}
 
 	if header.Size > maxImageUploadBytes {
-		return "", apperrors.NewBadRequest("image file must be 10MB or smaller", nil)
+		return "", apperrors.NewBadRequest("image file must be 50MB or smaller", nil)
 	}
 
 	buffer := make([]byte, 512)

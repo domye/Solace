@@ -6,6 +6,7 @@ import {
 	useUpdateArticle,
 	useCategories,
 	useTags,
+	useImageDropUpload,
 } from "@/hooks";
 import { LoadingButton, InputField, TextAreaField } from "@/components";
 import { LazyMarkdownEditor } from "@/components/admin";
@@ -37,6 +38,20 @@ export function ArticleEditorPage() {
 	);
 	const [pendingAction, setPendingAction] = useState<ArticleStatus | null>(null);
 	const [error, setError] = useState("");
+
+	const {
+		isDragActive: isCoverDragActive,
+		isUploading: isCoverUploading,
+		error: coverUploadError,
+		dragHandlers: coverDragHandlers,
+	} = useImageDropUpload({
+		multiple: false,
+		onUploadSuccess: (_files, urls) => {
+			if (urls[0]) {
+				setCoverImage(urls[0]);
+			}
+		},
+	});
 
 	useEffect(() => {
 		if (!existingArticle) {
@@ -130,7 +145,7 @@ export function ArticleEditorPage() {
 				</div>
 			)}
 
-			<div className="card-base p-6 h-[calc(100vh-12rem)] flex flex-col !transform-none hover:!transform-none hover:!shadow-[var(--showa-shadow-offset)_var(--showa-shadow-offset)_0_var(--showa-shadow-color)]">
+			<div className="card-base p-6 h-[calc(100vh-12rem)] flex flex-col !transform:none hover:!transform:none hover:!shadow-[var(--showa-shadow-offset)_var(--showa-shadow-offset)_0_var(--showa-shadow-color)]">
 				<InputField
 					label="标题"
 					value={title}
@@ -166,13 +181,40 @@ export function ArticleEditorPage() {
 							className="input-base"
 						/>
 					</div>
-					<InputField
-						label="封面图片"
-						value={coverImage}
-						onChange={setCoverImage}
-						placeholder="https://example.com/cover.jpg"
-						type="url"
-					/>
+					<div
+						className="relative"
+						onDragEnter={coverDragHandlers.onDragEnter}
+						onDragOver={coverDragHandlers.onDragOver}
+						onDragLeave={coverDragHandlers.onDragLeave}
+						onDrop={coverDragHandlers.onDrop}
+					>
+						<InputField
+							label="封面图片"
+							value={coverImage}
+							onChange={setCoverImage}
+							placeholder="https://example.com/cover.jpg"
+							type="url"
+						/>
+						{isCoverDragActive && (
+							<div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[var(--radius-medium)] border-2 border-dashed border-sky-400 bg-sky-50/80 dark:bg-sky-900/30">
+								<span className="text-sm font-medium text-sky-600 dark:text-sky-300">
+									松手上传
+								</span>
+							</div>
+						)}
+						{isCoverUploading && (
+							<div className="pointer-events-none absolute right-3 top-9 z-10 flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+								<div
+									aria-hidden="true"
+									className="h-4 w-4 animate-spin rounded-full border-2 border-slate-200 border-t-sky-500 dark:border-slate-700 dark:border-t-sky-400"
+								/>
+								<span>封面上传中</span>
+							</div>
+						)}
+						{coverUploadError && (
+							<p className="mt-1 text-xs text-red-500">{coverUploadError}</p>
+						)}
+					</div>
 				</div>
 
 				<TextAreaField

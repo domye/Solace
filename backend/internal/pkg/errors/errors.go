@@ -78,6 +78,14 @@ func NewNotFound(message string) AppError {
 	}
 }
 
+func NewTooLarge(message string) AppError {
+	return &appError{
+		code:       "PAYLOAD_TOO_LARGE",
+		message:    message,
+		httpStatus: http.StatusRequestEntityTooLarge,
+	}
+}
+
 func NewTooManyRequests(message string) AppError {
 	return &appError{
 		code:       "TOO_MANY_REQUESTS",

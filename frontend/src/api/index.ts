@@ -148,12 +148,23 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Res
     const newToken = await doRefreshToken();
 
     if (newToken && init?.headers) {
-      const headers = new Headers(init.headers);
-      headers.set('Authorization', `Bearer ${newToken}`);
+      const retryHeaders = new Headers(init.headers);
+      retryHeaders.set('Authorization', `Bearer ${newToken}`);
+
+      // Clone FormData to ensure body is fresh for retry
+      let retryBody = init.body;
+      if (init.body instanceof FormData) {
+        const cloned = new FormData();
+        init.body.forEach((value, key) => {
+          cloned.append(key, value);
+        });
+        retryBody = cloned;
+      }
 
       return originalFetch(input, {
         ...init,
-        headers,
+        headers: retryHeaders,
+        body: retryBody,
       });
     } else {
       clearAuthStorage();
@@ -184,6 +195,10 @@ export async function uploadImage(file: File): Promise<string> {
     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     body: formData,
   });
+
+  if (response.status === 413) {
+    throw new Error('图片文件过大，请上传 50MB 以内的图片');
+  }
 
   const payload = await response.json().catch(() => null);
 

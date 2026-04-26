@@ -30,8 +30,14 @@ import React, {
 	type ReactNode,
 } from "react";
 import type { CSSProperties } from "react";
+import { useState, useCallback, createContext, useContext } from "react";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 import type { TocHeading } from "@/components/widget/TableOfContents";
 import { LazyImage } from "@/components/common/ui";
+
+/** 图片点击预览 Context */
+const ImagePreviewContext = createContext<(src: string, alt: string) => void>(() => {});
 import { useImageSettings } from "@/hooks";
 import { remarkGallery } from "@/lib/remark/gallery";
 import { getImageRenderMetadata } from "@/utils/image";
@@ -344,13 +350,16 @@ const Image = memo(function Image({
 		? ({ width: metadata.width, maxWidth: "100%", height: "auto" } satisfies CSSProperties)
 		: undefined;
 
+	const openPreview = useContext(ImagePreviewContext);
+
 	return (
 		<LazyImage
 			src={metadata.src}
 			alt={alt}
 			style={style}
-			className="max-w-full h-auto rounded-[var(--radius-large)] my-4 mx-auto"
+			className="max-w-full h-auto rounded-[var(--radius-large)] my-4 mx-auto cursor-zoom-in"
 			effect="blur"
+			onClick={() => openPreview(metadata.src, alt ?? "")}
 		/>
 	);
 });
@@ -479,10 +488,17 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
 	className = "",
 	onHeadingsExtracted,
 }: MarkdownRendererProps) {
-	// 提取标题并通知父组件 (使用 useMemo 缓存结果)
 	const headings = useMemo(() => extractHeadings(content), [content]);
 
-	// 首次渲染时懒加载 JetBrains Mono 字体
+	const [previewOpen, setPreviewOpen] = useState(false);
+	const [previewSrc, setPreviewSrc] = useState("");
+	const [previewAlt, setPreviewAlt] = useState("");
+	const openPreview = useCallback((src: string, alt: string) => {
+		setPreviewSrc(src);
+		setPreviewAlt(alt);
+		setPreviewOpen(true);
+	}, []);
+
 	useEffect(() => {
 		loadJetBrainsMono();
 	}, []);
@@ -493,12 +509,29 @@ export const MarkdownRenderer = memo(function MarkdownRenderer({
 
 	return (
 		<div className={`custom-md ${className}`}>
-			<ReactMarkdown
-				remarkPlugins={[remarkGfm, remarkDirective, remarkGallery, remarkBreaks]}
-				components={MARKDOWN_COMPONENTS}
-			>
-				{content}
-			</ReactMarkdown>
+			<ImagePreviewContext.Provider value={openPreview}>
+				<ReactMarkdown
+					remarkPlugins={[remarkGfm, remarkDirective, remarkGallery, remarkBreaks]}
+					components={MARKDOWN_COMPONENTS}
+				>
+					{content}
+				</ReactMarkdown>
+			</ImagePreviewContext.Provider>
+			<Lightbox
+				open={previewOpen}
+				close={() => setPreviewOpen(false)}
+				slides={[{ src: previewSrc, alt: previewAlt }]}
+				carousel={{ finite: true }}
+				controller={{ closeOnPullDown: true, closeOnBackdropClick: true }}
+				styles={{ container: { backgroundColor: "rgba(0, 0, 0, 0.85)" } }}
+				render={{ slide: (props) => (
+					<img
+						src={props.slide.src}
+						alt={props.slide.alt ?? ""}
+						style={{ maxWidth: "100%", maxHeight: "100vh", objectFit: "contain" as const }}
+					/>
+				) }}
+			/>
 		</div>
 	);
 });
