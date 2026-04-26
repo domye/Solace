@@ -343,9 +343,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Tailwind CSS](https://tailwindcss.com/) - CSS framework
 - [TanStack Query](https://tanstack.com/query) - Data fetching
 
----
 
-<div align="center">
+
 
 ![Stargazers over time](https://starchart.cc/domye/Solace.svg?variant=adaptive)
 
