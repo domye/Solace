@@ -68,8 +68,10 @@ export function MarkdownEditor({
 	);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const valueRef = useRef(value);
+	const isUserInputRef = useRef(false);
 
 	// Remount once when async content arrives so undo history starts at the loaded baseline.
+	// Skip remount when the value change originated from user typing (handleEditorChange).
 	const [editorKey, setEditorKey] = useState(0);
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [uploadError, setUploadError] = useState("");
@@ -80,13 +82,15 @@ export function MarkdownEditor({
 	}, [value]);
 
 	useEffect(() => {
-		if (value && !isInitialized) {
+		if (value && !isInitialized && !isUserInputRef.current) {
 			setIsInitialized(true);
 			setEditorKey((k) => k + 1);
 		}
+		isUserInputRef.current = false;
 	}, [value, isInitialized]);
 
 	const handleEditorChange = ({ text }: { html: string; text: string }) => {
+		isUserInputRef.current = true;
 		onChange(text);
 	};
 
