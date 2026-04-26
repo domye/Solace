@@ -346,6 +346,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <div align="center">
+ [![Stargazers over time](https://starchart.cc/domye/Solace.svg?variant=adaptive)](https://starchart.cc/domye/Solace)
 
 **[⬆ Back to Top](#solace)**
 
