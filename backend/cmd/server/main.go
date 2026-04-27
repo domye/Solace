@@ -46,6 +46,13 @@ func ensureSettingsSchema(ctx context.Context, settingsRepo repository.SettingsR
 	return nil
 }
 
+func ensureMediaSchema(ctx context.Context, mediaRepo repository.MediaAssetRepository) error {
+	if err := mediaRepo.EnsureTables(ctx); err != nil {
+		return fmt.Errorf("ensure media schema: %w", err)
+	}
+	return nil
+}
+
 func main() {
 	// 加载配置
 	cfg := config.Load()
@@ -78,13 +85,23 @@ func main() {
 	tagRepo := repository.NewTagRepository(db)
 	pageRepo := repository.NewPageRepository(db)
 	settingsRepo := repository.NewSettingsRepository(db)
-	schemaCtx, cancelSchema := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancelSchema()
-	if err := ensureSettingsSchema(schemaCtx, settingsRepo); err != nil {
+	mediaRepo := repository.NewMediaAssetRepository(db)
+	settingsSchemaCtx, cancelSettingsSchema := context.WithTimeout(context.Background(), 10*time.Second)
+	if err := ensureSettingsSchema(settingsSchemaCtx, settingsRepo); err != nil {
+		cancelSettingsSchema()
 		logger.Fatal().Err(err).Msg("settings 表初始化失败")
 	}
+	cancelSettingsSchema()
+
+	mediaSchemaCtx, cancelMediaSchema := context.WithTimeout(context.Background(), 10*time.Second)
+	if err := ensureMediaSchema(mediaSchemaCtx, mediaRepo); err != nil {
+		cancelMediaSchema()
+		logger.Fatal().Err(err).Msg("media asset table init failed")
+	}
+	cancelMediaSchema()
 
 	// 初始化 JWT 管理器
+
 	jwtManager := jwt.NewJWTManager(
 		cfg.JWTSecret(),
 		cfg.JWTAccessDuration(),
@@ -99,6 +116,7 @@ func main() {
 	)
 	ownerService := service.NewOwnerService(cfg)
 	githubService := service.NewGitHubService(cfg)
+	mediaService := service.NewMediaService(mediaRepo, cfg)
 	articleService := service.NewArticleService(articleRepo, categoryRepo, tagRepo)
 	categoryService := service.NewCategoryService(categoryRepo)
 	tagService := service.NewTagService(tagRepo)
@@ -109,13 +127,14 @@ func main() {
 	authHandler := handler.NewAuthHandler(authService)
 	ownerHandler := handler.NewOwnerHandler(ownerService)
 	githubHandler := handler.NewGitHubHandler(githubService, cfg)
-	articleHandler := handler.NewArticleHandler(articleService)
+	articleHandler := handler.NewArticleHandler(articleService, mediaService)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 	tagHandler := handler.NewTagHandler(tagService)
 	sitemapHandler := handler.NewSitemapHandler(articleService, categoryService, tagService, pageService, cfg)
 	rssHandler := handler.NewRSSHandler(articleService, ownerService, cfg)
-	pageHandler := handler.NewPageHandler(pageService)
+	pageHandler := handler.NewPageHandler(pageService, mediaService)
 	settingsHandler := handler.NewSettingsHandler(settingsService)
+	mediaHandler := handler.NewMediaHandler(mediaService)
 	uploadHandler, err := handler.NewUploadHandler(cfg)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("上传处理器初始化失败")
@@ -135,6 +154,7 @@ func main() {
 		pageHandler,
 		uploadHandler,
 		settingsHandler,
+		mediaHandler,
 	)
 	r := appRouter.Setup(cfg)
 

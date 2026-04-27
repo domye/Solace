@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log/slog"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -12,12 +13,13 @@ import (
 
 // PageHandler 页面处理器
 type PageHandler struct {
-	pageService service.PageService
+	pageService  service.PageService
+	mediaService service.MediaService
 }
 
 // NewPageHandler 创建页面处理器
-func NewPageHandler(pageService service.PageService) *PageHandler {
-	return &PageHandler{pageService: pageService}
+func NewPageHandler(pageService service.PageService, mediaService service.MediaService) *PageHandler {
+	return &PageHandler{pageService: pageService, mediaService: mediaService}
 }
 
 // Create 创建页面
@@ -52,6 +54,14 @@ func (h *PageHandler) Create(c *gin.Context) {
 	if err != nil {
 		RespondWithError(c, err)
 		return
+	}
+
+	if h.mediaService != nil {
+		mediaCtx, cancel := detachedRequestContext(c)
+		defer cancel()
+		if err := h.mediaService.SyncPageRefs(mediaCtx, page.ID, req.Content, req.CoverImage); err != nil {
+			slog.Warn("sync page media refs failed", "page_id", page.ID, "error", err)
+		}
 	}
 
 	RespondWithCreated(c, page)
@@ -206,6 +216,14 @@ func (h *PageHandler) Update(c *gin.Context) {
 		return
 	}
 
+	if h.mediaService != nil {
+		mediaCtx, cancel := detachedRequestContext(c)
+		defer cancel()
+		if err := h.mediaService.SyncPageRefs(mediaCtx, page.ID, req.Content, req.CoverImage); err != nil {
+			slog.Warn("sync page media refs failed", "page_id", page.ID, "error", err)
+		}
+	}
+
 	RespondWithSuccess(c, page)
 }
 
@@ -229,6 +247,14 @@ func (h *PageHandler) Delete(c *gin.Context) {
 	if err := h.pageService.Delete(c.Request.Context(), uint(id)); err != nil {
 		RespondWithError(c, err)
 		return
+	}
+
+	if h.mediaService != nil {
+		mediaCtx, cancel := detachedRequestContext(c)
+		defer cancel()
+		if err := h.mediaService.ReleasePageRefs(mediaCtx, uint(id)); err != nil {
+			slog.Warn("release page media refs failed", "page_id", uint(id), "error", err)
+		}
 	}
 
 	RespondWithNoContent(c)

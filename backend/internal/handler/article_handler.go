@@ -1,24 +1,26 @@
 package handler
 
 import (
-	"gin-quickstart/internal/pkg/text"
+	"log/slog"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"gin-quickstart/internal/dto/request"
 	apperrors "gin-quickstart/internal/pkg/errors"
+	"gin-quickstart/internal/pkg/text"
 	"gin-quickstart/internal/service"
 )
 
 // ArticleHandler 文章处理器
 type ArticleHandler struct {
 	articleService service.ArticleService
+	mediaService   service.MediaService
 }
 
 // NewArticleHandler 创建文章处理器
-func NewArticleHandler(articleService service.ArticleService) *ArticleHandler {
-	return &ArticleHandler{articleService: articleService}
+func NewArticleHandler(articleService service.ArticleService, mediaService service.MediaService) *ArticleHandler {
+	return &ArticleHandler{articleService: articleService, mediaService: mediaService}
 }
 
 // Create 创建文章
@@ -77,6 +79,14 @@ func (h *ArticleHandler) Create(c *gin.Context) {
 	if err != nil {
 		RespondWithError(c, err)
 		return
+	}
+
+	if h.mediaService != nil {
+		mediaCtx, cancel := detachedRequestContext(c)
+		defer cancel()
+		if err := h.mediaService.SyncArticleRefs(mediaCtx, article.ID, req.Content, req.CoverImage); err != nil {
+			slog.Warn("sync article media refs failed", "article_id", article.ID, "error", err)
+		}
 	}
 
 	RespondWithCreated(c, article)
@@ -274,6 +284,14 @@ func (h *ArticleHandler) Update(c *gin.Context) {
 		return
 	}
 
+	if h.mediaService != nil {
+		mediaCtx, cancel := detachedRequestContext(c)
+		defer cancel()
+		if err := h.mediaService.SyncArticleRefs(mediaCtx, article.ID, req.Content, req.CoverImage); err != nil {
+			slog.Warn("sync article media refs failed", "article_id", article.ID, "error", err)
+		}
+	}
+
 	RespondWithSuccess(c, article)
 }
 
@@ -298,6 +316,14 @@ func (h *ArticleHandler) Delete(c *gin.Context) {
 	if err := h.articleService.Delete(c.Request.Context(), uint(id)); err != nil {
 		RespondWithError(c, err)
 		return
+	}
+
+	if h.mediaService != nil {
+		mediaCtx, cancel := detachedRequestContext(c)
+		defer cancel()
+		if err := h.mediaService.ReleaseArticleRefs(mediaCtx, uint(id)); err != nil {
+			slog.Warn("release article media refs failed", "article_id", uint(id), "error", err)
+		}
 	}
 
 	RespondWithNoContent(c)

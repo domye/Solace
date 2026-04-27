@@ -101,10 +101,12 @@ type UploadConfig struct {
 }
 
 type ImgBedConfig struct {
-	Endpoint     string `toml:"endpoint"`
-	Token        string `toml:"token"`
-	Field        string `toml:"field"`
-	UploadFolder string `toml:"upload_folder"`
+	Endpoint       string `toml:"endpoint"`
+	Token          string `toml:"token"`
+	Field          string `toml:"field"`
+	UploadFolder   string `toml:"upload_folder"`
+	DeleteEndpoint string `toml:"delete_endpoint"`
+	DeleteToken    string `toml:"delete_token"`
 }
 
 // Load 从 TOML 文件加载配置
@@ -245,4 +247,24 @@ func (c *Config) ImgBedUploadFolder() string {
 		return value
 	}
 	return strings.TrimSpace(c.Upload.ImgBed.UploadFolder)
+}
+
+func (c *Config) ImgBedDeleteEndpoint() string {
+	if value := strings.TrimSpace(os.Getenv("IMGBED_DELETE_ENDPOINT")); value != "" {
+		return value
+	}
+	if value := strings.TrimSpace(c.Upload.ImgBed.DeleteEndpoint); value != "" {
+		return value
+	}
+	return strings.TrimSpace(c.Upload.ImgBed.Endpoint)
+}
+
+func (c *Config) ImgBedDeleteToken() string {
+	if value := strings.TrimSpace(os.Getenv("IMGBED_DELETE_TOKEN")); value != "" {
+		return value
+	}
+	if value := strings.TrimSpace(c.Upload.ImgBed.DeleteToken); value != "" {
+		return value
+	}
+	return strings.TrimSpace(c.Upload.ImgBed.Token)
 }

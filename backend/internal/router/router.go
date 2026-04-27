@@ -26,6 +26,7 @@ type Router struct {
 	pageHandler     *handler.PageHandler
 	uploadHandler   *handler.UploadHandler
 	settingsHandler *handler.SettingsHandler
+	mediaHandler    *handler.MediaHandler
 	authService     service.AuthService
 }
 
@@ -43,6 +44,7 @@ func NewRouter(
 	pageHandler *handler.PageHandler,
 	uploadHandler *handler.UploadHandler,
 	settingsHandler *handler.SettingsHandler,
+	mediaHandler *handler.MediaHandler,
 ) *Router {
 	return &Router{
 		authHandler:     authHandler,
@@ -57,6 +59,7 @@ func NewRouter(
 		pageHandler:     pageHandler,
 		uploadHandler:   uploadHandler,
 		settingsHandler: settingsHandler,
+		mediaHandler:    mediaHandler,
 	}
 }
 
@@ -147,7 +150,7 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 			// 受保护的文章路由
 			protectedArticles := protected.Group("/articles")
 			{
-				articles.GET("/:id", r.articleHandler.GetByID)
+				protectedArticles.GET("/:id", r.articleHandler.GetByID)
 				protectedArticles.POST("", r.articleHandler.Create)
 				protectedArticles.PUT("/:id", r.articleHandler.Update)
 				protectedArticles.DELETE("/:id", r.articleHandler.Delete)
@@ -183,6 +186,11 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 			{
 				protectedSettings.GET("/images", r.settingsHandler.GetImageSettings)
 				protectedSettings.PUT("/images", r.settingsHandler.UpdateImageSettings)
+			}
+
+			protectedMedia := protected.Group("/admin/media")
+			{
+				protectedMedia.POST("/assets/register", r.mediaHandler.RegisterAsset)
 			}
 
 			protectedUploads := protected.Group("/uploads")

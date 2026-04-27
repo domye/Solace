@@ -54,5 +54,7 @@ dir = "uploads"
 [upload.imgbed]
 endpoint = "https://cloudflare-imgbed-edp.pages.dev/upload?returnFormat=full"
 token = ""
+delete_endpoint = "https://cloudflare-imgbed-edp.pages.dev/api/manage/delete"
+delete_token = ""
 field = "file"
 upload_folder = "Blog"

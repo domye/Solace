@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"gin-quickstart/internal/model"
 )
@@ -60,4 +61,14 @@ type SettingsRepository interface {
 	EnsureTable(ctx context.Context) error
 	FindByKey(ctx context.Context, key string) (*model.Setting, error)
 	Upsert(ctx context.Context, setting *model.Setting) error
+}
+
+type MediaAssetRepository interface {
+	EnsureTables(ctx context.Context) error
+	UpsertAsset(ctx context.Context, asset *model.MediaAsset) (*model.MediaAsset, error)
+	FindByURLs(ctx context.Context, urls []string) ([]*model.MediaAsset, error)
+	ReplaceResourceRefs(ctx context.Context, resourceType string, resourceID uint, assetIDs []uint) error
+	DeleteResourceRefs(ctx context.Context, resourceType string, resourceID uint) error
+	ListOrphanedAssets(ctx context.Context, olderThan time.Time, limit int) ([]*model.MediaAsset, error)
+	DeleteAssetByID(ctx context.Context, assetID uint) error
 }
