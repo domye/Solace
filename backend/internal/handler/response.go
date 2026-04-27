@@ -3,9 +3,11 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	apperrors "gin-quickstart/internal/pkg/errors"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 // Response 标准 API 响应结构
@@ -32,7 +34,6 @@ type PagedResponse struct {
 	TotalPages int         `json:"totalPages"`
 }
 
-// RespondWithSuccess 发送成功响应
 func RespondWithSuccess(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusOK, Response{
 		Success: true,
@@ -40,7 +41,6 @@ func RespondWithSuccess(c *gin.Context, data interface{}) {
 	})
 }
 
-// RespondWithCreated 发送创建成功响应
 func RespondWithCreated(c *gin.Context, data interface{}) {
 	c.JSON(http.StatusCreated, Response{
 		Success: true,
@@ -48,7 +48,6 @@ func RespondWithCreated(c *gin.Context, data interface{}) {
 	})
 }
 
-// RespondWithPaged 发送分页响应
 func RespondWithPaged(c *gin.Context, data interface{}, page, pageSize int, total int64) {
 	totalPages := int(total) / pageSize
 	if int(total)%pageSize > 0 {
@@ -65,7 +64,6 @@ func RespondWithPaged(c *gin.Context, data interface{}, page, pageSize int, tota
 	})
 }
 
-// RespondWithError 发送错误响应
 func RespondWithError(c *gin.Context, err error) {
 	var appErr apperrors.AppError
 	if errors.As(err, &appErr) {
@@ -80,7 +78,22 @@ func RespondWithError(c *gin.Context, err error) {
 		return
 	}
 
-	// 未知错误 - 返回通用消息
+	if isArticleSlugConflictError(err) {
+		conflictErr := apperrors.NewConflict(
+			"文章链接已存在，请修改标题或自定义 slug 后重试",
+			map[string]string{"field": "slug"},
+		)
+		c.JSON(conflictErr.HTTPStatus(), Response{
+			Success: false,
+			Error: &ErrorBody{
+				Code:    conflictErr.Code(),
+				Message: conflictErr.Error(),
+				Details: conflictErr.Details(),
+			},
+		})
+		return
+	}
+
 	c.JSON(http.StatusInternalServerError, Response{
 		Success: false,
 		Error: &ErrorBody{
@@ -90,7 +103,19 @@ func RespondWithError(c *gin.Context, err error) {
 	})
 }
 
-// RespondWithNoContent 发送无内容响应
 func RespondWithNoContent(c *gin.Context) {
 	c.Status(http.StatusNoContent)
+}
+
+func isArticleSlugConflictError(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "23505" && pgErr.ConstraintName == "articles_slug_key"
+	}
+
+	return strings.Contains(err.Error(), "articles_slug_key")
 }

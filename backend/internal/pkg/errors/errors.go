@@ -61,6 +61,15 @@ func NewBadRequest(message string, details interface{}) AppError {
 	}
 }
 
+func NewConflict(message string, details interface{}) AppError {
+	return &appError{
+		code:       "CONFLICT",
+		message:    message,
+		httpStatus: http.StatusConflict,
+		details:    details,
+	}
+}
+
 // NewUnauthorized 创建未授权错误
 func NewUnauthorized(message string) AppError {
 	return &appError{
