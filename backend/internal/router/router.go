@@ -123,6 +123,7 @@ func (r *Router) Setup(cfg *config.Config) (*gin.Engine, []*middleware.RateLimit
 		{
 			articles.GET("", r.articleHandler.GetList)
 			articles.GET("/archive", r.articleHandler.GetArchive)
+			articles.GET("/contributions", r.articleHandler.GetContributions)
 			articles.GET("/random", r.articleHandler.GetRandom)
 			articles.GET("/recent", r.articleHandler.GetRecent)
 			articles.GET("/slug/:slug", r.articleHandler.GetBySlug)

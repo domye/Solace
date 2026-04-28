@@ -139,6 +139,25 @@ const docTemplate = `{
                 }
             }
         },
+        "/articles/contributions": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "article"
+                ],
+                "summary": "获取文章贡献日历",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/handler.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/articles/random": {
             "get": {
                 "produces": [
@@ -1257,7 +1276,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "slug": {
-                    "description": "可选，为空则自动生成",
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 1
@@ -1431,7 +1449,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "slug": {
-                    "description": "可选，为空则保持不变",
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 1
@@ -1518,7 +1535,6 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "contributions": {
-                    "description": "key: MM-DD, value: count",
                     "type": "object",
                     "additionalProperties": {
                         "type": "integer"
@@ -1533,14 +1549,12 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "groups": {
-                    "description": "按年份分组",
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/service.ContributionsGroup"
                     }
                 },
                 "total": {
-                    "description": "过去一年总贡献数",
                     "type": "integer"
                 }
             }

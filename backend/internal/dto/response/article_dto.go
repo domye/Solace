@@ -65,3 +65,15 @@ type ArchiveGroup struct {
 type ArchiveResponse struct {
 	Groups []*ArchiveGroup `json:"groups"`
 }
+
+// ArticleContributionsGroup 文章贡献分组（按年份）
+type ArticleContributionsGroup struct {
+	Year          int            `json:"year"`
+	Contributions map[string]int `json:"contributions"`
+}
+
+// ArticleContributionsResponse 文章贡献日历响应
+type ArticleContributionsResponse struct {
+	Total  int                          `json:"total"`
+	Groups []*ArticleContributionsGroup `json:"groups"`
+}

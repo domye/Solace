@@ -178,6 +178,22 @@ func (h *ArticleHandler) GetArchive(c *gin.Context) {
 	RespondWithSuccess(c, resp.Groups)
 }
 
+// GetContributions 获取文章贡献日历
+// @Summary 获取文章贡献日历
+// @Tags article
+// @Produce json
+// @Success 200 {object} Response
+// @Router /articles/contributions [get]
+func (h *ArticleHandler) GetContributions(c *gin.Context) {
+	resp, err := h.articleService.GetContributions(c.Request.Context())
+	if err != nil {
+		RespondWithError(c, err)
+		return
+	}
+
+	RespondWithSuccess(c, resp)
+}
+
 // Search 搜索文章
 // @Summary 搜索文章
 // @Tags article

@@ -62,7 +62,6 @@ definitions:
       parent_id:
         type: integer
       slug:
-        description: 可选，为空则自动生成
         maxLength: 100
         minLength: 1
         type: string
@@ -189,7 +188,6 @@ definitions:
       parent_id:
         type: integer
       slug:
-        description: 可选，为空则保持不变
         maxLength: 100
         minLength: 1
         type: string
@@ -255,7 +253,6 @@ definitions:
       contributions:
         additionalProperties:
           type: integer
-        description: 'key: MM-DD, value: count'
         type: object
       year:
         type: integer
@@ -263,12 +260,10 @@ definitions:
   service.ContributionsResponse:
     properties:
       groups:
-        description: 按年份分组
         items:
           $ref: '#/definitions/service.ContributionsGroup'
         type: array
       total:
-        description: 过去一年总贡献数
         type: integer
     type: object
 host: localhost:8080
@@ -442,6 +437,18 @@ paths:
           schema:
             $ref: '#/definitions/handler.Response'
       summary: 获取归档列表
+      tags:
+      - article
+  /articles/contributions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 获取文章贡献日历
       tags:
       - article
   /articles/random:

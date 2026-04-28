@@ -30,6 +30,7 @@ type ArticleService interface {
 	GetBySlug(ctx context.Context, slug string) (*response.ArticleResponse, error)
 	GetList(ctx context.Context, page, pageSize int, status string, categorySlug, tagSlug string) (*response.ArticleListResponse, error)
 	GetArchive(ctx context.Context) (*response.ArchiveResponse, error)
+	GetContributions(ctx context.Context) (*response.ArticleContributionsResponse, error)
 	Search(ctx context.Context, query string, page, pageSize int) (*response.ArticleListResponse, error)
 	GetRandom(ctx context.Context, limit int) ([]*response.ArticleSummary, error)
 	GetRecent(ctx context.Context, limit int) ([]*response.ArticleSummary, error)
@@ -47,6 +48,7 @@ type articleRepository interface {
 	FindByTag(ctx context.Context, tagSlug string, limit, offset int) ([]*model.Article, int64, error)
 	FindBySlugWithNav(ctx context.Context, slug string) (*model.Article, *model.Article, *model.Article, error)
 	GetArchive(ctx context.Context) ([]*model.Article, error)
+	GetContributions(ctx context.Context, from, to time.Time) ([]*model.Article, error)
 	Search(ctx context.Context, query string, limit, offset int) ([]*model.Article, int64, error)
 	FindRandom(ctx context.Context, limit int) ([]*model.Article, error)
 	FindRecent(ctx context.Context, limit int) ([]*model.Article, error)
@@ -274,6 +276,48 @@ func (s *articleService) GetArchive(ctx context.Context) (*response.ArchiveRespo
 	})
 
 	return &response.ArchiveResponse{Groups: groups}, nil
+}
+
+func (s *articleService) GetContributions(ctx context.Context) (*response.ArticleContributionsResponse, error) {
+	to := time.Now()
+	from := to.AddDate(-1, 0, 0)
+
+	articles, err := s.articleRepo.GetContributions(ctx, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	yearGroups := make(map[int]*response.ArticleContributionsGroup)
+	total := 0
+
+	for _, article := range articles {
+		if article.PublishedAt == nil {
+			continue
+		}
+
+		year := article.PublishedAt.Year()
+		dateKey := article.PublishedAt.Format("01-02")
+
+		if _, ok := yearGroups[year]; !ok {
+			yearGroups[year] = &response.ArticleContributionsGroup{
+				Year:          year,
+				Contributions: make(map[string]int),
+			}
+		}
+
+		yearGroups[year].Contributions[dateKey]++
+		total++
+	}
+
+	groups := make([]*response.ArticleContributionsGroup, 0, len(yearGroups))
+	for _, g := range yearGroups {
+		groups = append(groups, g)
+	}
+	sort.Slice(groups, func(i, j int) bool {
+		return groups[i].Year > groups[j].Year
+	})
+
+	return &response.ArticleContributionsResponse{Total: total, Groups: groups}, nil
 }
 
 func (s *articleService) Search(ctx context.Context, query string, page, pageSize int) (*response.ArticleListResponse, error) {
