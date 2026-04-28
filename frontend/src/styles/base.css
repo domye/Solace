@@ -41,7 +41,6 @@
 		}
 	}
 
-	/* 单列布局时整体缩放为 95%（lg 到 xl 之间） */
 	@media (min-width: 1024px) and (max-width: 2560px) {
 		html {
 			zoom: 0.95;
