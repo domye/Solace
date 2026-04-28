@@ -279,15 +279,20 @@ func (s *articleService) GetArchive(ctx context.Context) (*response.ArchiveRespo
 }
 
 func (s *articleService) GetContributions(ctx context.Context) (*response.ArticleContributionsResponse, error) {
+	log := logger.WithContext(ctx)
+	log.Debug().Msg("获取文章贡献日历数据")
+
 	to := time.Now()
 	from := to.AddDate(-1, 0, 0)
 
 	articles, err := s.articleRepo.GetContributions(ctx, from, to)
 	if err != nil {
+		log.Error().Err(err).Msg("获取文章贡献数据失败")
 		return nil, err
 	}
 
-	yearGroups := make(map[int]*response.ArticleContributionsGroup)
+	// 预估：最多 2 年数据
+	yearGroups := make(map[int]*response.ArticleContributionsGroup, 2)
 	total := 0
 
 	for _, article := range articles {
@@ -301,7 +306,7 @@ func (s *articleService) GetContributions(ctx context.Context) (*response.Articl
 		if _, ok := yearGroups[year]; !ok {
 			yearGroups[year] = &response.ArticleContributionsGroup{
 				Year:          year,
-				Contributions: make(map[string]int),
+				Contributions: make(map[string]int, 64),
 			}
 		}
 
@@ -317,6 +322,7 @@ func (s *articleService) GetContributions(ctx context.Context) (*response.Articl
 		return groups[i].Year > groups[j].Year
 	})
 
+	log.Debug().Int("total", total).Int("groups", len(groups)).Msg("获取文章贡献数据成功")
 	return &response.ArticleContributionsResponse{Total: total, Groups: groups}, nil
 }
 
