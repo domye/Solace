@@ -171,14 +171,14 @@ const ModeSwitcher = memo(function ModeSwitcher({ mode, onModeChange }: ModeSwit
 			<button
 				type="button"
 				onClick={() => onModeChange("github")}
-				className={`px-2 py-0.5 text-[8px] lg:text-[9px] rounded transition-all duration-200 ${mode === "github" ? "bg-white dark:bg-neutral-700 text-[var(--primary)] shadow-sm" : "text-neutral-500 dark:text-neutral-400 hover:text-[var(--primary)]"}`}
+				className={`px-2 py-0.5 text-[8px] lg:text-[9px] rounded transition-all duration-200 ${mode === "github" ? "bg-white dark:bg-neutral-700 text-slate-600 dark:text-slate-300 shadow-sm" : "text-neutral-500 dark:text-neutral-400 hover:text-[var(--primary)]"}`}
 			>
 				GitHub
 			</button>
 			<button
 				type="button"
 				onClick={() => onModeChange("articles")}
-				className={`px-2 py-0.5 text-[8px] lg:text-[9px] rounded transition-all duration-200 ${mode === "articles" ? "bg-white dark:bg-neutral-700 text-[var(--primary)] shadow-sm" : "text-neutral-500 dark:text-neutral-400 hover:text-[var(--primary)]"}`}
+				className={`px-2 py-0.5 text-[8px] lg:text-[9px] rounded transition-all duration-200 ${mode === "articles" ? "bg-white dark:bg-neutral-700 text-slate-600 dark:text-slate-300 shadow-sm" : "text-neutral-500 dark:text-neutral-400 hover:text-[var(--primary)]"}`}
 			>
 				文章
 			</button>
