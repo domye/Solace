@@ -48,9 +48,10 @@ const ContributionCalendar = lazy(() =>
 interface LeftSidebarProps {
 	isArticlePage: boolean;
 	headings: { id: string; text: string; depth: number }[];
+	showCategories: boolean; // 是否显示分类（单列时显示）
 }
 
-function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
+function LeftSidebar({ isArticlePage, headings, showCategories }: LeftSidebarProps) {
 	const hasToc = isArticlePage && headings.length > 0;
 
 	// 有 TOC 时：Profile 不固定，TOC 和 Tags 固定
@@ -69,6 +70,12 @@ function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
 						className="onload-animation"
 						style={{ animationDelay: "150ms" }}
 					/>
+					{showCategories && (
+						<Categories
+							className="onload-animation"
+							style={{ animationDelay: "200ms" }}
+						/>
+					)}
 					<TableOfContents headings={headings} />
 				</div>
 			</aside>
@@ -84,6 +91,12 @@ function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
 					className="onload-animation"
 					style={{ animationDelay: "150ms" }}
 				/>
+				{showCategories && (
+					<Categories
+						className="onload-animation"
+						style={{ animationDelay: "200ms" }}
+					/>
+				)}
 			</div>
 		</aside>
 	);
@@ -170,7 +183,11 @@ export function MainLayout() {
 				<div className="flex gap-4">
 					{/* 左侧边栏 - Profile + TOC（lg 以上显示） */}
 					{isLgOrLarger && (
-						<LeftSidebar isArticlePage={isArticlePage} headings={headings} />
+						<LeftSidebar
+							isArticlePage={isArticlePage}
+							headings={headings}
+							showCategories={!isXlOrLarger}
+						/>
 					)}
 
 					{/* 主内容区 */}
