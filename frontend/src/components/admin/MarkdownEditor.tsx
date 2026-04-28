@@ -5,6 +5,10 @@ import MarkdownIt from "markdown-it";
 import { uploadImage } from "@/api";
 import { useImageSettings, useImageDropUpload } from "@/hooks";
 import { appendImageWidthParam, getImageRenderMetadata } from "@/utils/image";
+import {
+	createMarkdownUploadBatchTracker,
+	type MarkdownUploadBatchItem,
+} from "./markdownUploadBatches";
 import "react-markdown-editor-lite/lib/index.css";
 
 const DEFAULT_IMAGE_WIDTH = 720;
@@ -47,12 +51,9 @@ function escapeMarkdownText(text: string): string {
 	return text.replace(/[\\[\]]/g, "\\$&");
 }
 
-interface UploadItem {
-	id: number;
-	fileName: string;
-	status: "uploading" | "success" | "error";
+type UploadItem = MarkdownUploadBatchItem & {
 	error?: string;
-}
+};
 
 interface MarkdownEditorProps {
 	value: string;
@@ -78,9 +79,10 @@ export function MarkdownEditor({
 	);
 	const wrapperRef = useRef<HTMLDivElement>(null);
 	const valueRef = useRef(value);
+	const uploadItemsRef = useRef<UploadItem[]>([]);
 	const isUserInputRef = useRef(false);
 	const nextUploadIdRef = useRef(0);
-	const dragDropIdsRef = useRef<number[]>([]);
+	const uploadBatchTrackerRef = useRef(createMarkdownUploadBatchTracker());
 
 	const [editorKey, setEditorKey] = useState(0);
 	const [isInitialized, setIsInitialized] = useState(false);
@@ -90,6 +92,10 @@ export function MarkdownEditor({
 	useEffect(() => {
 		valueRef.current = value;
 	}, [value]);
+
+	useEffect(() => {
+		uploadItemsRef.current = uploadItems;
+	}, [uploadItems]);
 
 	useEffect(() => {
 		if (value && !isInitialized && !isUserInputRef.current) {
@@ -212,49 +218,43 @@ export function MarkdownEditor({
 		clearError: clearDropError,
 	} = useImageDropUpload({
 		multiple: true,
-		onFilesAccepted: (files) => {
+		onFilesAccepted: (files, batchId) => {
 			setUploadError("");
 			const ids = addUploadItems(files.map((f) => f.name));
-			dragDropIdsRef.current = ids;
+			uploadBatchTrackerRef.current.register(batchId, ids);
 		},
-		onFileUploaded: (file) => {
-			setUploadItems((prev) => {
-				const idx = prev.findIndex(
-					(it) => it.status === "uploading" && it.fileName === file.name,
-				);
-				if (idx === -1) return prev;
-				return prev.map((it, i) =>
-					i === idx ? { ...it, status: "success" as const } : it,
-				);
-			});
+		onFileUploaded: (file, _url, batchId) => {
+			const targetId = uploadBatchTrackerRef.current.findUploadingItemId(
+				batchId,
+				file,
+				uploadItemsRef.current,
+			);
+			if (targetId !== undefined) {
+				updateUploadItem(targetId, "success");
+			}
 		},
-		onFileFailed: (file, err) => {
-			setUploadItems((prev) => {
-				const idx = prev.findIndex(
-					(it) => it.status === "uploading" && it.fileName === file.name,
-				);
-				if (idx === -1) return prev;
-				return prev.map((it, i) =>
-					i === idx
-						? { ...it, status: "error" as const, error: err.message }
-						: it,
-				);
-			});
+		onFileFailed: (file, err, batchId) => {
+			const targetId = uploadBatchTrackerRef.current.findUploadingItemId(
+				batchId,
+				file,
+				uploadItemsRef.current,
+			);
+			if (targetId !== undefined) {
+				updateUploadItem(targetId, "error", err.message);
+			}
 		},
-		onUploadSuccess: (files, urls) => {
+		onUploadSuccess: (files, urls, batchId) => {
 			const results = files.map((f, i) =>
 				formatImageAsMarkdown(f, urls[i] ?? ""),
 			);
 			if (results.length > 0) {
 				insertMarkdown(results.join("\n\n"));
 			}
-			const ids = dragDropIdsRef.current;
-			dragDropIdsRef.current = [];
+			const ids = uploadBatchTrackerRef.current.takeBatchIds(batchId);
 			if (ids.length > 0) scheduleCleanup(ids);
 		},
-		onUploadError: () => {
-			const ids = dragDropIdsRef.current;
-			dragDropIdsRef.current = [];
+		onUploadError: (_error, _files, batchId) => {
+			const ids = uploadBatchTrackerRef.current.takeBatchIds(batchId);
 			if (ids.length > 0) scheduleCleanup(ids);
 		},
 	});

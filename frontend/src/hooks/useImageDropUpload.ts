@@ -1,6 +1,10 @@
 import { useState, useCallback, useRef } from "react";
 import type { DragEvent } from "react";
 import { uploadImage } from "@/api";
+import {
+	reportImageDropUploadError,
+	runImageDropUploadBatch,
+} from "./imageDropUploadBatch";
 
 interface UseImageDropUploadOptions {
 	multiple?: boolean;
@@ -8,11 +12,12 @@ interface UseImageDropUploadOptions {
 	onUploadSuccess: (
 		files: File[],
 		urls: string[],
+		batchId: string,
 	) => Promise<void> | void;
-	onUploadError?: (error: Error) => void;
-	onFilesAccepted?: (files: File[]) => void;
-	onFileUploaded?: (file: File, url: string) => void;
-	onFileFailed?: (file: File, error: Error) => void;
+	onUploadError?: (error: Error, files: File[], batchId: string) => void;
+	onFilesAccepted?: (files: File[], batchId: string) => void;
+	onFileUploaded?: (file: File, url: string, batchId: string) => void;
+	onFileFailed?: (file: File, error: Error, batchId: string) => void;
 }
 
 interface UseImageDropUploadReturn {
@@ -50,6 +55,7 @@ export function useImageDropUpload({
 	const [error, setError] = useState("");
 
 	const dragDepthRef = useRef(0);
+	const nextBatchIdRef = useRef(0);
 
 	const clearError = useCallback(() => setError(""), []);
 
@@ -91,37 +97,34 @@ export function useImageDropUpload({
 				return;
 			}
 
-			onFilesAccepted?.(accepted);
+			const batchId = `drop-${nextBatchIdRef.current++}`;
+			onFilesAccepted?.(accepted, batchId);
 			setError("");
 			setUploadingCount((c) => c + accepted.length);
 
-			(async () => {
-				const urls: string[] = [];
-				const successFiles: File[] = [];
-				let lastError: Error | null = null;
-
-				for (const f of accepted) {
-					try {
-						const url = await uploadImage(f);
-						urls.push(url);
-						successFiles.push(f);
-						onFileUploaded?.(f, url);
-					} catch (err: unknown) {
-						lastError = err instanceof Error ? err : new Error("Image upload failed");
-						onFileFailed?.(f, lastError);
-					}
+			void (async () => {
+				try {
+					await runImageDropUploadBatch({
+						files: accepted,
+						batchId,
+						uploadFile: uploadImage,
+						onUploadSuccess,
+						onUploadError,
+						onFileUploaded,
+						onFileFailed,
+						setError,
+					});
+				} catch (error: unknown) {
+					reportImageDropUploadError({
+						error,
+						files: accepted,
+						batchId,
+						onUploadError,
+						setError,
+					});
+				} finally {
+					setUploadingCount((c) => Math.max(0, c - accepted.length));
 				}
-
-				if (urls.length > 0) {
-					await onUploadSuccess(successFiles, urls);
-				}
-
-				if (lastError) {
-					setError(lastError.message);
-					onUploadError?.(lastError);
-				}
-
-				setUploadingCount((c) => Math.max(0, c - accepted.length));
 			})();
 		},
 		[effectiveMax, onUploadSuccess, onUploadError, onFilesAccepted, onFileUploaded, onFileFailed],
