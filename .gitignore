@@ -5,6 +5,7 @@
 *.swp
 *.swo
 .omx
+.omc
 
 # AI Tools
 .claude/
