@@ -1,7 +1,8 @@
 /**
- * GitHub 贡献日历组件
+ * 贡献日历组件
  *
  * Mizuki 风格：传统日历布局，单月显示，可左右切换，使用主题色
+ * 支持两种模式：GitHub 贡献日历 和 文章发布日历
  */
 
 import { useMemo, useState, useEffect } from "react";
@@ -9,6 +10,7 @@ import {
 	useGitHubContributions,
 	extractGitHubUsername,
 } from "@/hooks/api/github";
+import { useArticleContributions } from "@/hooks/api/articles";
 import type { ContributionsGroup } from "@/hooks/api/github";
 import { useOwner } from "@/hooks";
 
@@ -34,6 +36,8 @@ interface CalendarBuildResult {
 	monthTotal: number;
 	emptyCellsCount: number;
 }
+
+type CalendarMode = "github" | "articles";
 
 // ============================================================
 // 常量
@@ -109,6 +113,7 @@ const TITLE_STYLE = "font-bold text-sm lg:text-base text-90 relative ml-5 lg:ml-
 const WEEK_DAY_STYLE = "text-center text-[8px] lg:text-[9px] text-neutral-400 dark:text-neutral-500 font-medium py-0.5";
 const CELL_BASE_STYLE = "aspect-square flex items-center justify-center rounded cursor-pointer relative transition-all duration-200";
 const NAV_BTN_STYLE = "p-0.5 lg:p-1 rounded hover:bg-[var(--btn-plain-bg-hover)] text-neutral-600 dark:text-neutral-400 hover:text-[var(--primary)] transition-colors text-base lg:text-lg font-bold";
+const MODE_BTN_STYLE = "px-2 py-0.5 text-[8px] lg:text-[9px] rounded transition-all duration-200";
 
 export function ContributionCalendar({
 	className,
@@ -120,7 +125,19 @@ export function ContributionCalendar({
 		[owner?.github_url],
 	);
 
-	const { data: sparseData, isLoading, error } = useGitHubContributions();
+	// 模式切换状态
+	const [mode, setMode] = useState<CalendarMode>("github");
+
+	// GitHub 贡献数据
+	const { data: githubData, isLoading: githubLoading, error: githubError } = useGitHubContributions();
+
+	// 文章贡献数据
+	const { data: articleData, isLoading: articleLoading, error: articleError } = useArticleContributions();
+
+	// 根据模式选择数据
+	const sparseData = mode === "github" ? githubData : articleData;
+	const isLoading = mode === "github" ? githubLoading : articleLoading;
+	const error = mode === "github" ? githubError : articleError;
 
 	// 当前年月
 	const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
@@ -167,9 +184,6 @@ export function ContributionCalendar({
 		() => buildCalendar(currentYear, currentMonth, maxCount, currentYearGroup),
 		[currentYear, currentMonth, maxCount, currentYearGroup],
 	);
-
-	// 当前年份总贡献数（从顶层 total 获取）
-	const yearTotal = sparseData?.total ?? 0;
 
 	// 是否显示"返回今天"
 	const isBackToTodayVisible = useMemo(() => {
@@ -278,7 +292,8 @@ export function ContributionCalendar({
 		);
 	}
 
-	if (!githubUsername) {
+	// GitHub 模式需要检查用户名
+	if (mode === "github" && !githubUsername) {
 		return null;
 	}
 
@@ -350,46 +365,74 @@ export function ContributionCalendar({
 					))}
 
 					{/* 日期 */}
-					{cells.map((cell) => (
-						<button
-							key={cell.date}
-							type="button"
-							className={`${CELL_BASE_STYLE} ${cell.isToday ? "font-bold ring-1.5 ring-[var(--primary)]/40" : "hover:bg-[var(--btn-plain-bg-hover)]"}`}
-							style={{
-								backgroundColor: cell.isToday
-									? isDark ? "oklch(0.35 0.08 var(--hue))" : "oklch(0.88 0.06 var(--hue))"
-									: getCellBg(cell),
-							}}
-							title={`${cell.date}: ${cell.count} 次贡献`}
-						>
-							<span
-								className={`text-[8px] lg:text-[10px] ${
-									cell.isToday
-										? "font-bold text-neutral-500 dark:text-neutral-200"
-										: cell.count > 0
-											? "font-medium text-neutral-700 dark:text-neutral-300"
-											: "text-neutral-400 dark:text-neutral-500"
-								}`}
+					{cells.map((cell) => {
+						// 今日格子：无填充色，只显示主题色边框
+						const getBg = () => {
+							if (cell.isToday && cell.count > 0) {
+								return isDark
+									? "oklch(0.25 0.008 " + hue + ")"
+									: "oklch(0.96 0.008 " + hue + ")";
+							}
+							if (cell.isToday) {
+								return isDark
+									? "oklch(0.25 0.008 " + hue + ")"
+									: "oklch(0.96 0.008 " + hue + ")";
+							}
+							return getCellBg(cell);
+						};
+
+						return (
+							<button
+								key={cell.date}
+								type="button"
+								className={`${CELL_BASE_STYLE} ${cell.isToday ? "ring-1 ring-[var(--primary)]/50" : "hover:bg-[var(--btn-plain-bg-hover)]"}`}
+								style={{
+									backgroundColor: getBg(),
+								}}
+								title={mode === "github" ? `${cell.date}: ${cell.count} 次贡献` : `${cell.date}: ${cell.count} 篇文章`}
 							>
-								{cell.day}
-							</span>
-							{/* 有贡献的小圆点 */}
-							{cell.count > 0 && !cell.isToday && (
-								<span className="absolute bottom-0.5 w-0.5 h-0.5 rounded-full bg-[var(--primary)]/60" />
-							)}
-						</button>
-					))}
+								<span
+									className={`text-[8px] lg:text-[10px] ${
+										cell.isToday
+											? "text-neutral-600 dark:text-neutral-300"
+											: cell.count > 0
+												? "font-medium text-neutral-700 dark:text-neutral-300"
+												: "text-neutral-400 dark:text-neutral-500"
+									}`}
+								>
+									{cell.day}
+								</span>
+								{/* 有贡献的小圆点 */}
+								{cell.count > 0 && (
+									<span className="absolute bottom-0.5 w-0.5 h-0.5 rounded-full bg-[var(--primary)]/60" />
+								)}
+							</button>
+						);
+					})}
 				</div>
 			</div>
 
 			{/* 底部统计 */}
 			<div className="px-2.5 lg:px-3 mt-1 lg:mt-1.5 flex items-center justify-between text-[8px] lg:text-[9px] text-neutral-400 dark:text-neutral-500">
 				<span>
-					当月 <span className="font-medium text-[var(--primary)]">{monthTotal}</span> 次
+					当月 <span className="font-medium text-[var(--primary)]">{monthTotal}</span> {mode === "github" ? "次" : "篇"}
 				</span>
-				<span>
-					过去一年 <span className="font-medium text-[var(--primary)]">{yearTotal}</span> 次
-				</span>
+				<div className="flex items-center gap-1 bg-neutral-100/80 dark:bg-neutral-800/60 p-0.5 rounded-md">
+					<button
+						type="button"
+						onClick={() => setMode("github")}
+						className={`${MODE_BTN_STYLE} ${mode === "github" ? "bg-white dark:bg-neutral-700 text-[var(--primary)] shadow-sm" : "text-neutral-500 dark:text-neutral-400 hover:text-[var(--primary)]"}`}
+					>
+						GitHub
+					</button>
+					<button
+						type="button"
+						onClick={() => setMode("articles")}
+						className={`${MODE_BTN_STYLE} ${mode === "articles" ? "bg-white dark:bg-neutral-700 text-[var(--primary)] shadow-sm" : "text-neutral-500 dark:text-neutral-400 hover:text-[var(--primary)]"}`}
+					>
+						文章
+					</button>
+				</div>
 			</div>
 		</div>
 	);

@@ -169,3 +169,25 @@ export function useRecentArticles(limit = 5) {
 		staleTime: 5 * 60 * 1000,
 	});
 }
+
+/** 获取文章贡献日历 */
+export function useArticleContributions() {
+	return useQuery({
+		queryKey: queryKeys.articles.contributions(),
+		queryFn: async () => {
+			const response = await fetch("/api/v1/articles/contributions");
+			if (!response.ok) {
+				throw new Error("获取文章贡献数据失败");
+			}
+			const result = await response.json();
+			return result.data as {
+				total: number;
+				groups: Array<{
+					year: number;
+					contributions: Record<string, number>;
+				}>;
+			};
+		},
+		staleTime: 10 * 60 * 1000,
+	});
+}

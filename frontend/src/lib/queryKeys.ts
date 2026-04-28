@@ -15,6 +15,7 @@ export const queryKeys = {
 		detail: (id: number) => ["article", id] as const,
 		bySlug: (slug: string) => ["article", slug] as const,
 		archive: () => ["articles", "archive"] as const,
+		contributions: () => ["articles", "contributions"] as const,
 		search: (query: string, page?: number, pageSize?: number) =>
 			["articles", "search", query, { page, pageSize }] as const,
 		random: (limit?: number) => ["articles", "random", limit] as const,
