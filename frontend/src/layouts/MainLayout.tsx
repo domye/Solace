@@ -174,7 +174,7 @@ export function MainLayout() {
 	}, [location.pathname]);
 
 	return (
-		<div className="min-h-screen flex flex-col">
+		<div className="flex flex-col" style={{ minHeight: "calc(100dvh / 0.95)" }}>
 			{/* 顶部导航栏 */}
 			<Navbar />
 

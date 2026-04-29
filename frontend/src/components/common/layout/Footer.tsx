@@ -3,7 +3,7 @@ export function Footer() {
 	const currentYear = new Date().getFullYear();
 
 	return (
-		<footer className="w-full">
+		<footer className="w-full mt-auto">
 			<div className="border-t border-black/10 dark:border-white/15 my-4 border-dashed mx-4" />
 			<div className="rounded-2xl mb-4 flex flex-col items-center justify-center px-4">
 				<p className="text-50 text-xs md:text-sm text-center leading-relaxed space-y-1">
