@@ -6,19 +6,13 @@
  * - 行号显示
  * - 一键复制
  * - 深色/浅色主题切换
+ * - 代码折叠（超过 15 行自动折叠，底部可展开）
  *
  * 语言动态加载：js, ts, python, go, java, html, sql, json
  * 其他语言使用 text 模式（无高亮）
  */
 
-import {
-	memo,
- useState,
-	useCallback,
-	useMemo,
- useRef,
- useEffect,
-} from "react";
+import { memo, useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import {
 	atomOneDark,
@@ -39,8 +33,7 @@ const LANGUAGE_MODULES: Record<string, () => Promise<{ default: unknown }>> = {
 		import("react-syntax-highlighter/dist/esm/languages/hljs/typescript"),
 	python: () =>
 		import("react-syntax-highlighter/dist/esm/languages/hljs/python"),
-	py: () =>
-		import("react-syntax-highlighter/dist/esm/languages/hljs/python"),
+	py: () => import("react-syntax-highlighter/dist/esm/languages/hljs/python"),
 	go: () => import("react-syntax-highlighter/dist/esm/languages/hljs/go"),
 	java: () => import("react-syntax-highlighter/dist/esm/languages/hljs/java"),
 	html: () =>
@@ -51,6 +44,9 @@ const LANGUAGE_MODULES: Record<string, () => Promise<{ default: unknown }>> = {
 
 // 已加载语言缓存
 const loadedLanguages = new Set<string>();
+
+/** 折叠阈值：超过此行数的代码块默认折叠 */
+const COLLAPSE_THRESHOLD = 10;
 
 interface CodeBlockProps {
 	children: string;
@@ -127,6 +123,7 @@ export const CodeBlock = memo(function CodeBlock({
 	const [copied, setCopied] = useState(false);
 	const [lineCount, setLineCount] = useState(0);
 	const [languageLoaded, setLanguageLoaded] = useState(false);
+	const [expanded, setExpanded] = useState(false);
 	const isDark = useDarkMode();
 	const codeRef = useRef<string>(children);
 
@@ -135,6 +132,9 @@ export const CodeBlock = memo(function CodeBlock({
 	const lang = langMatch?.[1] || language || "text";
 	const langDisplay = getLanguageName(lang);
 	const actualLang = getActualLang(lang);
+
+	// 是否可折叠（超过阈值行数）
+	const isCollapsible = lineCount > COLLAPSE_THRESHOLD;
 
 	// 更新代码内容和行数
 	useEffect(() => {
@@ -177,6 +177,28 @@ export const CodeBlock = memo(function CodeBlock({
 			console.error("Failed to copy:", err);
 		}
 	}, []);
+
+	// 展开/折叠切换
+	const toggleExpand = useCallback(() => {
+		setExpanded((prev) => !prev);
+	}, []);
+
+	// 获取显示的代码（折叠时只显示前 COLLAPSE_THRESHOLD 行）
+	const displayCode = useMemo(() => {
+		if (expanded || !isCollapsible) {
+			return children;
+		}
+		const lines = children.split("\n");
+		return lines.slice(0, COLLAPSE_THRESHOLD).join("\n");
+	}, [children, expanded, isCollapsible]);
+
+	// 显示的行数
+	const displayLineCount = useMemo(() => {
+		if (expanded || !isCollapsible) {
+			return lineCount;
+		}
+		return COLLAPSE_THRESHOLD;
+	}, [lineCount, expanded, isCollapsible]);
 
 	// 主题样式 (使用 useMemo 缓存)
 	const theme = useMemo(
@@ -306,11 +328,8 @@ export const CodeBlock = memo(function CodeBlock({
 						color: theme.lineNumColor,
 					}}
 				>
-					{Array.from({ length: lineCount }, (_, i) => (
-						<div
-							key={i}
-							className="text-[0.85rem] leading-[1.6] font-mono"
-						>
+					{Array.from({ length: displayLineCount }, (_, i) => (
+						<div key={i} className="text-[0.85rem] leading-[1.6] font-mono">
 							{i + 1}
 						</div>
 					))}
@@ -325,10 +344,44 @@ export const CodeBlock = memo(function CodeBlock({
 						codeTagProps={{ style: CODE_TAG_STYLE }}
 						PreTag="div"
 					>
-						{children}
+						{displayCode}
 					</SyntaxHighlighter>
+					{/* 折叠时的渐变遮罩 */}
+					{isCollapsible && !expanded && (
+						<div
+							className="absolute bottom-0 left-0 right-0 h-24 pointer-events-none"
+							style={{
+								background: `linear-gradient(to bottom, transparent, ${theme.bg})`,
+							}}
+						/>
+					)}
 				</div>
 			</div>
+
+			{/* 展开/折叠按钮 */}
+			{isCollapsible && (
+				<button
+					onClick={toggleExpand}
+					className="w-full py-1.5 text-xs font-medium transition-all duration-200 flex items-center justify-center gap-1 hover:bg-[var(--btn-regular-bg)]"
+					style={{
+						color: theme.lineNumColor,
+						borderTop: `1px solid ${theme.border}`,
+						backgroundColor: theme.headerBg,
+					}}
+				>
+					{expanded ? (
+						<>
+							<SafeIcon icon="lucide:chevron-up" size="0.875rem" />
+							<span>收起代码</span>
+						</>
+					) : (
+						<>
+							<SafeIcon icon="lucide:chevron-down" size="0.875rem" />
+							<span>展开全部 ({lineCount} 行)</span>
+						</>
+					)}
+				</button>
+			)}
 		</div>
 	);
 });

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strings"
 	"testing"
+	"time"
 
 	"gin-quickstart/internal/model"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -102,6 +103,10 @@ func (r *fakeArticleRepository) UpdateWithTags(ctx context.Context, article *mod
 
 func (r *fakeArticleRepository) Delete(ctx context.Context, id uint) error {
 	return nil
+}
+
+func (r *fakeArticleRepository) GetContributions(ctx context.Context, from, to time.Time) ([]*model.Article, error) {
+	return nil, nil
 }
 
 type fakeCategoryRepository struct{}

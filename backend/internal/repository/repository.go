@@ -20,6 +20,7 @@ type ArticleRepository interface {
 	Search(ctx context.Context, query string, limit, offset int) ([]*model.Article, int64, error)
 	FindRandom(ctx context.Context, limit int) ([]*model.Article, error)
 	FindRecent(ctx context.Context, limit int) ([]*model.Article, error)
+	GetContributions(ctx context.Context, from, to time.Time) ([]*model.Article, error)
 	Create(ctx context.Context, article *model.Article) error
 	CreateWithTags(ctx context.Context, article *model.Article, tagIDs []uint) error
 	Update(ctx context.Context, article *model.Article) error

@@ -48,9 +48,10 @@ const ContributionCalendar = lazy(() =>
 interface LeftSidebarProps {
 	isArticlePage: boolean;
 	headings: { id: string; text: string; depth: number }[];
+	showCategories: boolean; // 是否显示分类（单列时显示）
 }
 
-function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
+function LeftSidebar({ isArticlePage, headings, showCategories }: LeftSidebarProps) {
 	const hasToc = isArticlePage && headings.length > 0;
 
 	// 有 TOC 时：Profile 不固定，TOC 和 Tags 固定
@@ -72,6 +73,14 @@ function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
 								style={{ animationDelay: "150ms" }}
 							/>
 						</div>
+						{showCategories && (
+							<div className="flex-shrink-0">
+								<Categories
+									className="onload-animation"
+									style={{ animationDelay: "200ms" }}
+								/>
+							</div>
+						)}
 						<div className="flex-1 min-h-0">
 							<TableOfContents headings={headings} />
 						</div>
@@ -90,6 +99,12 @@ function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
 					className="onload-animation"
 					style={{ animationDelay: "150ms" }}
 				/>
+				{showCategories && (
+					<Categories
+						className="onload-animation"
+						style={{ animationDelay: "200ms" }}
+					/>
+				)}
 			</div>
 		</aside>
 	);
@@ -167,7 +182,7 @@ export function MainLayout() {
 	}, [location.pathname]);
 
 	return (
-		<div className="min-h-screen flex flex-col">
+		<div className="flex flex-col" style={{ minHeight: "calc(100dvh / 0.95)" }}>
 			{/* 顶部导航栏 */}
 			<Navbar />
 
@@ -176,7 +191,11 @@ export function MainLayout() {
 				<div className="flex gap-4">
 					{/* 左侧边栏 - Profile + TOC（lg 以上显示） */}
 					{isLgOrLarger && (
-						<LeftSidebar isArticlePage={isArticlePage} headings={headings} />
+						<LeftSidebar
+							isArticlePage={isArticlePage}
+							headings={headings}
+							showCategories={!isXlOrLarger}
+						/>
 					)}
 
 					{/* 主内容区 */}

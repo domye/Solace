@@ -99,6 +99,10 @@ func (s *stubArticleService) Delete(context.Context, uint) error {
 	panic("unexpected call")
 }
 
+func (s *stubArticleService) GetContributions(context.Context) (*response.ArticleContributionsResponse, error) {
+	panic("unexpected call")
+}
+
 type stubOwnerService struct {
 	owner *response.OwnerResponse
 }

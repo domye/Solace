@@ -69,6 +69,17 @@ export class ArticleService {
     });
   }
   /**
+   * 获取文章贡献日历
+   * @returns handler_Response OK
+   * @throws ApiError
+   */
+  public getArticlesContributions(): CancelablePromise<handler_Response> {
+    return this.httpRequest.request({
+      method: 'GET',
+      url: '/articles/contributions',
+    });
+  }
+  /**
    * 获取随机文章
    * @param limit 数量
    * @returns handler_Response OK

@@ -41,6 +41,12 @@
 		}
 	}
 
+	@media (min-width: 1024px) and (max-width: 2560px) {
+		html {
+			zoom: 0.95;
+		}
+	}
+
 	html {
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;

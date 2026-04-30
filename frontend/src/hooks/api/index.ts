@@ -10,6 +10,7 @@ export {
   useArticle,
   useArticleBySlug,
   useArchive,
+  useArticleContributions,
   useSearch,
   useCreateArticle,
   useUpdateArticle,

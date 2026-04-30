@@ -395,3 +395,22 @@ func (r *articleRepo) FindRecent(ctx context.Context, limit int) ([]*model.Artic
 	}
 	return articles, nil
 }
+
+func (r *articleRepo) GetContributions(ctx context.Context, from, to time.Time) ([]*model.Article, error) {
+	start := time.Now()
+	var articles []*model.Article
+
+	err := r.db.WithContext(ctx).
+		Select("id, title, slug, published_at").
+		Where("status = ? AND published_at >= ? AND published_at <= ?", model.StatusPublished, from, to).
+		Order("published_at DESC").
+		Find(&articles).Error
+
+	if err != nil {
+		logger.Error().Err(err).Dur("duration", time.Since(start)).Msg("GetContributions 失败")
+		return nil, err
+	}
+
+	logger.Debug().Int("count", len(articles)).Dur("duration", time.Since(start)).Msg("GetContributions 成功")
+	return articles, nil
+}

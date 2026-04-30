@@ -77,6 +77,10 @@ func (s *contentTestArticleService) Delete(context.Context, uint) error {
 	return nil
 }
 
+func (s *contentTestArticleService) GetContributions(context.Context) (*response.ArticleContributionsResponse, error) {
+	panic("unexpected call")
+}
+
 type contentTestPageService struct{}
 
 func (s *contentTestPageService) Create(context.Context, string, string, string, string, string, string, string, int, bool) (*response.PageResponse, error) {
