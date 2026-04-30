@@ -44,12 +44,12 @@ export function ArchivePage() {
 			<PageSEO title="归档" description="按时间归档浏览所有文章" path="/archive" />
 			{isFetching && !isLoading && <InlineLoader />}
 			<CategoryBar />
-			<div className="card-base px-8 py-6 onload-animation">
+			<div className="card-base px-4 md:px-8 py-4 md:py-6 onload-animation">
 				{groups?.length ? (
 					groups.map((group) => (
 						<div key={group.year}>
-							<div className="flex flex-row w-full items-center h-[3.75rem]">
-								<div className="w-[15%] md:w-[10%] text-2xl font-bold text-right text-75">
+							<div className="flex flex-row w-full items-center h-14 md:h-[3.75rem]">
+								<div className="w-[15%] md:w-[10%] text-xl md:text-2xl font-bold text-right text-75">
 									{group.year}
 								</div>
 								<div className="w-[15%] md:w-[10%]">
@@ -64,10 +64,10 @@ export function ArchivePage() {
 									key={post.id}
 									to={`/articles/${post.slug}`}
 									aria-label={post.title}
-									className="group btn-plain !block h-10 w-full rounded-lg hover:text-[initial]"
+									className="group btn-plain !block h-9 md:h-10 w-full rounded-lg hover:text-[initial]"
 								>
 									<div className="flex flex-row justify-start items-center h-full">
-										<div className="w-[15%] md:w-[10%] text-sm text-right text-50">
+										<div className="w-[15%] md:w-[10%] text-xs md:text-sm text-right text-50">
 											{formatShortDate(post.published_at || post.created_at)}
 										</div>
 										<div className="w-[15%] md:w-[10%] relative dash-line h-full flex items-center">

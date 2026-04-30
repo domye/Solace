@@ -80,7 +80,7 @@ func main() {
 	}
 
 	// 初始化仓储
-	articleRepo := repository.NewArticleRepository(db)
+	articleRepo := repository.NewArticleRepository(db, cfg.MaxSearchQueryLen())
 	categoryRepo := repository.NewCategoryRepository(db)
 	tagRepo := repository.NewTagRepository(db)
 	pageRepo := repository.NewPageRepository(db)
@@ -156,7 +156,7 @@ func main() {
 		settingsHandler,
 		mediaHandler,
 	)
-	r := appRouter.Setup(cfg)
+	r, limiters := appRouter.Setup(cfg)
 
 	// 创建 HTTP 服务器
 	srv := &http.Server{
@@ -188,6 +188,11 @@ func main() {
 	// 关闭服务器
 	if err := srv.Shutdown(ctx); err != nil {
 		logger.Error().Err(err).Msg("服务器关闭错误")
+	}
+
+	// 停止所有限流器
+	for _, limiter := range limiters {
+		limiter.Stop()
 	}
 
 	// 关闭数据库连接

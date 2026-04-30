@@ -3,6 +3,7 @@ package router
 import (
 	"time"
 
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -64,11 +65,14 @@ func NewRouter(
 }
 
 // Setup 初始化路由并注册所有路由
-func (r *Router) Setup(cfg *config.Config) *gin.Engine {
+// 返回 gin.Engine 和所有创建的 RateLimiter 列表（用于服务关闭时调用 Stop）
+func (r *Router) Setup(cfg *config.Config) (*gin.Engine, []*middleware.RateLimiter) {
+	var limiters []*middleware.RateLimiter
 	gin.SetMode(cfg.ServerMode())
 
 	engine := gin.New()
 
+	engine.Use(gzip.Gzip(gzip.DefaultCompression))
 	engine.Use(middleware.CORS(cfg))
 	engine.Use(middleware.RequestID())
 	engine.Use(middleware.Logging())
@@ -78,11 +82,15 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 
-	// 站点地图
-	engine.GET("/sitemap.xml", r.sitemapHandler.GetSitemap)
-
-	// RSS 订阅
-	engine.GET("/rss.xml", r.rssHandler.GetRSS)
+	if cfg.RateLimit() > 0 {
+		publicLimiter := middleware.NewRateLimiter(cfg.RateLimit(), time.Minute)
+		limiters = append(limiters, publicLimiter)
+		engine.GET("/sitemap.xml", middleware.RateLimit(publicLimiter), r.sitemapHandler.GetSitemap)
+		engine.GET("/rss.xml", middleware.RateLimit(publicLimiter), r.rssHandler.GetRSS)
+	} else {
+		engine.GET("/sitemap.xml", r.sitemapHandler.GetSitemap)
+		engine.GET("/rss.xml", r.rssHandler.GetRSS)
+	}
 
 	// API v1 路由
 	v1 := engine.Group("/api/v1")
@@ -113,6 +121,7 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		{
 			if cfg.RateLimit() > 0 {
 				limiter := middleware.NewRateLimiter(cfg.RateLimit(), time.Minute)
+				limiters = append(limiters, limiter)
 				auth.Use(middleware.RateLimit(limiter))
 			}
 			auth.POST("/login", r.authHandler.Login)
@@ -133,6 +142,7 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		// 搜索接口（单独限流）
 		if cfg.SearchRateLimit() > 0 {
 			searchLimiter := middleware.NewRateLimiter(cfg.SearchRateLimit(), time.Minute)
+			limiters = append(limiters, searchLimiter)
 			v1.GET("/articles/search", middleware.RateLimit(searchLimiter), r.articleHandler.Search)
 		} else {
 			v1.GET("/articles/search", r.articleHandler.Search)
@@ -203,5 +213,5 @@ func (r *Router) Setup(cfg *config.Config) *gin.Engine {
 		}
 	}
 
-	return engine
+	return engine, limiters
 }

@@ -22,7 +22,6 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 		activeIdRef.current = activeId;
 	}, [activeId]);
 
-	// IntersectionObserver 监测可见标题
 	useEffect(() => {
 		if (headings.length === 0) return;
 
@@ -33,13 +32,14 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 			(entries) => {
 				const visible = new Set<string>(visibleHeadingsRef.current);
 				entries.forEach((entry) => {
-					if (entry.isIntersecting) visible.add(entry.target.id);
-					else visible.delete(entry.target.id);
+					if (entry.isIntersecting) {
+						visible.add(entry.target.id);
+					} else {
+						visible.delete(entry.target.id);
+					}
 				});
 
 				visibleHeadingsRef.current = visible;
-
-				// 找到第一个可见标题作为活动项
 				if (visible.size > 0) {
 					const firstVisible = headings.find((h) => visible.has(h.id))?.id;
 					if (firstVisible) setActiveId(firstVisible);
@@ -56,7 +56,6 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 		return () => observerRef.current?.disconnect();
 	}, [headings]);
 
-	// 滚动位置检测（备用方案）
 	useEffect(() => {
 		let scrollTimeout: ReturnType<typeof setTimeout>;
 
@@ -99,7 +98,6 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 		};
 	}, [headings, offset]);
 
-	// 点击导航项处理
 	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
 		e.preventDefault();
 		const element = document.getElementById(id);

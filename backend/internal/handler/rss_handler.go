@@ -46,43 +46,48 @@ func (h *RSSHandler) GetRSS(c *gin.Context) {
 
 	now := time.Now().Format(time.RFC1123Z)
 
-	var xml string
-	xml = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
-	xml += `<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">` + "\n"
-	xml += `<channel>` + "\n"
+	var sb strings.Builder
+	sb.Grow(4096)
+
+	sb.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
+	sb.WriteByte('\n')
+	sb.WriteString(`<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">`)
+	sb.WriteByte('\n')
+	sb.WriteString(`<channel>`)
+	sb.WriteByte('\n')
 
 	siteTitle := owner.Nickname + "'s Blog"
 	if siteTitle == "'s Blog" {
 		siteTitle = "Solace Blog"
 	}
-	xml += fmt.Sprintf("  <title>%s</title>\n", escapeXML(siteTitle))
-	xml += fmt.Sprintf("  <link>%s</link>\n", baseURL)
-	xml += fmt.Sprintf("  <description>%s</description>\n", escapeXML(owner.Bio))
-	xml += fmt.Sprintf("  <language>zh-CN</language>\n")
-	xml += fmt.Sprintf("  <lastBuildDate>%s</lastBuildDate>\n", now)
-	xml += fmt.Sprintf("  <atom:link href=\"%s/rss.xml\" rel=\"self\" type=\"application/rss+xml\"/>\n", baseURL)
+	fmt.Fprintf(&sb, "  <title>%s</title>\n", escapeXML(siteTitle))
+	fmt.Fprintf(&sb, "  <link>%s</link>\n", baseURL)
+	fmt.Fprintf(&sb, "  <description>%s</description>\n", escapeXML(owner.Bio))
+	sb.WriteString("  <language>zh-CN</language>\n")
+	fmt.Fprintf(&sb, "  <lastBuildDate>%s</lastBuildDate>\n", now)
+	fmt.Fprintf(&sb, "  <atom:link href=\"%s/rss.xml\" rel=\"self\" type=\"application/rss+xml\"/>\n", baseURL)
 
 	for _, article := range articles {
 		if article.PublishedAt == nil {
 			continue
 		}
 
-		xml += "  <item>\n"
-		xml += fmt.Sprintf("    <title>%s</title>\n", escapeXML(article.Title))
-		xml += fmt.Sprintf("    <link>%s/articles/%s</link>\n", baseURL, article.Slug)
-		xml += fmt.Sprintf("    <guid>%s/articles/%s</guid>\n", baseURL, article.Slug)
-		xml += fmt.Sprintf("    <pubDate>%s</pubDate>\n", article.PublishedAt.Format(time.RFC1123Z))
+		sb.WriteString("  <item>\n")
+		fmt.Fprintf(&sb, "    <title>%s</title>\n", escapeXML(article.Title))
+		fmt.Fprintf(&sb, "    <link>%s/articles/%s</link>\n", baseURL, article.Slug)
+		fmt.Fprintf(&sb, "    <guid>%s/articles/%s</guid>\n", baseURL, article.Slug)
+		fmt.Fprintf(&sb, "    <pubDate>%s</pubDate>\n", article.PublishedAt.Format(time.RFC1123Z))
 		if article.Summary != "" {
-			xml += fmt.Sprintf("    <description>%s</description>\n", escapeXML(article.Summary))
+			fmt.Fprintf(&sb, "    <description>%s</description>\n", escapeXML(article.Summary))
 		}
-		xml += "  </item>\n"
+		sb.WriteString("  </item>\n")
 	}
 
-	xml += `</channel>` + "\n"
-	xml += `</rss>`
+	sb.WriteString("</channel>\n")
+	sb.WriteString("</rss>")
 
 	c.Header("Content-Type", "application/xml; charset=utf-8")
-	c.String(200, xml)
+	c.String(200, sb.String())
 }
 
 func escapeXML(s string) string {

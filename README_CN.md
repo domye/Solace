@@ -347,9 +347,9 @@ expire = 24  # hours
 - [Tailwind CSS](https://tailwindcss.com/) - CSS 框架
 - [TanStack Query](https://tanstack.com/query) - 数据请求库
 
----
-
 <div align="center">
+
+![Stargazers over time](https://starchart.cc/domye/Solace.svg?variant=adaptive)
 
 **[⬆ 返回顶部](#solace)**
 

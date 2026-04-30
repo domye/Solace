@@ -32,9 +32,9 @@ import {
 	Categories,
 	Tags,
 } from "@/components/widget";
-import { BackToTop } from "@/components/common/ui";
+import { BackToTop, MobileToc } from "@/components/common/ui";
 import { useTocStore } from "@/stores";
-import { useMediaQuery, useOwner, useCategories, useTags } from "@/hooks";
+import { useMediaQuery } from "@/hooks";
 import { useMemo, lazy, Suspense } from "react";
 
 // 懒加载 ContributionCalendar - 避免 GitHub API 阻塞首屏渲染
@@ -158,12 +158,6 @@ export function MainLayout() {
 	const { headings } = useTocStore();
 	const location = useLocation();
 
-	// 预加载全局数据 - 所有子组件直接从缓存获取，避免并发请求
-	useOwner();
-	useCategories();
-	useTags();
-
-	// 响应式断点检测
 	const isLgOrLarger = useMediaQuery("(min-width: 1024px)");
 	const isXlOrLarger = useMediaQuery("(min-width: 1280px)");
 
@@ -203,6 +197,7 @@ export function MainLayout() {
 
 			{/* 返回顶部按钮 */}
 			<BackToTop />
+			<MobileToc />
 		</div>
 	);
 }

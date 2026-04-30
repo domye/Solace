@@ -51,14 +51,14 @@ export const LicenseBlock = memo(function LicenseBlock({
 	// 优先使用传入的 author，否则使用站长昵称
 	const displayAuthor = author || owner?.nickname || "博主";
 	return (
-		<div className="relative overflow-hidden bg-[var(--btn-regular-bg)] py-3 px-4 md:py-5 md:px-6 rounded-xl mt-8">
+		<div className="relative overflow-hidden bg-[var(--btn-regular-bg)] py-2 px-3 md:py-3 md:px-4 lg:py-5 lg:px-6 rounded-xl mt-6 md:mt-8">
 			{/* 文章标题 */}
-			<div className="font-bold text-75 mb-1">{title}</div>
+			<div className="font-bold text-xs md:text-sm text-75 mb-0.5 md:mb-1">{title}</div>
 
 			{/* 文章链接 */}
 			<a
 				href={url}
-				className="text-[var(--primary)] hover:underline text-sm break-all"
+				className="text-[var(--primary)] hover:underline text-[10px] md:text-xs break-all"
 				target="_blank"
 				rel="noopener noreferrer"
 			>
@@ -66,29 +66,29 @@ export const LicenseBlock = memo(function LicenseBlock({
 			</a>
 
 			{/* 信息行：作者、发布时间、许可证 */}
-			<div className="flex gap-4 md:gap-6 mt-2 md:mt-3 flex-wrap">
+			<div className="flex gap-3 md:gap-4 lg:gap-6 mt-1.5 md:mt-2 lg:mt-3 flex-wrap">
 				{/* 作者 */}
 				<div>
-					<div className="text-30 text-xs mb-0.5">作者</div>
-					<div className="text-75 text-sm">{displayAuthor}</div>
+					<div className="text-30 text-[10px] md:text-xs mb-0.5">作者</div>
+					<div className="text-75 text-[10px] md:text-xs">{displayAuthor}</div>
 				</div>
 
 				{/* 发布时间 */}
 				{publishedAt && (
 					<div>
-						<div className="text-30 text-xs mb-0.5">发布于</div>
-						<div className="text-75 text-sm">{formatDate(publishedAt)}</div>
+						<div className="text-30 text-[10px] md:text-xs mb-0.5">发布于</div>
+						<div className="text-75 text-[10px] md:text-xs">{formatDate(publishedAt)}</div>
 					</div>
 				)}
 
 				{/* 许可证 */}
 				<div>
-					<div className="text-30 text-xs mb-0.5">许可协议</div>
+					<div className="text-30 text-[10px] md:text-xs mb-0.5">许可协议</div>
 					<a
 						href={licenseUrl}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="text-[var(--primary)] hover:underline text-sm"
+						className="text-[var(--primary)] hover:underline text-[10px] md:text-xs"
 					>
 						{licenseName}
 					</a>

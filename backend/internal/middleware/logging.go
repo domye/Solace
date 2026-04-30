@@ -78,10 +78,10 @@ func LoggingWithConfig(cfg LoggingConfig) gin.HandlerFunc {
 			c.Request.Body = io.NopCloser(io.MultiReader(bytes.NewReader(requestBody), c.Request.Body))
 		}
 
-		var responseBody *bytes.Buffer
+		var blw *bodyLogWriter
 		if cfg.LogResponseBody {
-			responseBody = bytes.NewBufferString("")
-			c.Writer = &bodyLogWriter{body: responseBody, ResponseWriter: c.Writer}
+			blw = &bodyLogWriter{body: bytes.NewBufferString(""), ResponseWriter: c.Writer}
+			c.Writer = blw
 		}
 
 		log := logger.FromGinContext(c)
@@ -117,8 +117,8 @@ func LoggingWithConfig(cfg LoggingConfig) gin.HandlerFunc {
 			Dur("duration_ms", duration).
 			Int("response_size", c.Writer.Size())
 
-		if responseBody != nil && responseBody.Len() > 0 && responseBody.Len() < cfg.MaxBodySize {
-			event = event.Interface("response", sanitizeResponseBody(responseBody.Bytes()))
+		if cfg.LogResponseBody && blw != nil && blw.body.Len() > 0 && blw.body.Len() < cfg.MaxBodySize {
+			event = event.Interface("response", sanitizeResponseBody(blw.body.Bytes()))
 		}
 
 		event.Msg("请求完成")

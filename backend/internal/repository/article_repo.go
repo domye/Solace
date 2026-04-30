@@ -9,14 +9,20 @@ import (
 	"gorm.io/gorm"
 )
 
+const defaultMaxSearchQueryLen = 100
+
 // articleRepo 文章仓储实现
 type articleRepo struct {
-	db *gorm.DB
+	db                *gorm.DB
+	maxSearchQueryLen int
 }
 
 // NewArticleRepository 创建文章仓储
-func NewArticleRepository(db *gorm.DB) ArticleRepository {
-	return &articleRepo{db: db}
+func NewArticleRepository(db *gorm.DB, maxSearchQueryLen int) ArticleRepository {
+	if maxSearchQueryLen <= 0 {
+		maxSearchQueryLen = defaultMaxSearchQueryLen
+	}
+	return &articleRepo{db: db, maxSearchQueryLen: maxSearchQueryLen}
 }
 
 func (r *articleRepo) FindByID(ctx context.Context, id uint) (*model.Article, error) {
@@ -54,19 +60,25 @@ func (r *articleRepo) FindAll(ctx context.Context, limit, offset int, filters ma
 	var articles []*model.Article
 	var total int64
 
-	query := r.db.WithContext(ctx).Model(&model.Article{}).Preload("Category").Preload("Tags")
+	status, hasStatus := filters["status"]
 
-	// 应用筛选条件
-	if status, ok := filters["status"]; ok {
-		query = query.Where("status = ?", status)
+	baseQuery := r.db.WithContext(ctx).Model(&model.Article{})
+	if hasStatus {
+		baseQuery = baseQuery.Where("status = ?", status)
 	}
 
-	// 统计总数
-	if err := query.Count(&total).Error; err != nil {
+	if err := baseQuery.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// 获取分页结果
+	query := r.db.WithContext(ctx).
+		Select("id, title, slug, summary, cover_image, category_id, status, is_top, published_at, created_at, updated_at").
+		Preload("Category").
+		Preload("Tags")
+	if hasStatus {
+		query = query.Where("status = ?", status)
+	}
+
 	if err := query.Order("is_top DESC, created_at DESC").
 		Offset(offset).
 		Limit(limit).
@@ -81,19 +93,19 @@ func (r *articleRepo) FindPublished(ctx context.Context, limit, offset int, filt
 	var articles []*model.Article
 	var total int64
 
-	query := r.db.WithContext(ctx).
+	if err := r.db.WithContext(ctx).
 		Model(&model.Article{}).
-		Preload("Category").
-		Preload("Tags").
-		Where("status = ?", model.StatusPublished)
-
-	// 统计总数
-	if err := query.Count(&total).Error; err != nil {
+		Where("status = ?", model.StatusPublished).
+		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// 获取分页结果
-	if err := query.Order("is_top DESC, published_at DESC").
+	if err := r.db.WithContext(ctx).
+		Select("id, title, slug, summary, cover_image, category_id, status, is_top, published_at, created_at, updated_at").
+		Preload("Category").
+		Preload("Tags").
+		Where("status = ?", model.StatusPublished).
+		Order("is_top DESC, published_at DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&articles).Error; err != nil {
@@ -113,19 +125,18 @@ func (r *articleRepo) FindByCategory(ctx context.Context, categorySlug string, l
 		return nil, 0, err
 	}
 
-	query := r.db.WithContext(ctx).
+	if err := r.db.WithContext(ctx).
 		Model(&model.Article{}).
-		Preload("Category").
-		Preload("Tags").
-		Where("status = ? AND category_id = ?", model.StatusPublished, category.ID)
-
-	// 统计总数
-	if err := query.Count(&total).Error; err != nil {
+		Where("status = ? AND category_id = ?", model.StatusPublished, category.ID).
+		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// 获取分页结果
-	if err := query.Order("is_top DESC, published_at DESC").
+	if err := r.db.WithContext(ctx).
+		Preload("Category").
+		Preload("Tags").
+		Where("status = ? AND category_id = ?", model.StatusPublished, category.ID).
+		Order("is_top DESC, published_at DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&articles).Error; err != nil {
@@ -139,26 +150,25 @@ func (r *articleRepo) FindByTag(ctx context.Context, tagSlug string, limit, offs
 	var articles []*model.Article
 	var total int64
 
-	// 先获取标签ID
 	var tag model.Tag
 	if err := r.db.WithContext(ctx).Where("slug = ?", tagSlug).First(&tag).Error; err != nil {
 		return nil, 0, err
 	}
 
-	query := r.db.WithContext(ctx).
+	if err := r.db.WithContext(ctx).
 		Model(&model.Article{}).
-		Preload("Category").
-		Preload("Tags").
 		Joins("JOIN article_tags ON article_tags.article_id = articles.id").
-		Where("articles.status = ? AND article_tags.tag_id = ?", model.StatusPublished, tag.ID)
-
-	// 统计总数
-	if err := query.Count(&total).Error; err != nil {
+		Where("articles.status = ? AND article_tags.tag_id = ?", model.StatusPublished, tag.ID).
+		Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
 
-	// 获取分页结果
-	if err := query.Order("articles.is_top DESC, articles.published_at DESC").
+	if err := r.db.WithContext(ctx).
+		Preload("Category").
+		Preload("Tags").
+		Joins("JOIN article_tags ON article_tags.article_id = articles.id").
+		Where("articles.status = ? AND article_tags.tag_id = ?", model.StatusPublished, tag.ID).
+		Order("articles.is_top DESC, articles.published_at DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&articles).Error; err != nil {
@@ -166,31 +176,6 @@ func (r *articleRepo) FindByTag(ctx context.Context, tagSlug string, limit, offs
 	}
 
 	return articles, total, nil
-}
-
-func (r *articleRepo) FindByIDWithNav(ctx context.Context, id uint) (*model.Article, *model.Article, *model.Article, error) {
-	article, err := r.FindByID(ctx, id)
-	if err != nil {
-		return nil, nil, nil, err
-	}
-
-	var prev, next *model.Article
-
-	// 获取上一篇（更早发布的）
-	r.db.WithContext(ctx).
-		Select("id, title, slug").
-		Where("status = ? AND published_at < ? AND id != ?", model.StatusPublished, article.PublishedAt, id).
-		Order("published_at DESC").
-		First(&prev)
-
-	// 获取下一篇（更晚发布的）
-	r.db.WithContext(ctx).
-		Select("id, title, slug").
-		Where("status = ? AND published_at > ? AND id != ?", model.StatusPublished, article.PublishedAt, id).
-		Order("published_at ASC").
-		First(&next)
-
-	return article, prev, next, nil
 }
 
 func (r *articleRepo) FindBySlugWithNav(ctx context.Context, slug string) (*model.Article, *model.Article, *model.Article, error) {
@@ -218,20 +203,24 @@ func (r *articleRepo) FindBySlugWithNav(ctx context.Context, slug string) (*mode
 	return article, prev, next, nil
 }
 
+const maxSearchQueryLength = 100
+
 func (r *articleRepo) GetArchive(ctx context.Context) ([]*model.Article, error) {
+	start := time.Now()
 	var articles []*model.Article
 
 	err := r.db.WithContext(ctx).
 		Select("id, title, slug, summary, published_at, category_id").
 		Preload("Category").
-		Preload("Tags").
 		Where("status = ?", model.StatusPublished).
 		Order("published_at DESC").
 		Find(&articles).Error
 
 	if err != nil {
+		logger.Error().Err(err).Dur("duration", time.Since(start)).Msg("GetArchive 失败")
 		return nil, err
 	}
+	logger.Debug().Int("count", len(articles)).Dur("duration", time.Since(start)).Msg("GetArchive 成功")
 	return articles, nil
 }
 
@@ -240,27 +229,38 @@ func (r *articleRepo) Search(ctx context.Context, query string, limit, offset in
 	var articles []*model.Article
 	var total int64
 
-	searchPattern := "%" + query + "%"
+	if len(query) > r.maxSearchQueryLen {
+		query = query[:r.maxSearchQueryLen]
+	}
 
-	dbQuery := r.db.WithContext(ctx).
-		Model(&model.Article{}).
-		Preload("Category").
-		Where("status = ?", model.StatusPublished).
-		Where("title ILIKE ? OR content ILIKE ?", searchPattern, searchPattern)
-
-	// 统计总数
-	if err := dbQuery.Count(&total).Error; err != nil {
+	countSQL := `
+		SELECT COUNT(*) FROM articles
+		WHERE status = 'published' AND deleted_at IS NULL
+		AND search_vec @@ plainto_tsquery('simple', ?)
+	`
+	if err := r.db.WithContext(ctx).Raw(countSQL, query).Scan(&total).Error; err != nil {
 		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 统计失败")
 		return nil, 0, err
 	}
 
-	// 获取分页结果
-	if err := dbQuery.Order("published_at DESC").
-		Offset(offset).
-		Limit(limit).
-		Find(&articles).Error; err != nil {
+	searchSQL := `
+		SELECT * FROM articles
+		WHERE status = 'published' AND deleted_at IS NULL
+		AND search_vec @@ plainto_tsquery('simple', ?)
+		ORDER BY ts_rank(search_vec, plainto_tsquery('simple', ?)) DESC, published_at DESC
+		LIMIT ? OFFSET ?
+	`
+	if err := r.db.WithContext(ctx).Raw(searchSQL, query, query, limit, offset).Scan(&articles).Error; err != nil {
 		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 查询失败")
 		return nil, 0, err
+	}
+
+	// 加载关联数据
+	for _, article := range articles {
+		if article.CategoryID != nil {
+			r.db.WithContext(ctx).First(&article.Category, *article.CategoryID)
+		}
+		r.db.WithContext(ctx).Model(article).Association("Tags").Find(&article.Tags)
 	}
 
 	logger.Debug().Str("query", query).Int64("total", total).Dur("duration", time.Since(start)).Msg("Search 成功")
@@ -360,21 +360,6 @@ func (r *articleRepo) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
-func (r *articleRepo) SyncTags(ctx context.Context, articleID uint, tagIDs []uint) error {
-	var article model.Article
-	article.ID = articleID
-
-	var tags []*model.Tag
-	if len(tagIDs) > 0 {
-		if err := r.db.WithContext(ctx).Find(&tags, tagIDs).Error; err != nil {
-			return err
-		}
-	}
-
-	return r.db.WithContext(ctx).Model(&article).Association("Tags").Replace(tags)
-}
-
-// FindRandom 获取随机文章（仅已发布）
 func (r *articleRepo) FindRandom(ctx context.Context, limit int) ([]*model.Article, error) {
 	var articles []*model.Article
 
@@ -393,7 +378,6 @@ func (r *articleRepo) FindRandom(ctx context.Context, limit int) ([]*model.Artic
 	return articles, nil
 }
 
-// FindRecent 获取最近文章（仅已发布，按发布时间降序）
 func (r *articleRepo) FindRecent(ctx context.Context, limit int) ([]*model.Article, error) {
 	var articles []*model.Article
 

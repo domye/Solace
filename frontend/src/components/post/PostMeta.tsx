@@ -2,13 +2,14 @@
  * 文章元信息组件
  */
 
+import { memo } from "react";
 import { SafeIcon } from "@/components/common/ui";
 import { Link } from "react-router-dom";
 import { formatDate } from "@/utils/date";
 import { MetaItem } from "@/components/common/ui";
 import type { PostCardArticle } from "@/types";
 
-export function PostMeta({ article }: { article: PostCardArticle }) {
+export const PostMeta = memo(function PostMeta({ article }: { article: PostCardArticle }) {
 	return (
 		<div className="flex flex-wrap text-50 items-center gap-4 gap-y-2 mb-4">
 			<MetaItem
@@ -40,4 +41,4 @@ export function PostMeta({ article }: { article: PostCardArticle }) {
 			)}
 		</div>
 	);
-}
+});

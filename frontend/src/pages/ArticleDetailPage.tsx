@@ -73,16 +73,16 @@ export function ArticleDetailPage() {
 			{breadcrumbItems.length > 0 && <BreadcrumbSEO items={breadcrumbItems} />}
 			<ReadingProgress show={true} articleRef={articleRef} />
 			<article ref={articleRef} className="flex-1 min-w-0 space-y-4">
-				<div className="card-base p-6 md:p-8 fade-in-up">
-					<h1 className="text-90 text-2xl md:text-3xl font-bold mb-4">
+				<div className="card-base p-4 md:p-6 lg:p-8 fade-in-up">
+					<h1 className="text-90 text-xl md:text-2xl lg:text-3xl font-bold mb-3 md:mb-4">
 						{article.title}
 					</h1>
 					<PostMeta article={article} />
 					{!article.cover_image && (
-						<div className="border-[var(--border-light)] border-dashed border-b mb-5" />
+						<div className="border-[var(--border-light)] border-dashed border-b mb-4 md:mb-5" />
 					)}
 					{article.summary && (
-						<div className="text-50 border-l-2 border-[var(--primary)] pl-4 mb-6 bg-[var(--btn-regular-bg)]  py-2 italic">
+						<div className="text-50 border-l-2 border-[var(--primary)] pl-3 md:pl-4 mb-4 md:mb-6 bg-[var(--btn-regular-bg)] py-1.5 md:py-2 italic text-sm md:text-base">
 							{article.summary}
 						</div>
 					)}
@@ -91,14 +91,14 @@ export function ArticleDetailPage() {
 						src={article.cover_image}
 						alt=""
 						className="w-full h-full object-cover rounded-xl"
-						wrapperClassName="w-full rounded-xl overflow-hidden mb-6"
+						wrapperClassName="w-full rounded-xl overflow-hidden mb-4 md:mb-6"
 						aspectRatio="16/9"
 						effect="blur"
 					/>
 				)}
 					<MarkdownRenderer
 						content={article.content}
-						className="mt-6"
+						className="mt-4 md:mt-6"
 						onHeadingsExtracted={handleHeadings}
 					/>
 
@@ -109,8 +109,8 @@ export function ArticleDetailPage() {
 						publishedAt={article.published_at || article.created_at}
 					/>
 
-					<div className="border-t border-[var(--border-light)] mt-8 pt-4">
-						<div className="flex items-center justify-between text-50 text-sm">
+					<div className="border-t border-[var(--border-light)] mt-6 md:mt-8 pt-3 md:pt-4">
+						<div className="flex items-center justify-between text-50 text-xs md:text-sm">
 							{/* 左下角：更新时间 */}
 							<span className="flex items-center gap-2">
 								<SafeIcon

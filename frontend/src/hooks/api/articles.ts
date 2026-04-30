@@ -6,6 +6,7 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/api";
+import { queryKeys } from "@/lib/queryKeys";
 import { extractData, extractPagedData } from "./utils";
 import type { Article, ArticleSummary, ArchiveGroup } from "@/types";
 import type {
@@ -22,7 +23,7 @@ export function useArticles(params: {
 	tag?: string;
 }) {
 	return useQuery({
-		queryKey: ["articles", params],
+		queryKey: queryKeys.articles.list(params),
 		queryFn: async () => {
 			const response = await apiClient.article.getArticles(
 				params.page ?? 1,
@@ -33,49 +34,52 @@ export function useArticles(params: {
 			);
 			return extractPagedData<ArticleSummary>(response);
 		},
+		staleTime: 2 * 60 * 1000,
 	});
 }
 
 /** 获取单篇文章（按 ID） */
 export function useArticle(id: number) {
 	return useQuery({
-		queryKey: ["article", id],
+		queryKey: queryKeys.articles.detail(id),
 		queryFn: async () => {
 			const response = await apiClient.article.getArticles1(id);
 			return extractData<Article>(response);
 		},
 		enabled: id > 0,
+		staleTime: 5 * 60 * 1000,
 	});
 }
 
 /** 获取单篇文章（按 slug） */
 export function useArticleBySlug(slug: string) {
 	return useQuery({
-		queryKey: ["article", slug],
+		queryKey: queryKeys.articles.bySlug(slug),
 		queryFn: async () => {
 			const response = await apiClient.article.getArticlesSlug(slug);
 			return extractData<Article>(response);
 		},
 		enabled: slug.length > 0,
+		staleTime: 5 * 60 * 1000,
 	});
 }
 
 /** 获取归档列表 */
 export function useArchive() {
 	return useQuery({
-		queryKey: ["archive"],
+		queryKey: queryKeys.articles.archive(),
 		queryFn: async () => {
 			const response = await apiClient.article.getArticlesArchive();
 			return extractData<ArchiveGroup[]>(response);
 		},
-		staleTime: 5 * 60 * 1000,
+		staleTime: 10 * 60 * 1000,
 	});
 }
 
 /** 搜索文章 */
 export function useSearch(query: string, page = 1, pageSize = 10) {
 	return useQuery({
-		queryKey: ["search", query, page, pageSize],
+		queryKey: queryKeys.articles.search(query, page, pageSize),
 		queryFn: async () => {
 			const response = await apiClient.article.getArticlesSearch(
 				query,
@@ -98,8 +102,8 @@ export function useCreateArticle() {
 			return extractData(response);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["articles"] });
-			queryClient.invalidateQueries({ queryKey: ["archive"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.articles.list() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.articles.archive() });
 		},
 	});
 }
@@ -120,9 +124,9 @@ export function useUpdateArticle() {
 			return extractData(response);
 		},
 		onSuccess: (_, { id }) => {
-			queryClient.invalidateQueries({ queryKey: ["articles"] });
-			queryClient.invalidateQueries({ queryKey: ["article", id] });
-			queryClient.invalidateQueries({ queryKey: ["archive"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.articles.list() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.articles.detail(id) });
+			queryClient.invalidateQueries({ queryKey: queryKeys.articles.archive() });
 		},
 	});
 }
@@ -136,8 +140,8 @@ export function useDeleteArticle() {
 			await apiClient.article.deleteArticles(id);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["articles"] });
-			queryClient.invalidateQueries({ queryKey: ["archive"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.articles.list() });
+			queryClient.invalidateQueries({ queryKey: queryKeys.articles.archive() });
 		},
 	});
 }
@@ -145,23 +149,23 @@ export function useDeleteArticle() {
 /** 获取随机文章 */
 export function useRandomArticles(limit = 5) {
 	return useQuery({
-		queryKey: ["articles", "random", limit],
+		queryKey: queryKeys.articles.random(limit),
 		queryFn: async () => {
 			const response = await apiClient.article.getArticlesRandom(limit);
 			return extractData<ArticleSummary[]>(response);
 		},
-		staleTime: 5 * 60 * 1000, // 5 分钟内不重新请求
+		staleTime: 5 * 60 * 1000,
 	});
 }
 
 /** 获取最近文章 */
 export function useRecentArticles(limit = 5) {
 	return useQuery({
-		queryKey: ["articles", "recent", limit],
+		queryKey: queryKeys.articles.recent(limit),
 		queryFn: async () => {
 			const response = await apiClient.article.getArticlesRecent(limit);
 			return extractData<ArticleSummary[]>(response);
 		},
-		staleTime: 5 * 60 * 1000, // 5 分钟内不重新请求
+		staleTime: 5 * 60 * 1000,
 	});
 }

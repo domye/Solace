@@ -2,12 +2,12 @@ package handler
 
 import (
 	"log/slog"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
 
 	"gin-quickstart/internal/dto/request"
 	apperrors "gin-quickstart/internal/pkg/errors"
+	"gin-quickstart/internal/pkg/validator"
 	"gin-quickstart/internal/service"
 )
 
@@ -36,6 +36,10 @@ func (h *PageHandler) Create(c *gin.Context) {
 	var req request.CreatePageRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		RespondWithError(c, apperrors.NewBadRequest("无效的请求体", nil))
+		return
+	}
+	if err := validator.ValidateStruct(&req); err != nil {
+		RespondWithError(c, apperrors.NewBadRequest("请求参数校验失败", validator.FormatError(err)))
 		return
 	}
 
@@ -76,14 +80,13 @@ func (h *PageHandler) Create(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /pages/{id} [get]
 func (h *PageHandler) GetByID(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的页面ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
-	page, err := h.pageService.GetByID(c.Request.Context(), uint(id))
+	page, err := h.pageService.GetByID(c.Request.Context(), id)
 	if err != nil {
 		RespondWithError(c, err)
 		return
@@ -133,11 +136,12 @@ func (h *PageHandler) GetList(c *gin.Context) {
 		return
 	}
 
+	pagination := ParsePagination(c, 10, 100)
 	if query.Page == 0 {
-		query.Page = 1
+		query.Page = pagination.Page
 	}
 	if query.PageSize == 0 {
-		query.PageSize = 10
+		query.PageSize = pagination.PageSize
 	}
 
 	resp, err := h.pageService.GetList(
@@ -184,10 +188,9 @@ func (h *PageHandler) GetNavPages(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /pages/{id} [put]
 func (h *PageHandler) Update(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的页面ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
@@ -196,10 +199,14 @@ func (h *PageHandler) Update(c *gin.Context) {
 		RespondWithError(c, apperrors.NewBadRequest("无效的请求体", nil))
 		return
 	}
+	if err := validator.ValidateStruct(&req); err != nil {
+		RespondWithError(c, apperrors.NewBadRequest("请求参数校验失败", validator.FormatError(err)))
+		return
+	}
 
 	page, err := h.pageService.Update(
 		c.Request.Context(),
-		uint(id),
+		id,
 		req.Version,
 		req.Title,
 		req.Slug,
@@ -237,14 +244,13 @@ func (h *PageHandler) Update(c *gin.Context) {
 // @Failure 404 {object} Response
 // @Router /pages/{id} [delete]
 func (h *PageHandler) Delete(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := ParseID(c, "id")
 	if err != nil {
-		RespondWithError(c, apperrors.NewBadRequest("无效的页面ID", nil))
+		RespondWithError(c, err)
 		return
 	}
 
-	if err := h.pageService.Delete(c.Request.Context(), uint(id)); err != nil {
+	if err := h.pageService.Delete(c.Request.Context(), id); err != nil {
 		RespondWithError(c, err)
 		return
 	}

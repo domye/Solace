@@ -5,24 +5,42 @@
 @tailwind base;
 
 @layer base {
-	/* 强制保留滚动条空间，防止页面切换时左右偏移 */
-	/* 禁止水平滚动，防止元素溢出导致的右滑问题 */
 	html {
 		overflow-y: scroll;
 		overflow-x: hidden;
-		/* 整体缩放 - 移动端 14px，桌面端 15px */
-		font-size: 14px;
-		/* 平滑滚动 */
+		overscroll-behavior-x: none;
+	}
+
+	body {
+		overflow-y: auto;
+		overscroll-behavior-x: none;
+		touch-action: pan-y;
+		font-size: 13px;
 		scroll-behavior: smooth;
 	}
 
-	@media (min-width: 768px) {
+	@media (min-width: 1024px) {
 		html {
+			overflow-y: auto;
+		}
+
+		body {
+			overflow: visible;
+		}
+	}
+
+	@media (min-width: 768px) {
+		body {
+			font-size: 14px;
+		}
+	}
+
+	@media (min-width: 1024px) {
+		body {
 			font-size: 15px;
 		}
 	}
 
-	/* 默认透明滚动条 - 浅色模式 */
 	html {
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
@@ -41,21 +59,18 @@
 		border-radius: 6px;
 	}
 
-	/* 滚动时显示滚动条 - 浅色模式 */
 	html.scrolling {
 		scrollbar-color: oklch(0.5 0.08 var(--hue) / 0.5) transparent;
 	}
 
 	html.scrolling::-webkit-scrollbar-thumb {
 		background: oklch(0.5 0.08 var(--hue) / 0.5);
-		transition: background-color 0.3s ease;
 	}
 
 	html.scrolling::-webkit-scrollbar-thumb:hover {
 		background: oklch(0.5 0.12 var(--hue) / 0.8);
 	}
 
-	/* 深色模式滚动条 */
 	html.dark {
 		scrollbar-color: transparent transparent;
 	}
@@ -88,7 +103,6 @@
 		color: var(--text-90);
 		@apply antialiased transition;
 		line-height: 1.5;
-		font-display: swap;
 	}
 
 	::selection {
@@ -108,7 +122,6 @@
 		transition-duration: 0.01ms !important;
 	}
 
-	/* 禁用平滑滚动，尊重用户的减少动画偏好 */
 	html {
 		scroll-behavior: auto;
 	}

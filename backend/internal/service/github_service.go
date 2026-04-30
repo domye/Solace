@@ -14,31 +14,37 @@ import (
 	apperrors "gin-quickstart/internal/pkg/errors"
 )
 
-// GitHubService GitHub 服务接口
 type GitHubService interface {
 	GetContributions(ctx context.Context, username string, from, to time.Time) (*ContributionsResponse, error)
 }
 
-// ContributionsGroup 单年贡献数据
 type ContributionsGroup struct {
 	Year          int            `json:"year"`
-	Contributions map[string]int `json:"contributions"` // key: MM-DD, value: count
+	Contributions map[string]int `json:"contributions"`
 }
 
-// ContributionsResponse 贡献数据响应（按年份分组）
 type ContributionsResponse struct {
-	Total  int                   `json:"total"`  // 过去一年总贡献数
-	Groups []*ContributionsGroup `json:"groups"` // 按年份分组
+	Total  int                   `json:"total"`
+	Groups []*ContributionsGroup `json:"groups"`
 }
 
-// githubService GitHub 服务实现
 type githubService struct {
 	token string
 }
 
-// 全局 HTTP 客户端（连接复用）
-var globalHTTPClient sync.Once
-var httpClient *http.Client
+type cachedContributions struct {
+	data      *ContributionsResponse
+	expiresAt time.Time
+}
+
+var (
+	globalHTTPClient sync.Once
+	httpClient       *http.Client
+	contributionsMu  sync.RWMutex
+	contributionsCache = make(map[string]*cachedContributions)
+)
+
+const contributionsCacheTTL = 1 * time.Hour
 
 func getHTTPClient() *http.Client {
 	globalHTTPClient.Do(func() {
@@ -54,20 +60,18 @@ func getHTTPClient() *http.Client {
 	return httpClient
 }
 
-// NewGitHubService 创建 GitHub 服务
 func NewGitHubService(cfg *config.Config) GitHubService {
 	return &githubService{
 		token: cfg.GitHubToken(),
 	}
 }
 
-// graphqlResponse GitHub GraphQL API 响应结构
 type graphqlResponse struct {
 	Data struct {
 		User struct {
 			ContributionsCollection struct {
 				ContributionCalendar struct {
-					TotalContributions int `json:"totalContributions"` // 总贡献数
+					TotalContributions int `json:"totalContributions"`
 					Weeks              []struct {
 						ContributionDays []struct {
 							Date              string `json:"date"`
@@ -83,13 +87,38 @@ type graphqlResponse struct {
 	} `json:"errors"`
 }
 
-// GetContributions 获取用户贡献日历数据
 func (s *githubService) GetContributions(ctx context.Context, username string, from, to time.Time) (*ContributionsResponse, error) {
 	if s.token == "" {
 		return nil, apperrors.NewBadRequest("GitHub token not configured", nil)
 	}
 
-	// 构建 GraphQL 查询
+	cacheKey := fmt.Sprintf("%s|%s|%s", username, from.Format("2006-01-02"), to.Format("2006-01-02"))
+
+	contributionsMu.RLock()
+	if cached, ok := contributionsCache[cacheKey]; ok {
+		if time.Now().Before(cached.expiresAt) {
+			contributionsMu.RUnlock()
+			return cached.data, nil
+		}
+	}
+	contributionsMu.RUnlock()
+
+	result, err := s.fetchContributions(ctx, username, from, to)
+	if err != nil {
+		return nil, err
+	}
+
+	contributionsMu.Lock()
+	contributionsCache[cacheKey] = &cachedContributions{
+		data:      result,
+		expiresAt: time.Now().Add(contributionsCacheTTL),
+	}
+	contributionsMu.Unlock()
+
+	return result, nil
+}
+
+func (s *githubService) fetchContributions(ctx context.Context, username string, from, to time.Time) (*ContributionsResponse, error) {
 	query := `
 		query($username: String!, $from: DateTime!, $to: DateTime!) {
 			user(login: $username) {
@@ -132,7 +161,6 @@ func (s *githubService) GetContributions(ctx context.Context, username string, f
 	req.Header.Set("Authorization", "Bearer "+s.token)
 	req.Header.Set("Content-Type", "application/json")
 
-	// 使用全局 HTTP 客户端（连接复用）
 	resp, err := getHTTPClient().Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
@@ -153,11 +181,8 @@ func (s *githubService) GetContributions(ctx context.Context, username string, f
 		return nil, apperrors.NewBadRequest(result.Errors[0].Message, nil)
 	}
 
-	// 直接使用 API 返回的总数
 	total := result.Data.User.ContributionsCollection.ContributionCalendar.TotalContributions
 
-	// 转换数据格式（按年份分组）
-	// 预分配：最近12个月最多跨3个年份
 	yearGroups := make(map[int]*ContributionsGroup, 3)
 
 	for _, week := range result.Data.User.ContributionsCollection.ContributionCalendar.Weeks {
@@ -166,16 +191,13 @@ func (s *githubService) GetContributions(ctx context.Context, username string, f
 				continue
 			}
 
-			// 日期格式: YYYY-MM-DD，直接提取年份
 			if len(day.Date) < 4 {
 				continue
 			}
 
-			// 高效年份解析：直接计算字符值
 			year := int(day.Date[0]-'0')*1000 + int(day.Date[1]-'0')*100 +
 				int(day.Date[2]-'0')*10 + int(day.Date[3]-'0')
 
-			// 获取或创建年份组
 			group := yearGroups[year]
 			if group == nil {
 				group = &ContributionsGroup{
@@ -185,12 +207,10 @@ func (s *githubService) GetContributions(ctx context.Context, username string, f
 				yearGroups[year] = group
 			}
 
-			// 从 "YYYY-MM-DD" 提取 "MM-DD" (位置 5-10)
 			group.Contributions[day.Date[5:10]] = day.ContributionCount
 		}
 	}
 
-	// 转换为切片（按年份降序）
 	groups := make([]*ContributionsGroup, 0, len(yearGroups))
 	for _, g := range yearGroups {
 		groups = append(groups, g)

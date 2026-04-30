@@ -3,6 +3,7 @@ package handler
 import (
 	"gin-quickstart/internal/dto/request"
 	apperrors "gin-quickstart/internal/pkg/errors"
+	"gin-quickstart/internal/pkg/validator"
 	"gin-quickstart/internal/service"
 	"github.com/gin-gonic/gin"
 )
@@ -31,6 +32,10 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	var req request.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		RespondWithError(c, apperrors.NewBadRequest("无效的请求体", nil))
+		return
+	}
+	if err := validator.ValidateStruct(&req); err != nil {
+		RespondWithError(c, apperrors.NewBadRequest("请求参数校验失败", validator.FormatError(err)))
 		return
 	}
 

@@ -2,42 +2,40 @@ package repository
 
 import (
 	"context"
+	stderrors "errors"
+	"time"
 
 	"gin-quickstart/internal/model"
+	"gin-quickstart/internal/pkg/logger"
+
 	"gorm.io/gorm"
 )
 
-// categoryRepo 分类仓储实现
 type categoryRepo struct {
 	db *gorm.DB
 }
 
-// NewCategoryRepository 创建分类仓储
 func NewCategoryRepository(db *gorm.DB) CategoryRepository {
 	return &categoryRepo{db: db}
 }
 
 func (r *categoryRepo) FindByID(ctx context.Context, id uint) (*model.Category, error) {
+	start := time.Now()
 	var category model.Category
 	err := r.db.WithContext(ctx).First(&category, id).Error
 	if err != nil {
+		logger.Debug().Err(err).Uint("category_id", id).Dur("duration", time.Since(start)).Msg("FindByID 失败")
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
 		return nil, err
 	}
+	logger.Debug().Uint("category_id", id).Dur("duration", time.Since(start)).Msg("FindByID 成功")
 	return &category, nil
 }
 
-func (r *categoryRepo) FindAll(ctx context.Context) ([]*model.Category, error) {
-	var categories []*model.Category
-	err := r.db.WithContext(ctx).
-		Order("sort_order ASC, name ASC").
-		Find(&categories).Error
-	if err != nil {
-		return nil, err
-	}
-	return categories, nil
-}
-
 func (r *categoryRepo) FindAllWithCount(ctx context.Context) ([]*model.CategoryWithCount, error) {
+	start := time.Now()
 	var results []*model.CategoryWithCount
 
 	err := r.db.WithContext(ctx).
@@ -49,33 +47,44 @@ func (r *categoryRepo) FindAllWithCount(ctx context.Context) ([]*model.CategoryW
 		Scan(&results).Error
 
 	if err != nil {
+		logger.Error().Err(err).Dur("duration", time.Since(start)).Msg("FindAllWithCount 失败")
 		return nil, err
 	}
+	logger.Debug().Int("count", len(results)).Dur("duration", time.Since(start)).Msg("FindAllWithCount 成功")
 	return results, nil
 }
 
-func (r *categoryRepo) FindChildren(ctx context.Context, parentID uint) ([]*model.Category, error) {
-	var categories []*model.Category
-	err := r.db.WithContext(ctx).
-		Where("parent_id = ?", parentID).
-		Order("sort_order ASC, name ASC").
-		Find(&categories).Error
-	if err != nil {
-		return nil, err
-	}
-	return categories, nil
-}
-
 func (r *categoryRepo) Create(ctx context.Context, category *model.Category) error {
-	return r.db.WithContext(ctx).Create(category).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Create(category).Error
+	if err != nil {
+		logger.Error().Err(err).Str("name", category.Name).Dur("duration", time.Since(start)).Msg("Create 失败")
+		return err
+	}
+	logger.Debug().Uint("category_id", category.ID).Dur("duration", time.Since(start)).Msg("Create 成功")
+	return nil
 }
 
 func (r *categoryRepo) Update(ctx context.Context, category *model.Category) error {
-	return r.db.WithContext(ctx).Save(category).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Save(category).Error
+	if err != nil {
+		logger.Error().Err(err).Uint("category_id", category.ID).Dur("duration", time.Since(start)).Msg("Update 失败")
+		return err
+	}
+	logger.Debug().Uint("category_id", category.ID).Dur("duration", time.Since(start)).Msg("Update 成功")
+	return nil
 }
 
 func (r *categoryRepo) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&model.Category{}, id).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Delete(&model.Category{}, id).Error
+	if err != nil {
+		logger.Error().Err(err).Uint("category_id", id).Dur("duration", time.Since(start)).Msg("Delete 失败")
+		return err
+	}
+	logger.Debug().Uint("category_id", id).Dur("duration", time.Since(start)).Msg("Delete 成功")
+	return nil
 }
 
 func (r *categoryRepo) ExistsBySlug(ctx context.Context, slug string) bool {

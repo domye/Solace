@@ -119,7 +119,7 @@ function MobileCover({
 	cover_image: string;
 }) {
 	return (
-		<div className="flex-shrink-0 self-end rounded-[var(--radius-small)] overflow-hidden w-[110px]">
+		<div className="flex-shrink-0 self-end rounded-[var(--radius-small)] overflow-hidden w-[90px]">
 			<CoverImage src={cover_image} className="w-full h-full object-cover" wrapperClassName="w-full" />
 		</div>
 	);
@@ -171,16 +171,16 @@ export function PostCard({
 			{/* 移动端布局 */}
 			<Link
 				to={url}
-				className="md:hidden flex gap-3 p-3.5 active:scale-[0.98] transition-transform"
+				className="md:hidden flex gap-2.5 p-3 active:scale-[0.98] transition-transform"
 			>
 				<div className="flex-1 min-w-0 flex flex-col">
-					<h2 className="font-semibold text-base leading-snug line-clamp-1 mb-1">
+					<h2 className="font-semibold text-sm leading-snug line-clamp-1 mb-0.5">
 						{article.title}
 					</h2>
-					<p className="text-sm text-[var(--text-50)] line-clamp-2 leading-relaxed flex-1">
+					<p className="text-xs text-[var(--text-50)] line-clamp-2 leading-relaxed flex-1">
 						{summary}
 					</p>
-					<CardTags tags={article.tags} maxTags={3} />
+					<CardTags tags={article.tags} maxTags={2} />
 				</div>
 				{hasCover && (
 					<MobileCover

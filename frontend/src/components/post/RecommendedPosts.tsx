@@ -57,21 +57,21 @@ function PostItem({
 		<div>
 			<Link
 				to={`/articles/${article.slug}`}
-				className="group flex items-center gap-3 px-3 py-3 -mx-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] transition-all"
+				className="group flex items-center gap-2 md:gap-3 px-2 md:px-3 py-2 md:py-3 -mx-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 active:scale-[0.98] transition-all"
 			>
 				{/* 序号 */}
-				<div className="shrink-0 w-6 h-6 rounded-md bg-[var(--enter-btn-bg)] text-[var(--primary)] flex items-center justify-center text-sm font-bold">
+				<div className="shrink-0 w-5 h-5 md:w-6 md:h-6 rounded-md bg-[var(--enter-btn-bg)] text-[var(--primary)] flex items-center justify-center text-xs md:text-sm font-bold">
 					{index + 1}
 				</div>
 
 				{/* 标题和副信息 */}
 				<div className="flex-1 min-w-0">
-					<div className="font-bold text-sm truncate group-hover:text-[var(--primary)]">
+					<div className="font-bold text-xs md:text-sm truncate group-hover:text-[var(--primary)]">
 						{article.title}
 					</div>
-					<div className="text-xs text-[var(--text-30)] truncate mt-1">
+					<div className="text-[10px] md:text-xs text-[var(--text-30)] truncate mt-0.5 md:mt-1">
 						{article.category && (
-							<span className="px-1.5 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] mr-1.5">
+							<span className="px-1 py-0.5 rounded bg-[var(--btn-regular-bg)] text-[var(--btn-content)] mr-1 md:mr-1.5">
 								{article.category.name}
 							</span>
 						)}
@@ -82,8 +82,8 @@ function PostItem({
 				{/* 箭头 */}
 				<SafeIcon
 					icon="material-symbols:chevron-right-rounded"
-					size="1.25rem"
-					className="shrink-0 text-black/15 dark:text-white/15 group-hover:text-[var(--primary)] group-hover:translate-x-0.5 transition"
+					size="1rem"
+					className="shrink-0 text-black/15 dark:text-white/15 group-hover:text-[var(--primary)] group-hover:translate-x-0.5 transition md:!size-[1.25rem]"
 				/>
 			</Link>
 
@@ -97,11 +97,11 @@ function PostItem({
 /** 骨架屏项 */
 function SkeletonItem() {
 	return (
-		<div className="flex items-center gap-3 px-3 py-3">
-			<div className="w-6 h-6 rounded-md bg-[var(--btn-regular-bg)] animate-pulse" />
-			<div className="flex-1 space-y-2">
-				<div className="h-4 w-3/4 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
-				<div className="h-3 w-1/2 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
+		<div className="flex items-center gap-2 md:gap-3 px-2 md:px-3 py-2 md:py-3">
+			<div className="w-5 h-5 md:w-6 md:h-6 rounded-md bg-[var(--btn-regular-bg)] animate-pulse" />
+			<div className="flex-1 space-y-1.5 md:space-y-2">
+				<div className="h-3.5 md:h-4 w-3/4 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
+				<div className="h-2.5 md:h-3 w-1/2 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
 			</div>
 		</div>
 	);
@@ -110,11 +110,11 @@ function SkeletonItem() {
 /** 骨架屏 */
 function RecommendedPostsSkeleton() {
 	return (
-		<div className="card-base p-5 md:p-6 flex flex-col">
+		<div className="card-base p-3 md:p-5 lg:p-6 flex flex-col">
 			{/* 标题骨架 */}
-			<div className="flex items-center gap-2 pb-3 mb-1 border-b border-dashed border-[var(--line-divider)]">
-				<div className="w-5 h-5 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
-				<div className="w-20 h-4 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
+			<div className="flex items-center gap-2 pb-2 md:pb-3 mb-1 border-b border-dashed border-[var(--line-divider)]">
+				<div className="w-4 h-4 md:w-5 md:h-5 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
+				<div className="w-16 md:w-20 h-3.5 md:h-4 rounded bg-[var(--btn-regular-bg)] animate-pulse" />
 			</div>
 			{/* 列表骨架 */}
 			{Array.from({ length: 5 }).map((_, i) => (
@@ -155,16 +155,16 @@ export function RecommendedPosts({
 	if (isLoading) return <RecommendedPostsSkeleton />;
 
 	return (
-		<div className={`card-base p-5 md:p-6 flex flex-col ${className}`}>
+		<div className={`card-base p-3 md:p-5 lg:p-6 flex flex-col ${className}`}>
 			{/* 标题栏 */}
-			<div className="flex items-center gap-2 pb-3 mb-1 border-b border-dashed border-[var(--line-divider)]">
+			<div className="flex items-center gap-1.5 md:gap-2 pb-2 md:pb-3 mb-1 border-b border-dashed border-[var(--line-divider)]">
 				<SafeIcon
 					icon={config.icon}
-					size="1.25rem"
-					className="text-[var(--primary)]"
+					size="1rem"
+					className="text-[var(--primary)] md:!size-[1.25rem]"
 				/>
-				<span className="font-bold">{config.title}</span>
-				<span className="ml-auto text-xs px-2 py-0.5 rounded-full bg-[var(--btn-regular-bg)] text-[var(--btn-content)]">
+				<span className="font-bold text-sm md:text-base">{config.title}</span>
+				<span className="ml-auto text-[10px] md:text-xs px-1.5 md:px-2 py-0.5 rounded-full bg-[var(--btn-regular-bg)] text-[var(--btn-content)]">
 					{config.badge}
 				</span>
 			</div>

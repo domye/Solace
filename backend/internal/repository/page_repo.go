@@ -2,69 +2,73 @@ package repository
 
 import (
 	"context"
+	stderrors "errors"
+	"time"
 
 	"gin-quickstart/internal/model"
+	"gin-quickstart/internal/pkg/logger"
+
 	"gorm.io/gorm"
 )
 
-// PageRepository 页面数据访问接口
-type PageRepository interface {
-	Create(ctx context.Context, page *model.Page) error
-	FindByID(ctx context.Context, id uint) (*model.Page, error)
-	FindBySlug(ctx context.Context, slug string) (*model.Page, error)
-	FindList(ctx context.Context, offset, limit int, status, template string) ([]*model.Page, int64, error)
-	FindNavPages(ctx context.Context) ([]*model.Page, error)
-	FindAllPublished(ctx context.Context) ([]*model.Page, error)
-	Update(ctx context.Context, page *model.Page) error
-	Delete(ctx context.Context, id uint) error
-	ExistsBySlug(ctx context.Context, slug string) bool
-}
-
-// pageRepo 页面仓储实现
 type pageRepo struct {
 	db *gorm.DB
 }
 
-// NewPageRepository 创建页面仓储
 func NewPageRepository(db *gorm.DB) PageRepository {
 	return &pageRepo{db: db}
 }
 
-// Create 创建页面
 func (r *pageRepo) Create(ctx context.Context, page *model.Page) error {
-	return r.db.WithContext(ctx).Create(page).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Create(page).Error
+	if err != nil {
+		logger.Error().Err(err).Str("title", page.Title).Dur("duration", time.Since(start)).Msg("Create 失败")
+		return err
+	}
+	logger.Debug().Uint("page_id", page.ID).Dur("duration", time.Since(start)).Msg("Create 成功")
+	return nil
 }
 
-// FindByID 根据 ID 查询页面
 func (r *pageRepo) FindByID(ctx context.Context, id uint) (*model.Page, error) {
+	start := time.Now()
 	var page model.Page
 	err := r.db.WithContext(ctx).First(&page, id).Error
 	if err != nil {
+		logger.Debug().Err(err).Uint("page_id", id).Dur("duration", time.Since(start)).Msg("FindByID 失败")
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
 		return nil, err
 	}
+	logger.Debug().Uint("page_id", id).Dur("duration", time.Since(start)).Msg("FindByID 成功")
 	return &page, nil
 }
 
-// FindBySlug 根据 Slug 查询页面（仅已发布）
 func (r *pageRepo) FindBySlug(ctx context.Context, slug string) (*model.Page, error) {
+	start := time.Now()
 	var page model.Page
 	err := r.db.WithContext(ctx).
 		Where("slug = ? AND status = ?", slug, model.PageStatusPublished).
 		First(&page).Error
 	if err != nil {
+		logger.Debug().Err(err).Str("slug", slug).Dur("duration", time.Since(start)).Msg("FindBySlug 失败")
+		if stderrors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, gorm.ErrRecordNotFound
+		}
 		return nil, err
 	}
+	logger.Debug().Uint("page_id", page.ID).Str("slug", slug).Dur("duration", time.Since(start)).Msg("FindBySlug 成功")
 	return &page, nil
 }
 
-// FindList 查询页面列表（管理用，支持筛选）
 func (r *pageRepo) FindList(ctx context.Context, offset, limit int, status, template string) ([]*model.Page, int64, error) {
+	start := time.Now()
 	var pages []*model.Page
 	var total int64
 
 	query := r.db.WithContext(ctx).Model(&model.Page{})
 
-	// 应用筛选条件
 	if status != "" {
 		query = query.Where("status = ?", status)
 	}
@@ -72,24 +76,25 @@ func (r *pageRepo) FindList(ctx context.Context, offset, limit int, status, temp
 		query = query.Where("template = ?", template)
 	}
 
-	// 统计总数
 	if err := query.Count(&total).Error; err != nil {
+		logger.Error().Err(err).Dur("duration", time.Since(start)).Msg("FindList 统计失败")
 		return nil, 0, err
 	}
 
-	// 获取分页结果
 	if err := query.Order("page_order ASC, created_at DESC").
 		Offset(offset).
 		Limit(limit).
 		Find(&pages).Error; err != nil {
+		logger.Error().Err(err).Dur("duration", time.Since(start)).Msg("FindList 查询失败")
 		return nil, 0, err
 	}
 
+	logger.Debug().Int64("total", total).Dur("duration", time.Since(start)).Msg("FindList 成功")
 	return pages, total, nil
 }
 
-// FindNavPages 查询导航页面列表（已发布且显示在导航中）
 func (r *pageRepo) FindNavPages(ctx context.Context) ([]*model.Page, error) {
+	start := time.Now()
 	var pages []*model.Page
 
 	err := r.db.WithContext(ctx).
@@ -99,37 +104,35 @@ func (r *pageRepo) FindNavPages(ctx context.Context) ([]*model.Page, error) {
 		Find(&pages).Error
 
 	if err != nil {
+		logger.Error().Err(err).Dur("duration", time.Since(start)).Msg("FindNavPages 失败")
 		return nil, err
 	}
+	logger.Debug().Int("count", len(pages)).Dur("duration", time.Since(start)).Msg("FindNavPages 成功")
 	return pages, nil
 }
 
-// FindAllPublished 查询所有已发布页面
-func (r *pageRepo) FindAllPublished(ctx context.Context) ([]*model.Page, error) {
-	var pages []*model.Page
-
-	err := r.db.WithContext(ctx).
-		Where("status = ?", model.PageStatusPublished).
-		Order("page_order ASC, created_at DESC").
-		Find(&pages).Error
-
-	if err != nil {
-		return nil, err
-	}
-	return pages, nil
-}
-
-// Update 更新页面
 func (r *pageRepo) Update(ctx context.Context, page *model.Page) error {
-	return r.db.WithContext(ctx).Save(page).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Save(page).Error
+	if err != nil {
+		logger.Error().Err(err).Uint("page_id", page.ID).Dur("duration", time.Since(start)).Msg("Update 失败")
+		return err
+	}
+	logger.Debug().Uint("page_id", page.ID).Dur("duration", time.Since(start)).Msg("Update 成功")
+	return nil
 }
 
-// Delete 删除页面
 func (r *pageRepo) Delete(ctx context.Context, id uint) error {
-	return r.db.WithContext(ctx).Delete(&model.Page{}, id).Error
+	start := time.Now()
+	err := r.db.WithContext(ctx).Delete(&model.Page{}, id).Error
+	if err != nil {
+		logger.Error().Err(err).Uint("page_id", id).Dur("duration", time.Since(start)).Msg("Delete 失败")
+		return err
+	}
+	logger.Debug().Uint("page_id", id).Dur("duration", time.Since(start)).Msg("Delete 成功")
+	return nil
 }
 
-// ExistsBySlug 检查 Slug 是否已存在
 func (r *pageRepo) ExistsBySlug(ctx context.Context, slug string) bool {
 	var count int64
 	r.db.WithContext(ctx).Model(&model.Page{}).Where("slug = ?", slug).Count(&count)

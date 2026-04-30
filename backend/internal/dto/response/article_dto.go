@@ -65,12 +65,3 @@ type ArchiveGroup struct {
 type ArchiveResponse struct {
 	Groups []*ArchiveGroup `json:"groups"`
 }
-
-// SearchResult 搜索结果
-type SearchResult struct {
-	ID          uint       `json:"id"`
-	Title       string     `json:"title"`
-	Slug        string     `json:"slug"`
-	Summary     string     `json:"summary,omitempty"`
-	PublishedAt *time.Time `json:"published_at,omitempty"`
-}

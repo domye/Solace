@@ -34,8 +34,8 @@ type TagWithCount struct {
 
 // ArticleTag 文章-标签关联表
 type ArticleTag struct {
-	ArticleID uint `gorm:"primaryKey;autoIncrement:false" json:"article_id"`
-	TagID     uint `gorm:"primaryKey;autoIncrement:false" json:"tag_id"`
+	ArticleID uint `gorm:"primaryKey;autoIncrement:false;index:idx_article_id;index:idx_tag_id" json:"article_id"`
+	TagID     uint `gorm:"primaryKey;autoIncrement:false;index:idx_tag_id;index:idx_article_id" json:"tag_id"`
 }
 
 // TableName 返回关联表名

@@ -39,7 +39,7 @@ func (stubAuthService) ValidateAccessToken(string) (*pkgjwt.Claims, error) {
 func TestArticleIDRouteRequiresAuth(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
-	app := NewRouter(
+	app, _ := NewRouter(
 		nil,
 		nil,
 		nil,

@@ -4,9 +4,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSearch, useEscapeKey } from "@/hooks";
+import { useEscapeKey } from "@/hooks";
 import { useDebouncedCallback } from "use-debounce";
 import { SafeIcon } from "@/components/common/ui";
+import { apiClient } from "@/api";
+import { extractPagedData } from "@/hooks/api/utils";
+import type { ArticleSummary } from "@/types";
 
 interface SearchModalProps {
 	isOpen: boolean;
@@ -15,20 +18,56 @@ interface SearchModalProps {
 
 export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 	const [query, setQuery] = useState("");
+	const [debouncedQuery, setDebouncedQuery] = useState("");
+	const [results, setResults] = useState<ArticleSummary[]>([]);
+	const [isLoading, setIsLoading] = useState(false);
 	const navigate = useNavigate();
 
-	const debouncedSearch = useDebouncedCallback(
-		(q: string) => (q.trim() ? q : ""),
-		1000,
-	);
-	const { data: results, isLoading } = useSearch(
-		debouncedSearch.isPending() ? "" : query,
-	);
+	const debouncedSetQuery = useDebouncedCallback((q: string) => {
+		setDebouncedQuery(q.trim() ? q : "");
+	}, 500);
+
+	useEffect(() => {
+		if (query.trim().length >= 2) {
+			debouncedSetQuery(query);
+		} else {
+			setDebouncedQuery("");
+			setResults([]);
+		}
+	}, [query, debouncedSetQuery]);
+
+	useEffect(() => {
+		if (!debouncedQuery) {
+			setResults([]);
+			return;
+		}
+
+		const fetchResults = async () => {
+			setIsLoading(true);
+			try {
+				const response = await apiClient.article.getArticlesSearch(
+					debouncedQuery,
+					1,
+					10,
+				);
+				const data = extractPagedData<ArticleSummary>(response);
+				setResults(data.data || []);
+			} catch {
+				setResults([]);
+			} finally {
+				setIsLoading(false);
+			}
+		};
+
+		fetchResults();
+	}, [debouncedQuery]);
 
 	const handleSelect = useCallback(
 		(slug: string) => {
 			navigate(`/articles/${slug}`);
 			setQuery("");
+			setDebouncedQuery("");
+			setResults([]);
 			onClose();
 		},
 		[navigate, onClose],
@@ -40,6 +79,8 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 		if (isOpen) {
 			document.body.style.overflow = "hidden";
 			setQuery("");
+			setDebouncedQuery("");
+			setResults([]);
 		}
 		return () => {
 			document.body.style.overflow = "";
@@ -48,7 +89,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
 	if (!isOpen) return null;
 
-	const showEmpty = query.trim() && !isLoading && !results?.data?.length;
+	const showEmpty = query.trim().length >= 2 && !isLoading && !results.length;
 
 	return (
 		<div
@@ -97,13 +138,13 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 								size="2.5rem"
 								className="mb-2"
 							/>
-							<p>未找到 "{query}" 的相关文章</p>
+							<p>未找到 "{debouncedQuery}" 的相关文章</p>
 						</div>
 					)}
 
-					{results?.data?.length ? (
+					{results.length ? (
 						<div className="p-2">
-							{results.data.map((article) => (
+							{results.map((article) => (
 								<button
 									key={article.id}
 									onClick={() => handleSelect(article.slug)}
@@ -129,7 +170,7 @@ export function SearchModal({ isOpen, onClose }: SearchModalProps) {
 						</div>
 					) : null}
 
-					{!query.trim() && (
+					{query.trim().length < 2 && (
 						<div className="p-8 text-center text-50">
 							<SafeIcon
 								icon="material-symbols:search-rounded"

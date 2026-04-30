@@ -17,7 +17,6 @@ import (
 var (
 	ErrInvalidCredentials = apperrors.NewUnauthorized("邮箱或密码错误")
 	ErrTokenExpired       = apperrors.NewUnauthorized("令牌已过期")
-	ErrTokenRevoked       = apperrors.NewUnauthorized("令牌已被撤销")
 )
 
 // AuthService 认证业务逻辑接口

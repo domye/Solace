@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"gin-quickstart/internal/config"
@@ -41,26 +42,30 @@ func (h *SitemapHandler) GetSitemap(c *gin.Context) {
 		return
 	}
 
-	var xml string
-	xml = `<?xml version="1.0" encoding="UTF-8"?>` + "\n"
-	xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">` + "\n"
+	var sb strings.Builder
+	sb.Grow(8192)
 
-	xml += h.buildURL(baseURL, "", "1.0", "daily")
-	xml += h.buildURL(baseURL+"/archive", "", "0.8", "weekly")
+	sb.WriteString(`<?xml version="1.0" encoding="UTF-8"?>`)
+	sb.WriteByte('\n')
+	sb.WriteString(`<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`)
+	sb.WriteByte('\n')
+
+	h.buildURL(&sb, baseURL, "", "1.0", "daily")
+	h.buildURL(&sb, baseURL+"/archive", "", "0.8", "weekly")
 
 	pages, _ := h.pageService.GetList(c.Request.Context(), 1, 100, "published", "")
 	for _, pg := range pages.Items {
-		xml += h.buildURL(baseURL+"/pages/"+pg.Slug, "", "0.6", "monthly")
+		h.buildURL(&sb, baseURL+"/pages/"+pg.Slug, "", "0.6", "monthly")
 	}
 
 	categories, _ := h.categoryService.GetList(c.Request.Context())
 	for _, cat := range categories.Items {
-		xml += h.buildURL(baseURL+"/categories/"+cat.Slug, "", "0.6", "weekly")
+		h.buildURL(&sb, baseURL+"/categories/"+cat.Slug, "", "0.6", "weekly")
 	}
 
 	tags, _ := h.tagService.GetList(c.Request.Context())
 	for _, tag := range tags.Items {
-		xml += h.buildURL(baseURL+"/tags/"+tag.Slug, "", "0.5", "weekly")
+		h.buildURL(&sb, baseURL+"/tags/"+tag.Slug, "", "0.5", "weekly")
 	}
 
 	articles, _ := h.articleService.GetArchive(c.Request.Context())
@@ -70,31 +75,29 @@ func (h *SitemapHandler) GetSitemap(c *gin.Context) {
 			if post.PublishedAt != nil {
 				lastmod = post.PublishedAt.Format("2006-01-02")
 			}
-			xml += h.buildURL(baseURL+"/articles/"+post.Slug, lastmod, "0.7", "")
+			h.buildURL(&sb, baseURL+"/articles/"+post.Slug, lastmod, "0.7", "")
 		}
 	}
 
-	xml += `</urlset>`
+	sb.WriteString("</urlset>")
 
 	c.Header("Content-Type", "application/xml")
-	c.String(200, xml)
+	c.String(200, sb.String())
 }
 
-func (h *SitemapHandler) buildURL(loc, lastmod, priority, changefreq string) string {
-	var url string
-	url += "  <url>\n"
-	url += fmt.Sprintf("    <loc>%s</loc>\n", loc)
+func (h *SitemapHandler) buildURL(sb *strings.Builder, loc, lastmod, priority, changefreq string) {
+	sb.WriteString("  <url>\n")
+	fmt.Fprintf(sb, "    <loc>%s</loc>\n", loc)
 	if lastmod != "" {
-		url += fmt.Sprintf("    <lastmod>%s</lastmod>\n", lastmod)
+		fmt.Fprintf(sb, "    <lastmod>%s</lastmod>\n", lastmod)
 	} else {
-		url += fmt.Sprintf("    <lastmod>%s</lastmod>\n", time.Now().Format("2006-01-02"))
+		fmt.Fprintf(sb, "    <lastmod>%s</lastmod>\n", time.Now().Format("2006-01-02"))
 	}
 	if changefreq != "" {
-		url += fmt.Sprintf("    <changefreq>%s</changefreq>\n", changefreq)
+		fmt.Fprintf(sb, "    <changefreq>%s</changefreq>\n", changefreq)
 	}
 	if priority != "" {
-		url += fmt.Sprintf("    <priority>%s</priority>\n", priority)
+		fmt.Fprintf(sb, "    <priority>%s</priority>\n", priority)
 	}
-	url += "  </url>\n"
-	return url
+	sb.WriteString("  </url>\n")
 }

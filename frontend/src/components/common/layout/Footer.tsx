@@ -9,7 +9,7 @@ export function Footer() {
 		<footer className="w-full">
 			<div className="border-t border-black/10 dark:border-white/15 my-4 border-dashed mx-4" />
 			<div className="rounded-2xl mb-4 flex flex-col items-center justify-center px-4">
-				<p className="text-50 text-sm text-center leading-relaxed space-y-1">
+				<p className="text-50 text-xs md:text-sm text-center leading-relaxed space-y-1">
 					<span className="block">
 						&copy; {currentYear}{" "}
 						<FooterLink href="https://github.com/HSJ-BanFan">

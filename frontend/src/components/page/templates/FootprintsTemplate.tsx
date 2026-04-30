@@ -62,11 +62,11 @@ export function FootprintsTemplate({
 	}
 
 	return (
-		<div className="space-y-6 fade-in-up">
+		<div className="space-y-4 md:space-y-6 fade-in-up">
 			{/* 统计卡片 */}
-			<div className="card-base p-6 text-center">
-				<h1 className="text-90 text-2xl font-bold mb-2">我的足迹</h1>
-				<p className="text-50">
+			<div className="card-base p-4 md:p-6 text-center">
+				<h1 className="text-90 text-xl md:text-2xl font-bold mb-1 md:mb-2">我的足迹</h1>
+				<p className="text-xs md:text-sm text-50">
 					已探索{" "}
 					<span className="text-[var(--primary)] font-bold">
 						{validCities.length}
@@ -81,16 +81,16 @@ export function FootprintsTemplate({
 
 			{/* Markdown 简介 */}
 			{markdown && (
-				<div className="card-base p-6 md:p-8">
+				<div className="card-base p-4 md:p-6 lg:p-8">
 					<MarkdownRenderer content={markdown} />
 				</div>
 			)}
 
 			{/* 地图展示 - 懒加载 */}
 			{citiesWithCoords.length > 0 && (
-				<div className="card-base p-4 md:p-6">
-					<h2 className="text-90 text-xl font-bold mb-4 flex items-center gap-2">
-						<SafeIcon icon="material-symbols:map-outline-rounded" />
+				<div className="card-base p-3 md:p-4 lg:p-6">
+					<h2 className="text-90 text-lg md:text-xl font-bold mb-3 md:mb-4 flex items-center gap-1.5 md:gap-2">
+						<SafeIcon icon="material-symbols:map-outline-rounded" size="1.125rem" className="md:!size-[1.25rem]" />
 						足迹地图
 					</h2>
 					<Suspense fallback={<MapLoadingFallback />}>
@@ -103,13 +103,13 @@ export function FootprintsTemplate({
 			{provinces.map((province) => {
 				const provinceCities = citiesByProvince[province] || [];
 				return (
-					<div key={province} className="card-base p-6 md:p-8">
-						<h2 className="text-90 text-xl font-bold mb-4 flex items-center gap-2">
-							<SafeIcon icon="material-symbols:location-city-outline-rounded" />
+					<div key={province} className="card-base p-3 md:p-4 lg:p-6">
+						<h2 className="text-90 text-base md:text-lg font-bold mb-2 md:mb-3 flex items-center gap-1 md:gap-1.5">
+							<SafeIcon icon="material-symbols:location-city-outline-rounded" size="1rem" className="md:!size-[1.125rem]" />
 							{province}
-							<span className="text-50 text-sm">({provinceCities.length})</span>
+							<span className="text-50 text-[10px] md:text-xs">({provinceCities.length})</span>
 						</h2>
-						<div className="space-y-3">
+						<div className="space-y-1.5 md:space-y-2">
 							{provinceCities.map((city, idx) => (
 								<FootprintCard
 									key={`${province}-${city.name}-${idx}`}
@@ -123,7 +123,7 @@ export function FootprintsTemplate({
 
 			{/* 无足迹时显示 */}
 			{validCities.length === 0 && !markdown && (
-				<div className="card-base p-6 md:p-8 text-center text-50">
+				<div className="card-base p-4 md:p-6 lg:p-8 text-center text-50 text-sm md:text-base">
 					暂无足迹记录
 				</div>
 			)}

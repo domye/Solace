@@ -26,7 +26,7 @@ interface CategoryBarProps {
 
 /** 按钮基础样式 */
 const PILL_BASE_CLASS =
-	"category-pill text-sm px-3 py-1 rounded-lg whitespace-nowrap flex-shrink-0 transition-colors duration-200 flex items-center justify-center border-[1.5px]";
+	"category-pill text-xs lg:text-sm px-2 lg:px-3 py-0.5 lg:py-1 rounded-lg whitespace-nowrap flex-shrink-0 transition-colors duration-200 flex items-center justify-center border-[1.5px]";
 
 /** 活动状态样式 */
 const PILL_ACTIVE_CLASS =
@@ -55,7 +55,7 @@ function FadeMask({ side }: { side: "left" | "right" }) {
 /** 骨架屏项 */
 function SkeletonItem() {
 	return (
-		<div className="h-7 w-16 bg-[var(--btn-regular-bg)] rounded-lg animate-pulse flex-shrink-0" />
+		<div className="h-6 lg:h-7 w-14 lg:w-16 bg-[var(--btn-regular-bg)] rounded-lg animate-pulse flex-shrink-0" />
 	);
 }
 
@@ -78,7 +78,7 @@ function CategoryPill({
 		>
 			{category.name}
 			{(category.article_count ?? 0) > 0 && (
-				<span className="text-xs opacity-60 ml-1">
+				<span className="text-[10px] lg:text-xs opacity-60 ml-0.5 lg:ml-1">
 					{category.article_count}
 				</span>
 			)}
@@ -114,9 +114,9 @@ function NavPill({
 			data-active={isActive || undefined}
 			aria-label={ariaLabel}
 		>
-			{icon ? <SafeIcon icon={icon} size="1.125rem" /> : label}
+			{icon ? <SafeIcon icon={icon} size="1rem" className="lg:!size-[1.125rem]" /> : label}
 			{!icon && count !== undefined && count > 0 && (
-				<span className="text-xs opacity-60 ml-1">{count}</span>
+				<span className="text-[10px] lg:text-xs opacity-60 ml-0.5 lg:ml-1">{count}</span>
 			)}
 		</Link>
 	);
@@ -227,9 +227,9 @@ export function CategoryBar({ className }: CategoryBarProps) {
 
 	return (
 		<div
-			className={`card-base p-3 onload-animation${className ? ` ${className}` : ""}`}
+			className={`card-base p-2 lg:p-3 onload-animation${className ? ` ${className}` : ""}`}
 		>
-			<div className="flex gap-2">
+			<div className="flex gap-1.5 lg:gap-2">
 				{/* 首页按钮 */}
 				<NavPill
 					to="/"
@@ -237,7 +237,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
 					isActive={isHome}
 					onClick={scrollToTop}
 					icon="material-symbols:home"
-					className={PILL_BASE_CLASS.replace("px-3", "px-2")}
+					className={PILL_BASE_CLASS.replace("px-2 lg:px-3", "px-1.5 lg:px-2")}
 					ariaLabel="首页"
 				/>
 
@@ -262,7 +262,7 @@ export function CategoryBar({ className }: CategoryBarProps) {
 					<div
 						ref={scrollRef}
 						onWheel={handleWheel}
-						className="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth"
+						className="flex gap-1.5 lg:gap-2 overflow-x-auto scrollbar-hide scroll-smooth"
 						style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
 					>
 						{isLoading

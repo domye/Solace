@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "@/api";
+import { queryKeys } from "@/lib/queryKeys";
 import { extractData } from "./utils";
 import type { Tag } from "@/types";
 import type { request_CreateTagRequest, request_UpdateTagRequest } from "@/api";
@@ -9,7 +10,7 @@ import type { request_CreateTagRequest, request_UpdateTagRequest } from "@/api";
  */
 export function useTags() {
 	return useQuery({
-		queryKey: ["tags"],
+		queryKey: queryKeys.tags.all(),
 		queryFn: async () => {
 			const response = await apiClient.tag.getTags();
 			return extractData<Tag[]>(response);
@@ -30,7 +31,7 @@ export function useCreateTag() {
 			return extractData<Tag>(response);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["tags"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.tags.all() });
 		},
 	});
 }
@@ -53,7 +54,7 @@ export function useUpdateTag() {
 			return extractData<Tag>(response);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["tags"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.tags.all() });
 		},
 	});
 }
@@ -69,7 +70,7 @@ export function useDeleteTag() {
 			await apiClient.tag.deleteTags(id);
 		},
 		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["tags"] });
+			queryClient.invalidateQueries({ queryKey: queryKeys.tags.all() });
 		},
 	});
 }

@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
-import { SafeIcon } from "@/components/common/ui";
+import { create } from "zustand";
 
 interface Toast {
 	id: number;
@@ -7,40 +6,44 @@ interface Toast {
 	type: "error" | "warning" | "success";
 }
 
+interface ToastStore {
+	toasts: Toast[];
+	addToast: (message: string, type: Toast["type"]) => void;
+	removeToast: (id: number) => void;
+}
+
 let toastId = 0;
-const listeners: Set<(toasts: Toast[]) => void> = new Set();
-let currentToasts: Toast[] = [];
+
+export const useToastStore = create<ToastStore>((set) => ({
+	toasts: [],
+	addToast: (message, type) => {
+		const id = ++toastId;
+		set((state) => ({ toasts: [...state.toasts, { id, message, type }] }));
+
+		setTimeout(() => {
+			set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
+		}, 4000);
+	},
+	removeToast: (id) => {
+		set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
+	},
+}));
 
 export function showToast(message: string, type: Toast["type"] = "error") {
-	const id = ++toastId;
-	currentToasts = [...currentToasts, { id, message, type }];
-	listeners.forEach((listener) => listener(currentToasts));
-
-	setTimeout(() => {
-		currentToasts = currentToasts.filter((t) => t.id !== id);
-		listeners.forEach((listener) => listener(currentToasts));
-	}, 4000);
+	useToastStore.getState().addToast(message, type);
 }
 
 export function ToastContainer() {
-	const [toasts, setToasts] = useState<Toast[]>([]);
-
-	useEffect(() => {
-		listeners.add(setToasts);
-		return () => {
-			listeners.delete(setToasts);
-		};
-	}, []);
-
-	const removeToast = useCallback((id: number) => {
-		currentToasts = currentToasts.filter((t) => t.id !== id);
-		setToasts(currentToasts);
-	}, []);
+	const { toasts, removeToast } = useToastStore();
 
 	if (toasts.length === 0) return null;
 
 	return (
-		<div className="fixed top-4 right-4 z-[200] flex flex-col gap-2">
+		<div
+			className="fixed top-4 right-4 z-[200] flex flex-col gap-2"
+			role="alert"
+			aria-live="polite"
+		>
 			{toasts.map((toast) => (
 				<div
 					key={toast.id}
@@ -52,22 +55,13 @@ export function ToastContainer() {
 								: "bg-green-500 text-white"
 					}`}
 				>
-					<SafeIcon
-						icon={
-							toast.type === "error"
-								? "material-symbols:error-outline-rounded"
-								: toast.type === "warning"
-									? "material-symbols:warning-outline-rounded"
-									: "material-symbols:check-circle-outline-rounded"
-						}
-						size="1.25rem"
-					/>
 					<span className="text-sm flex-1">{toast.message}</span>
 					<button
 						onClick={() => removeToast(toast.id)}
 						className="opacity-70 hover:opacity-100"
+						aria-label="关闭提示"
 					>
-						<SafeIcon icon="material-symbols:close-rounded" size="1rem" />
+						×
 					</button>
 				</div>
 			))}

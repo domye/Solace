@@ -11,9 +11,7 @@ import (
 	"gin-quickstart/internal/pkg/logger"
 )
 
-// Connect 建立数据库连接
 func Connect(dsn string, logLevel string) (*gorm.DB, error) {
-	// 配置 GORM 日志级别
 	gormLogLevel := parseGormLogLevel(logLevel)
 
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
@@ -23,18 +21,26 @@ func Connect(dsn string, logLevel string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("数据库连接失败: %w", err)
 	}
 
-	// 获取底层 sql.DB 以配置连接池
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("获取 sql.DB 失败: %w", err)
 	}
 
-	// 配置连接池
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 
 	logger.Info().Msg("数据库连接成功")
+
+	dbStats, err := db.DB()
+	if err == nil {
+		stats := dbStats.Stats()
+		logger.Info().
+			Int("open_connections", stats.OpenConnections).
+			Int("in_use", stats.InUse).
+			Int("idle", stats.Idle).
+			Msg("连接池状态")
+	}
 
 	return db, nil
 }
@@ -52,7 +58,6 @@ func parseGormLogLevel(level string) gormlogger.LogLevel {
 	}
 }
 
-// Close 关闭数据库连接
 func Close(db *gorm.DB) error {
 	sqlDB, err := db.DB()
 	if err != nil {
