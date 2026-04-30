@@ -64,12 +64,18 @@ function LeftSidebar({ isArticlePage, headings }: LeftSidebarProps) {
 				</div>
 
 				{/* 吸顶组件区域 */}
-				<div className="sticky top-4 flex flex-col w-full gap-4">
-					<Tags
-						className="onload-animation"
-						style={{ animationDelay: "150ms" }}
-					/>
-					<TableOfContents headings={headings} />
+				<div className="sticky top-4 w-full">
+					<div className="flex max-h-[calc(100vh-2rem)] flex-col gap-4 overflow-hidden">
+						<div className="flex-shrink-0">
+							<Tags
+								className="onload-animation"
+								style={{ animationDelay: "150ms" }}
+							/>
+						</div>
+						<div className="flex-1 min-h-0">
+							<TableOfContents headings={headings} />
+						</div>
+					</div>
 				</div>
 			</aside>
 		);

@@ -14,33 +14,34 @@ interface UseTocScrollOptions {
 
 export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 	const [activeId, setActiveId] = useState<string>("");
-	const [visibleHeadings, setVisibleHeadings] = useState<Set<string>>(
-		new Set(),
-	);
+	const activeIdRef = useRef(activeId);
+	const visibleHeadingsRef = useRef<Set<string>>(new Set());
 	const observerRef = useRef<IntersectionObserver | null>(null);
+
+	useEffect(() => {
+		activeIdRef.current = activeId;
+	}, [activeId]);
 
 	// IntersectionObserver 监测可见标题
 	useEffect(() => {
 		if (headings.length === 0) return;
 
 		if (observerRef.current) observerRef.current.disconnect();
+		visibleHeadingsRef.current = new Set();
 
 		observerRef.current = new IntersectionObserver(
 			(entries) => {
-				const visible = new Set<string>(visibleHeadings);
+				const visible = new Set<string>(visibleHeadingsRef.current);
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) visible.add(entry.target.id);
 					else visible.delete(entry.target.id);
 				});
 
-				setVisibleHeadings(new Set(visible));
+				visibleHeadingsRef.current = visible;
 
 				// 找到第一个可见标题作为活动项
 				if (visible.size > 0) {
-					const visibleIds = Array.from(visible);
-					const firstVisible =
-						headings.find((h) => visibleIds.includes(h.id))?.id ||
-						visibleIds[0];
+					const firstVisible = headings.find((h) => visible.has(h.id))?.id;
 					if (firstVisible) setActiveId(firstVisible);
 				}
 			},
@@ -53,7 +54,7 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 		});
 
 		return () => observerRef.current?.disconnect();
-	}, [headings, visibleHeadings]);
+	}, [headings]);
 
 	// 滚动位置检测（备用方案）
 	useEffect(() => {
@@ -81,7 +82,11 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 					}
 				});
 
-				if (visibleHeadings.size === 0 && currentId && currentId !== activeId) {
+				if (
+					visibleHeadingsRef.current.size === 0 &&
+					currentId &&
+					currentId !== activeIdRef.current
+				) {
 					setActiveId(currentId);
 				}
 			}, 50);
@@ -92,7 +97,7 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 			window.removeEventListener("scroll", handleScroll);
 			if (scrollTimeout) clearTimeout(scrollTimeout);
 		};
-	}, [headings, activeId, visibleHeadings.size, offset]);
+	}, [headings, offset]);
 
 	// 点击导航项处理
 	const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
@@ -104,6 +109,7 @@ export function useTocScroll({ headings, offset = 80 }: UseTocScrollOptions) {
 			const elementPosition = elementRect - bodyRect;
 			const offsetPosition = elementPosition - offset;
 
+			visibleHeadingsRef.current = new Set();
 			window.scrollTo({
 				top: offsetPosition,
 				behavior: "smooth",

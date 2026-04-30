@@ -29,5 +29,6 @@
       "@layouts/*": ["src/layouts/*"]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": ["src/styles/base.test.ts"]
 }

@@ -49,7 +49,10 @@ export const TableOfContents = memo(function TableOfContents({
 	if (filteredHeadings.length === 0) return null;
 
 	return (
-		<div ref={tocRef} className="card-base pb-4 onload-animation">
+		<div
+			ref={tocRef}
+			className="card-base pb-4 onload-animation flex flex-col overflow-hidden min-h-0"
+		>
 			{/* 标题 - 与 Categories 组件样式一致 */}
 			<div
 				className="font-bold text-lg text-90 relative ml-8 mt-4 mb-2
@@ -60,7 +63,7 @@ export const TableOfContents = memo(function TableOfContents({
 			</div>
 
 			{/* 可滚动的导航区域 */}
-			<nav className="relative flex flex-col px-4">
+			<nav className="relative flex flex-1 min-h-0 flex-col px-4">
 				{/* 背景线条 */}
 				<div className="absolute left-4 top-1 bottom-1 w-[2px] bg-[var(--border-light)] z-0 rounded-full" />
 
@@ -76,7 +79,7 @@ export const TableOfContents = memo(function TableOfContents({
 
 				{/* 可滚动的标题列表 */}
 				<div
-					className="toc-scroll-container overflow-y-auto overflow-x-hidden max-h-[calc(100vh-280px)]
+					className="toc-scroll-container flex-1 overflow-y-auto overflow-x-hidden
             scrollbar-thin scrollbar-thumb-[var(--border-light)] scrollbar-track-transparent
             hover:scrollbar-thumb-[var(--primary)]"
 					style={{ scrollbarGutter: "stable" }}

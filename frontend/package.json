@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "npm exec -- tsx --tsconfig ./tsconfig.json ./src/api/index.test.ts && npm exec -- tsx --tsconfig ./tsconfig.json ./src/components/admin/markdownUploadBatches.test.ts && npm exec -- tsx --tsconfig ./tsconfig.json ./src/hooks/imageDropUploadBatch.test.ts",
+    "test": "npm exec -- tsx --tsconfig ./tsconfig.json ./src/api/index.test.ts && npm exec -- tsx --tsconfig ./tsconfig.json ./src/components/admin/markdownUploadBatches.test.ts && npm exec -- tsx --tsconfig ./tsconfig.json ./src/hooks/imageDropUploadBatch.test.ts && npm exec -- tsx --tsconfig ./tsconfig.json ./src/components/widget/TableOfContents.test.tsx && npm exec -- tsx --tsconfig ./tsconfig.json ./src/styles/base.test.ts",
     "generate-api": "openapi --input ../blog-backend/internal/docs/swagger.json --output ./src/api/generated --client fetch --name ApiClient --indent 2"
   },
   "dependencies": {

@@ -89,7 +89,6 @@
 		@apply antialiased transition;
 		line-height: 1.5;
 		font-display: swap;
-		overflow-x: hidden;
 	}
 
 	::selection {

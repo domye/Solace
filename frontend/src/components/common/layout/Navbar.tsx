@@ -374,7 +374,7 @@ export function Navbar() {
 				id="navbar"
 				className="relative z-50 mt-2 max-w-[var(--page-width)] mx-auto w-full px-4"
 			>
-				<div className="absolute h-8 -left-4 -right-4 -top-8 bg-[var(--page-bg)]" />
+				<div className="absolute h-8 left-0 right-0 -top-8 bg-[var(--page-bg)]" />
 
 				<div className="card-base !overflow-visible h-[4.5rem] flex items-center justify-between px-4">
 					<BrandLogo />
