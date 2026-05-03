@@ -3,7 +3,6 @@ package repository
 import (
 	"context"
 	"fmt"
-	"strings"
 	"time"
 
 	"gin-quickstart/internal/model"
@@ -235,9 +234,9 @@ func (r *articleRepo) Search(ctx context.Context, query string, limit, offset in
 		query = query[:r.maxSearchQueryLen]
 	}
 
-	// 使用 PostgreSQL 全文搜索
+	// 使用 PostgreSQL 全文搜索 - 参数化查询防止 SQL 注入
 	// plainto_tsquery 自动处理用户输入，'simple' 配置适合中文
-	tsQuery := fmt.Sprintf("plainto_tsquery('simple', '%s')", strings.ReplaceAll(query, "'", "''"))
+	tsQuery := "plainto_tsquery('simple', ?)"
 
 	// 统计总数
 	countSQL := fmt.Sprintf(`
@@ -245,7 +244,7 @@ func (r *articleRepo) Search(ctx context.Context, query string, limit, offset in
 		WHERE status = 'published' AND deleted_at IS NULL
 		AND search_vec @@ %s
 	`, tsQuery)
-	if err := r.db.WithContext(ctx).Raw(countSQL).Scan(&total).Error; err != nil {
+	if err := r.db.WithContext(ctx).Raw(countSQL, query).Scan(&total).Error; err != nil {
 		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 统计失败")
 		return nil, 0, err
 	}
@@ -258,7 +257,7 @@ func (r *articleRepo) Search(ctx context.Context, query string, limit, offset in
 		ORDER BY ts_rank(search_vec, %s) DESC, published_at DESC
 		LIMIT ? OFFSET ?
 	`, tsQuery, tsQuery)
-	if err := r.db.WithContext(ctx).Raw(searchSQL, limit, offset).Scan(&articles).Error; err != nil {
+	if err := r.db.WithContext(ctx).Raw(searchSQL, query, limit, offset).Scan(&articles).Error; err != nil {
 		logger.Error().Err(err).Str("query", query).Dur("duration", time.Since(start)).Msg("Search 查询失败")
 		return nil, 0, err
 	}
