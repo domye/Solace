@@ -9,7 +9,7 @@
 .claude/
 .opencode/
 .trellis/
-
+.pi/
 # OS
 .DS_Store
 Thumbs.db
